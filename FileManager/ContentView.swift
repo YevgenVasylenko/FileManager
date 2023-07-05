@@ -8,19 +8,21 @@
 import SwiftUI
 
 struct ContentView: View {
+    let files: [File]
+    
     var body: some View {
-        VStack {
-            Image(systemName: "globe")
-                .imageScale(.large)
-                .foregroundColor(.accentColor)
-            Text("Hello, world!")
+        NavigationSplitView {
+            SideBarView()
+        } detail: {
+            FolderView(files: files)
         }
         .padding()
     }
 }
 
 struct ContentView_Previews: PreviewProvider {
+    static var files: [File] = []
     static var previews: some View {
-        ContentView()
+        ContentView(files: files)
     }
 }
