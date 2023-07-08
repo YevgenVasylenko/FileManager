@@ -9,14 +9,9 @@ import SwiftUI
 
 struct SideBarView: View {
     var body: some View {
-        
-        List {
-            NavigationView {
-                Text("My files")
-            }
+        NavigationView {
+            Text("My Files")
         }
-        .navigationTitle("My files")
-//        .searchable(text: $searchText)
     }
 }
 

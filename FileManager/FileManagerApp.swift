@@ -9,10 +9,10 @@ import SwiftUI
 
 @main
 struct FileManagerApp: App {
-    static var files: [File] = []
+
     var body: some Scene {
         WindowGroup {
-            ContentView(files: FileManagerApp.files)
+            ContentView()
         }
     }
 }

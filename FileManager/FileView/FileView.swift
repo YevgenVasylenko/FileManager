@@ -8,27 +8,29 @@
 import SwiftUI
 
 struct FileView: View {
+
     var file: File
         
     var body: some View {
 
             VStack {
-//                Image(file.imageName)
-//                    .resizable()
-//                    .frame(width: 50, height: 50)
+                Image(file.imageName)
+                    .resizable()
+                    .frame(width: 50, height: 50)
                 
                 Text(file.name)
                     .font(.headline)
                 
-//                Text(file.details)
-//                    .font(.subheadline)
+                FileContextMenuView(file: file)
             }
 //            Spacer()
     }
 }
 
 struct FileView_Previews: PreviewProvider {
-    static var object = File(path: SystemFileManger.default.urls(for: .documentDirectory, in: .userDomainMask).first!)
+    static let fileManager = LocalFileManager(fileManagerRootPath: LocalFileMangerRootPath())
+    
+    static var object = fileManager.downloadsFolder
     
     static var previews: some View {
         FileView(file: self.object)

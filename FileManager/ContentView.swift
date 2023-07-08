@@ -8,21 +8,24 @@
 import SwiftUI
 
 struct ContentView: View {
-    let files: [File]
+    let file: File
+    
+    init(file: File = LocalFileManager().rootFolder) {
+        self.file = file
+    }
     
     var body: some View {
         NavigationSplitView {
             SideBarView()
         } detail: {
-            FolderView(files: files)
+            FolderView(viewModel: FolderViewModelImpl(file: file))
         }
         .padding()
     }
 }
 
 struct ContentView_Previews: PreviewProvider {
-    static var files: [File] = []
     static var previews: some View {
-        ContentView(files: files)
+        ContentView()
     }
 }

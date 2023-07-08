@@ -12,8 +12,8 @@ import Foundation
 final class LocalFileManager {
     enum Constants {
         static let root = "root"
-        static let trash = "trash"
-        static let downloads = "downloads"
+        static let trash = "root/trash"
+        static let downloads = "root/downloads"
     }
     
 //    enum Error: Error {
@@ -26,7 +26,7 @@ final class LocalFileManager {
     private(set) lazy var trashFolder = makeDefaultFolder(name: Constants.trash)
     private(set) lazy var downloadsFolder = makeDefaultFolder(name: Constants.downloads)
     
-    init(fileManagerRootPath: FileManagerRootPath) {
+    init(fileManagerRootPath: FileManagerRootPath = LocalFileMangerRootPath()) {
         self.fileManagerRootPath = fileManagerRootPath
     }
 }
@@ -36,7 +36,7 @@ extension LocalFileManager: FileManager {
     func contents(of file: File, completion: (Result<[File], Error>) -> Void) {
         do {
             var files: [File] = []
-            for path in try SystemFileManger.default.contentsOfDirectory(at: file.path, includingPropertiesForKeys: .none) {
+            for path in try SystemFileManger.default.contentsOfDirectory(at: file.path, includingPropertiesForKeys: nil, options: .producesRelativePathURLs) {
                 files.append(File(path: path))
             }
             completion(.success(files))

@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct File: Hashable, Equatable {
+struct File: Hashable {
     
     enum ObjectType {
         case folder
@@ -18,12 +18,13 @@ struct File: Hashable, Equatable {
     var name: String {
         path.lastPathComponent
     }
+    
     var path: URL
     
     var fileType: ObjectType {
         typeDefine()
     }
-    
+
     init(path: URL) {
         self.path = path
     }
@@ -49,3 +50,8 @@ struct File: Hashable, Equatable {
     }
 }
 
+extension File: Equatable {
+    static func == (lhs: File, rhs: File) -> Bool {
+        return lhs.path == rhs.path
+    }
+}

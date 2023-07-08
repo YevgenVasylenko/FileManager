@@ -17,12 +17,18 @@
 		5D616B672A4AE58300E1360A /* FileManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D616B662A4AE58300E1360A /* FileManagerTests.swift */; };
 		5D616B6F2A4AE5B000E1360A /* LocalFileManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D616B6E2A4AE5B000E1360A /* LocalFileManagerTests.swift */; };
 		5D616B702A4AE64800E1360A /* LocalFileManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D0B9CA82A446D080099021C /* LocalFileManager.swift */; };
-		5D616B712A4AFD2A00E1360A /* File.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D0B9CA62A4466BD0099021C /* File.swift */; };
 		5D78B1B12A4ECDAA00A76D0F /* FileManagerUtilities.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D78B1B02A4ECDAA00A76D0F /* FileManagerUtilities.swift */; };
 		5D78B1B32A4ECDD000A76D0F /* FileManagerUtilities.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D78B1B02A4ECDAA00A76D0F /* FileManagerUtilities.swift */; };
 		5D78B1B52A4ECEDC00A76D0F /* ConflictResolver.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D78B1B42A4ECEDC00A76D0F /* ConflictResolver.swift */; };
 		5D78B1B62A4ECEDF00A76D0F /* ConflictResolver.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D78B1B42A4ECEDC00A76D0F /* ConflictResolver.swift */; };
-		5D8E89242A44D41B00AF1223 /* TapBarNavigationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D8E89232A44D41B00AF1223 /* TapBarNavigationView.swift */; };
+		5D954CAC2A56D45A00A221DB /* FolderViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D954CAB2A56D45A00A221DB /* FolderViewModel.swift */; };
+		5D954CB82A58062300A221DB /* FileContextMenuView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D954CB72A58062300A221DB /* FileContextMenuView.swift */; };
+		5D954CBC2A580B4800A221DB /* FileContextMenuModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D954CBB2A580B4800A221DB /* FileContextMenuModel.swift */; };
+		5D954CC82A58559800A221DB /* FolderMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D954CC72A58559800A221DB /* FolderMonitor.swift */; };
+		5D954CCC2A59753E00A221DB /* PreviewFiles.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D954CCB2A59753D00A221DB /* PreviewFiles.swift */; };
+		5D954CCE2A597AD000A221DB /* File.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D0B9CA62A4466BD0099021C /* File.swift */; };
+		5D954CD22A597B5B00A221DB /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 5DA435042A459C22003B8E3A /* Localizable.strings */; };
+		5D954CD52A597FF800A221DB /* File+UI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D954CD42A597FF800A221DB /* File+UI.swift */; };
 		5DA434F62A4587DC003B8E3A /* RswiftLibrary in Frameworks */ = {isa = PBXBuildFile; productRef = 5DA434F52A4587DC003B8E3A /* RswiftLibrary */; };
 		5DA435022A459C22003B8E3A /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 5DA435042A459C22003B8E3A /* Localizable.strings */; };
 		5DA435082A45D642003B8E3A /* SideBarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DA435072A45D642003B8E3A /* SideBarView.swift */; };
@@ -54,7 +60,12 @@
 		5D616B6E2A4AE5B000E1360A /* LocalFileManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalFileManagerTests.swift; sourceTree = "<group>"; };
 		5D78B1B02A4ECDAA00A76D0F /* FileManagerUtilities.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileManagerUtilities.swift; sourceTree = "<group>"; };
 		5D78B1B42A4ECEDC00A76D0F /* ConflictResolver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConflictResolver.swift; sourceTree = "<group>"; };
-		5D8E89232A44D41B00AF1223 /* TapBarNavigationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TapBarNavigationView.swift; sourceTree = "<group>"; };
+		5D954CAB2A56D45A00A221DB /* FolderViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FolderViewModel.swift; sourceTree = "<group>"; };
+		5D954CB72A58062300A221DB /* FileContextMenuView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileContextMenuView.swift; sourceTree = "<group>"; };
+		5D954CBB2A580B4800A221DB /* FileContextMenuModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileContextMenuModel.swift; sourceTree = "<group>"; };
+		5D954CC72A58559800A221DB /* FolderMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FolderMonitor.swift; sourceTree = "<group>"; };
+		5D954CCB2A59753D00A221DB /* PreviewFiles.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreviewFiles.swift; sourceTree = "<group>"; };
+		5D954CD42A597FF800A221DB /* File+UI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "File+UI.swift"; sourceTree = "<group>"; };
 		5DA435032A459C22003B8E3A /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
 		5DA435052A459CC0003B8E3A /* uk */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = uk; path = uk.lproj/Localizable.strings; sourceTree = "<group>"; };
 		5DA435072A45D642003B8E3A /* SideBarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SideBarView.swift; sourceTree = "<group>"; };
@@ -94,6 +105,56 @@
 			path = FileManagerTests;
 			sourceTree = "<group>";
 		};
+		5D954CC12A5853E100A221DB /* FolderView */ = {
+			isa = PBXGroup;
+			children = (
+				5D0B9CA22A4464530099021C /* FolderView.swift */,
+				5D954CAB2A56D45A00A221DB /* FolderViewModel.swift */,
+				5D954CC72A58559800A221DB /* FolderMonitor.swift */,
+			);
+			path = FolderView;
+			sourceTree = "<group>";
+		};
+		5D954CC32A58540000A221DB /* FileContextMenuView */ = {
+			isa = PBXGroup;
+			children = (
+				5D954CB72A58062300A221DB /* FileContextMenuView.swift */,
+				5D954CBB2A580B4800A221DB /* FileContextMenuModel.swift */,
+			);
+			path = FileContextMenuView;
+			sourceTree = "<group>";
+		};
+		5D954CC42A58548300A221DB /* FileView */ = {
+			isa = PBXGroup;
+			children = (
+				5D0B9CA42A4466460099021C /* FileView.swift */,
+				5D0B9CA62A4466BD0099021C /* File.swift */,
+				5D954CD42A597FF800A221DB /* File+UI.swift */,
+			);
+			path = FileView;
+			sourceTree = "<group>";
+		};
+		5D954CC52A5854AC00A221DB /* FileManager */ = {
+			isa = PBXGroup;
+			children = (
+				5DD776152A544B5600F9B55D /* FileManager.swift */,
+				5D0B9CA82A446D080099021C /* LocalFileManager.swift */,
+				5D2499732A4D7CFD003D66F3 /* FIleManagerRootPath.swift */,
+				5D78B1B42A4ECEDC00A76D0F /* ConflictResolver.swift */,
+				5D78B1B02A4ECDAA00A76D0F /* FileManagerUtilities.swift */,
+			);
+			path = FileManager;
+			sourceTree = "<group>";
+		};
+		5D954CC62A5854C800A221DB /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				5DACCB4F2A44568B000A0CA9 /* Assets.xcassets */,
+				5DA435042A459C22003B8E3A /* Localizable.strings */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
 		5DA434F42A4587DC003B8E3A /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
@@ -126,18 +187,12 @@
 			children = (
 				5DACCB4B2A445689000A0CA9 /* FileManagerApp.swift */,
 				5DACCB4D2A445689000A0CA9 /* ContentView.swift */,
-				5D0B9CA22A4464530099021C /* FolderView.swift */,
-				5D0B9CA42A4466460099021C /* FileView.swift */,
-				5D8E89232A44D41B00AF1223 /* TapBarNavigationView.swift */,
 				5DA435072A45D642003B8E3A /* SideBarView.swift */,
-				5D0B9CA62A4466BD0099021C /* File.swift */,
-				5DA435042A459C22003B8E3A /* Localizable.strings */,
-				5DD776152A544B5600F9B55D /* FileManager.swift */,
-				5D0B9CA82A446D080099021C /* LocalFileManager.swift */,
-				5D2499732A4D7CFD003D66F3 /* FIleManagerRootPath.swift */,
-				5D78B1B42A4ECEDC00A76D0F /* ConflictResolver.swift */,
-				5D78B1B02A4ECDAA00A76D0F /* FileManagerUtilities.swift */,
-				5DACCB4F2A44568B000A0CA9 /* Assets.xcassets */,
+				5D954CC12A5853E100A221DB /* FolderView */,
+				5D954CC32A58540000A221DB /* FileContextMenuView */,
+				5D954CC42A58548300A221DB /* FileView */,
+				5D954CC52A5854AC00A221DB /* FileManager */,
+				5D954CC62A5854C800A221DB /* Resources */,
 			);
 			path = FileManager;
 			sourceTree = "<group>";
@@ -146,6 +201,7 @@
 			isa = PBXGroup;
 			children = (
 				5DACCB522A44568B000A0CA9 /* Preview Assets.xcassets */,
+				5D954CCB2A59753D00A221DB /* PreviewFiles.swift */,
 			);
 			path = "Preview Content";
 			sourceTree = "<group>";
@@ -239,6 +295,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				5D954CD22A597B5B00A221DB /* Localizable.strings in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -261,10 +318,10 @@
 			files = (
 				5D616B672A4AE58300E1360A /* FileManagerTests.swift in Sources */,
 				5D78B1B62A4ECEDF00A76D0F /* ConflictResolver.swift in Sources */,
-				5D616B712A4AFD2A00E1360A /* File.swift in Sources */,
 				5D78B1B32A4ECDD000A76D0F /* FileManagerUtilities.swift in Sources */,
 				5D616B702A4AE64800E1360A /* LocalFileManager.swift in Sources */,
 				5D2499762A4D7DA8003D66F3 /* FIleManagerRootPath.swift in Sources */,
+				5D954CCE2A597AD000A221DB /* File.swift in Sources */,
 				5D616B6F2A4AE5B000E1360A /* LocalFileManagerTests.swift in Sources */,
 				5D32C0152A54687900578958 /* FileManager.swift in Sources */,
 			);
@@ -274,17 +331,22 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				5D954CB82A58062300A221DB /* FileContextMenuView.swift in Sources */,
+				5D954CC82A58559800A221DB /* FolderMonitor.swift in Sources */,
+				5D954CCC2A59753E00A221DB /* PreviewFiles.swift in Sources */,
 				5D0B9CA72A4466BD0099021C /* File.swift in Sources */,
 				5D2499742A4D7CFD003D66F3 /* FIleManagerRootPath.swift in Sources */,
 				5DA435082A45D642003B8E3A /* SideBarView.swift in Sources */,
+				5D954CAC2A56D45A00A221DB /* FolderViewModel.swift in Sources */,
+				5D954CD52A597FF800A221DB /* File+UI.swift in Sources */,
 				5D0B9CA92A446D080099021C /* LocalFileManager.swift in Sources */,
-				5D8E89242A44D41B00AF1223 /* TapBarNavigationView.swift in Sources */,
 				5DD776162A544B5600F9B55D /* FileManager.swift in Sources */,
 				5D0B9CA52A4466460099021C /* FileView.swift in Sources */,
 				5D78B1B52A4ECEDC00A76D0F /* ConflictResolver.swift in Sources */,
 				5DACCB4E2A445689000A0CA9 /* ContentView.swift in Sources */,
 				5DACCB4C2A445689000A0CA9 /* FileManagerApp.swift in Sources */,
 				5D78B1B12A4ECDAA00A76D0F /* FileManagerUtilities.swift in Sources */,
+				5D954CBC2A580B4800A221DB /* FileContextMenuModel.swift in Sources */,
 				5D0B9CA32A4464530099021C /* FolderView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
