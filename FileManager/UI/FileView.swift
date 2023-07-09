@@ -21,19 +21,20 @@ struct FileView: View {
                 Text(file.name)
                     .font(.headline)
                 
-                FileContextMenuView(file: file)
+                if !file.actions.isEmpty {
+                    FileContextMenuView(file: file)
+                }
             }
-//            Spacer()
+//           Spacer()
     }
 }
 
 struct FileView_Previews: PreviewProvider {
-    static let fileManager = LocalFileManager(fileManagerRootPath: LocalFileMangerRootPath())
-    
-    static var object = fileManager.downloadsFolder
     
     static var previews: some View {
-        FileView(file: self.object)
+        FileView(file: PreviewFiles.trashFolder)
     }
 //        .previewLayout(.fixed(width: 300, height: 70))
 }
+
+

@@ -37,7 +37,15 @@ extension LocalFileManager: FileManager {
         do {
             var files: [File] = []
             for path in try SystemFileManger.default.contentsOfDirectory(at: file.path, includingPropertiesForKeys: nil, options: .producesRelativePathURLs) {
-                files.append(File(path: path))
+                var file = File(path: path)
+                if file == trashFolder {
+                    file.actions = FileAction.trashFolderActions
+                } else if file == downloadsFolder {
+                    file.actions = FileAction.downloadsFolderActions
+                } else {
+                    file.actions = FileAction.regularFolder
+                }
+                files.append(file)
             }
             completion(.success(files))
         } catch {
@@ -119,6 +127,7 @@ extension LocalFileManager: FileManager {
             completion(.failure(error))
         }
     }
+    // make cleanTrashFolder
 }
 
 // MARK: - Private
@@ -126,7 +135,13 @@ extension LocalFileManager: FileManager {
 private extension LocalFileManager {
 
     func makeDefaultFolder(name: String) -> File {
-        let file = File(path: documentsURL.appendingPathComponent(name))
+        var file = File(path: documentsURL.appendingPathComponent(name))
+        if file.name == Constants.trash {
+            file.actions = FileAction.trashFolderActions
+        }
+        if file.name == Constants.downloads {
+            file.actions = FileAction.downloadsFolderActions
+        }
         if SystemFileManger.default.fileExists(atPath: file.path.path) {
             return file
         }

@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct File: Hashable {
+struct File {
     
     enum ObjectType {
         case folder
@@ -24,6 +24,8 @@ struct File: Hashable {
     var fileType: ObjectType {
         typeDefine()
     }
+    
+    var actions: [FileAction] = []
 
     init(path: URL) {
         self.path = path
@@ -50,8 +52,13 @@ struct File: Hashable {
     }
 }
 
-extension File: Equatable {
+extension File: Hashable {
+    
     static func == (lhs: File, rhs: File) -> Bool {
         return lhs.path == rhs.path
+    }
+    
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(path)
     }
 }

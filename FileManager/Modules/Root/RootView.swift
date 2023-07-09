@@ -1,5 +1,5 @@
 //
-//  ContentView.swift
+//  RootView.swift
 //  FileManager
 //
 //  Created by Yevgen Vasylenko on 22.06.2023.
@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct ContentView: View {
+struct RootView: View {
     let file: File
     
     init(file: File = LocalFileManager().rootFolder) {
@@ -24,8 +24,8 @@ struct ContentView: View {
     }
 }
 
-struct ContentView_Previews: PreviewProvider {
+struct RootView_Previews: PreviewProvider {
     static var previews: some View {
-        ContentView()
+        RootView(file: PreviewFiles.rootFolder)
     }
 }

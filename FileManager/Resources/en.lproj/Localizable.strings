@@ -3,3 +3,5 @@
 "move_to" = "Move to";
 "copy_to" = "Copy to";
 "delete" = "Delete";
+"move_to_trash" = "Move to trash";
+"clean" = "Clean";

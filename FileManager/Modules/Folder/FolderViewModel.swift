@@ -7,43 +7,43 @@
 
 import Foundation
 
-struct State {
-    var loading: Bool = true
-    var files: [File] = []
-    var error: Error?
-}
-
 //protocol FolderViewModel: ObservableObject {
 //    var state: State { get }
 //    func load()
 //}
 
 class FolderViewModelImpl: ObservableObject {
+    
+    struct State {
+        var folder: File
+        var files: [File] = []
+        var loading: Bool = true
+        var error: Error?
+    }
+    
     private let fileManager = LocalFileManager(fileManagerRootPath: LocalFileMangerRootPath())
-    let file: File
+    private let file: File
     
     private lazy var folderMonitor = FolderMonitor(url: self.file.path)
     
+    init(file: File, state: State) {
+       self.file = file
+       self.state = state
+        
+        folderMonitor.folderDidChange = { [weak self] in
+            self?.load()
+        }
+   }
     
    convenience init(file: File) {
-       self.init(file: file, state: State())
-    }
-    
-     init(file: File, state: State) {
-        self.file = file
-        self.state = state
-         
-         folderMonitor.folderDidChange = { [weak self] in
-             self?.load()
-         }
+       self.init(file: file, state: State(folder: file))
     }
     
     @Published
-    private(set) var state = State()
+    private(set) var state: State
     
     func load() {
         folderMonitor.startMonitoring()
-        print(file.path.lastPathComponent)
         state.loading = true
         fileManager.contents(of: file) { result in
             switch result {
@@ -57,6 +57,12 @@ class FolderViewModelImpl: ObservableObject {
             state.loading = false
         }
     }
+    
+    func createFolder() {
+        
+    }
+    
+    
     
 }
 

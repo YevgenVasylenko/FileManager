@@ -28,21 +28,30 @@ struct FolderView: View {
     
     var body: some View {
         NavigationView {
-            
-            ScrollView {
-                
-                LazyVGrid(columns: columns, spacing: 20) {
-                    ForEach(viewModel.state.files, id: \.self) { file in
-                        
-                        NavigationLink {
-                            viewToShow(file: file)
-                        } label: {
-                            FileView(file: file)
+            ZStack(alignment: .bottomTrailing) {
+                ScrollView {
+                    
+                    LazyVGrid(columns: columns, spacing: 20) {
+                        ForEach(viewModel.state.files, id: \.self) { file in
+                            
+                            NavigationLink {
+                                viewToShow(file: file)
+                            } label: {
+                                FileView(file: file)
+                            }
                         }
+                        .navigationTitle(viewModel.state.folder.name)
+                        Spacer()
                     }
-                    .navigationTitle(viewModel.file.name)
-                    Spacer()
                 }
+                
+                Button {
+                    viewModel.createFolder()
+                } label: {
+                    Label("", systemImage: "plus.circle.fill")
+                }
+                .scaleEffect(3)
+                .padding()
             }
         }
         .onAppear {
@@ -50,6 +59,7 @@ struct FolderView: View {
         }
         .navigationViewStyle(.stack)
         .padding()
+        .ignoresSafeArea()
     }
     
     func viewToShow(file: File) -> some View {
@@ -66,11 +76,12 @@ struct FolderView: View {
 }
 
 struct FolderView_Previews: PreviewProvider {
-    static let fileManager = LocalFileManager(fileManagerRootPath: LocalFileMangerRootPath())
-    static var documentsFolder = fileManager.rootFolder
-
     static var previews: some View {
-        FolderView(viewModel: FolderViewModelImpl(file: documentsFolder))
+        FolderView(
+            viewModel: FolderViewModelImpl(
+                file: PreviewFiles.rootFolder,
+                state: .init(folder: PreviewFiles.rootFolder,
+                    files: PreviewFiles.createFoldersInTrash())))
     }
 }
 
