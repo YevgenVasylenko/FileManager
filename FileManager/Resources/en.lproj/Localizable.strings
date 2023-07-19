@@ -5,3 +5,7 @@
 "delete" = "Delete";
 "move_to_trash" = "Move to trash";
 "clean" = "Clean";
+
+"root" = "Root";
+"trash" = "Trash";
+"downloads" = "Downloads";

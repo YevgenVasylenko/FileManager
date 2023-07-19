@@ -10,31 +10,24 @@ import SwiftUI
 struct FileView: View {
 
     var file: File
-        
+    
     var body: some View {
-
-            VStack {
-                Image(file.imageName)
-                    .resizable()
-                    .frame(width: 50, height: 50)
-                
-                Text(file.name)
-                    .font(.headline)
-                
-                if !file.actions.isEmpty {
-                    FileContextMenuView(file: file)
-                }
-            }
-//           Spacer()
+        VStack {
+            Image(file.imageName)
+                .resizable()
+                .frame(width: 75, height: 75)
+            Text(file.name)
+                .font(.headline)
+                .lineLimit(2, reservesSpace: true)
+        }
+        .frame(width: 90)
     }
 }
 
 struct FileView_Previews: PreviewProvider {
-    
     static var previews: some View {
-        FileView(file: PreviewFiles.trashFolder)
+        FileView(file: PreviewFiles.downloadsFolder)
     }
-//        .previewLayout(.fixed(width: 300, height: 70))
 }
 
 

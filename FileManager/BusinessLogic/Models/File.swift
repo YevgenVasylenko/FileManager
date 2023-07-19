@@ -8,7 +8,8 @@
 import Foundation
 
 struct File {
-    
+    // enum case system
+         // case trash...
     enum ObjectType {
         case folder
         case image
@@ -35,8 +36,8 @@ struct File {
         return File(path: self.path.appendingPathComponent(name, isDirectory: true))
     }
     
-    mutating func rename(name: String) {
-        self.path = self.path.deletingLastPathComponent().appendingPathComponent(name)
+    func rename(name: String) -> File {
+        return File(path: self.path.deletingLastPathComponent().appendingPathComponent(name))
     }
     
     mutating func addTimeToName() {

@@ -40,6 +40,7 @@ class FolderMonitor {
         }
         folderMonitorSource?.resume()
     }
+    
     func stopMonitoring() {
         folderMonitorSource?.cancel()
     }

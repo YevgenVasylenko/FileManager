@@ -13,14 +13,15 @@ enum ConflictNameResult {
     case newName
 }
 
-protocol ConflictResolver {
-    func resolve() -> ConflictNameResult
+protocol NameConflictResolver {
+    func resolve(completion: @escaping (ConflictNameResult) -> Void)
 }
 
-struct ConflictResolverMock: ConflictResolver {
+struct NameConflictResolverMock: NameConflictResolver {
     var mockResult: ConflictNameResult!
-    
-    func resolve() -> ConflictNameResult {
-        mockResult
+
+    func resolve(completion: @escaping (ConflictNameResult) -> Void) {
+        completion(mockResult)
     }
+
 }

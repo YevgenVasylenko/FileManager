@@ -16,23 +16,37 @@ enum OperationResult {
 
 protocol FileManager {
     
-    func contents(of file: File, completion: (Result<[File], Error>) -> Void)
+    func contents(of file: File, completion: @escaping (Result<[File], Error>) -> Void)
     
-    func createFolder(at file: File, completion: (Result<Void, Error>) -> Void)
+    func createFolder(at file: File, completion: @escaping (Result<Void, Error>) -> Void)
     
-    func copyFile(
-        fileToCopy: File,
+    func rename(file: File, newName: String, completion: @escaping (Result<Void, Error>) -> Void)
+    
+    func copy(
+        files: [File],
         destination: File,
-        conflictResolver: ConflictResolver,
-        completion: (Result<OperationResult, Error>) -> Void)
+        conflictResolver: NameConflictResolver,
+        completion: @escaping (Result<OperationResult, Error>) -> Void)
     
-    func moveFile(
-        fileToCopy: File,
+    func copy(
+        file: File,
         destination: File,
-        conflictResolver: ConflictResolver,
-        completion: (Result<Void, Error>) -> Void)
+        conflictResolver: NameConflictResolver,
+        completion: @escaping (Result<OperationResult, Error>) -> Void)
     
-    func moveToTrash(fileToTrash: File, completion: (Result<File, Error>) -> Void)
+    func move(
+        files: [File],
+        destination: File,
+        conflictResolver: NameConflictResolver,
+        completion: @escaping (Result<OperationResult, Error>) -> Void)
     
-    func deleteFile(file: File, completion: (Result<Void, Error>) -> Void)
+    func move(
+        file: File,
+        destination: File,
+        conflictResolver: NameConflictResolver,
+        completion: @escaping (Result<OperationResult, Error>) -> Void)
+    
+    func moveToTrash(filesToTrash: [File], completion: @escaping (Result<File, Error>) -> Void)
+    
+    func deleteFile(files: [File], completion: @escaping (Result<Void, Error>) -> Void)
 }

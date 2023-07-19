@@ -7,13 +7,8 @@
 
 import Foundation
 
-//protocol FolderViewModel: ObservableObject {
-//    var state: State { get }
-//    func load()
-//}
-
-class FolderViewModelImpl: ObservableObject {
-    
+class FolderViewModel: ObservableObject {
+  
     struct State {
         var folder: File
         var files: [File] = []
@@ -22,7 +17,7 @@ class FolderViewModelImpl: ObservableObject {
     }
     
     private let fileManager = LocalFileManager(fileManagerRootPath: LocalFileMangerRootPath())
-    private let file: File
+    let file: File
     
     private lazy var folderMonitor = FolderMonitor(url: self.file.path)
     
@@ -40,7 +35,7 @@ class FolderViewModelImpl: ObservableObject {
     }
     
     @Published
-    private(set) var state: State
+    var state: State
     
     func load() {
         folderMonitor.startMonitoring()
@@ -48,7 +43,7 @@ class FolderViewModelImpl: ObservableObject {
         fileManager.contents(of: file) { result in
             switch result {
             case .success(let files):
-                DispatchQueue.main.asyncAfter(deadline: .now() + .seconds(2)) { [self] in
+                DispatchQueue.main.asyncAfter(deadline: .now() + .seconds(1)) { [self] in
                     self.state.files = files
                 }
             case .failure(let failure):
@@ -59,18 +54,16 @@ class FolderViewModelImpl: ObservableObject {
     }
     
     func createFolder() {
-        
-    }
-    
-    
-    
+        let createdFile = file.makeSubfile(name: "NewFolder")
+        state.loading = true
+        fileManager.createFolder(at: createdFile) { result in
+            switch result {
+            case .success:
+                break
+            case .failure(let failure):
+                state.error = failure
+            }
+            state.loading = false
+        }
+    }   
 }
-
-//class FolderViewModelStub: FolderViewModel, ObservableObject {
-//    var state: State
-//    func load() {}
-//    
-//    init(state: State) {
-//        self.state = state
-//    }
-//}

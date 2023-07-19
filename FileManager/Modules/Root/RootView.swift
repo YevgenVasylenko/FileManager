@@ -9,16 +9,21 @@ import SwiftUI
 
 struct RootView: View {
     let file: File
+    let fileSelectDelegate: FileSelectDelegate?
     
-    init(file: File = LocalFileManager().rootFolder) {
+    init(
+        file: File = LocalFileManager().rootFolder,
+        fileSelectDelegate: FileSelectDelegate? = nil
+    ){
         self.file = file
+        self.fileSelectDelegate = fileSelectDelegate
     }
     
     var body: some View {
         NavigationSplitView {
             SideBarView()
         } detail: {
-            FolderView(viewModel: FolderViewModelImpl(file: file))
+            FolderView(file: file, fileSelectDelegate: fileSelectDelegate)
         }
         .padding()
     }
