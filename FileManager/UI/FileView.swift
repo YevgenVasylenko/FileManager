@@ -20,7 +20,7 @@ struct FileView: View {
                 .font(.headline)
                 .lineLimit(2, reservesSpace: true)
         }
-        .frame(width: 90)
+        .frame(width: 75)
     }
 }
 

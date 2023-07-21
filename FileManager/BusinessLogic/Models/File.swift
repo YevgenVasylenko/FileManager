@@ -26,6 +26,8 @@ struct File {
         typeDefine()
     }
     
+    var fileChosen: Bool = false
+    
     var actions: [FileAction] = []
 
     init(path: URL) {

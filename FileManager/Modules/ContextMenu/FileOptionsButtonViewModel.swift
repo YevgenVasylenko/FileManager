@@ -7,29 +7,6 @@
 
 import Foundation
 
-enum NameConflict {
-    case resolving(File)
-    case resolved(ConflictNameResult)
-    
-    var file: File? {
-        switch self {
-        case .resolving(let file):
-            return file
-        case .resolved:
-            return nil
-        }
-    }
-}
-
-enum FileActionType {
-    case copy
-    case move
-}
-
-struct FileSelectDelegate {
-    let type: FileActionType
-    let selected: (File) -> Void
-}
 
 class FileOptionsButtonViewModel: ObservableObject {
     // make state private set, make function to change state
@@ -40,7 +17,7 @@ class FileOptionsButtonViewModel: ObservableObject {
         var fileActionType: FileActionType?
     }
     
-    let fileManager = LocalFileManager()
+    private let fileManager = LocalFileManager()
     private let file: File
     private var conflictCompletion: ((ConflictNameResult) -> Void)?
     

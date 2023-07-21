@@ -18,7 +18,6 @@ struct FolderView: View {
         GridItem(.flexible())
     ]
     
-    
     init(file: File, fileSelectDelegate: FileSelectDelegate?) {
         viewModel = FolderViewModel(file: file)
         self.fileSelectDelegate = fileSelectDelegate
@@ -37,39 +36,70 @@ struct FolderView: View {
                 }
                 ScrollView {
                     LazyVGrid(columns: columns, spacing: 20) {
-                        ForEach(viewModel.state.files, id: \.self) { file in
+                        ForEach($viewModel.state.files, id: \.self) { $file in
                             VStack {
                                 NavigationLink {
                                     viewToShow(file: file)
                                 } label: {
                                     FileView(file: file)
                                 }
-                                FileOptionsButtonView(file: file)
+                                FileOptionsButtonView(file: file) { action in
+                                    viewModel.state.file = file
+                                    switch action {
+                                    case .rename:
+                                        viewModel.rename()
+                                    case .move:
+                                        viewModel.move()
+                                    case .copy:
+                                        viewModel.copy()
+                                    case .moveToTrash:
+                                        viewModel.moveToTrash()
+                                    case .delete:
+                                        viewModel.delete()
+                                    case .clean:
+                                        viewModel.clear()
+                                    }
+                                }
+                                .disabled(viewModel.state.filesChooseInProgress)
+                            }
+                            .disabled(viewModel.isFilesDisabledInFolder(isFolderDestinationChose: fileSelectDelegate, file: file))
+                            .overlay(alignment: .center) {
+                                if viewModel.state.filesChooseInProgress && !viewModel.isFileDefault(file: file) {
+                                    Toggle(isOn: $file.fileChosen) {
+                                        Image(systemName: file.fileChosen ? "checkmark.square.fill" : "square")
+                                            .foregroundColor(file.fileChosen ? .blue : .gray)
+                                            .font(.system(size: 30))
+                                    }
+                                    .toggleStyle(.button)
+                                }
                             }
                         }
-                        Spacer()
                     }
                 }
                 createFolderButton()
+                actionMenuBarForChosenFiles()
             }
         }
+        
         .onAppear {
             if EnvironmentUtils.isPreview == false {
                 viewModel.load()
             }
         }
+        .destinationPopoverFileFolder(viewModule: viewModel)
+        .conflictAlertFolder(viewModule: viewModel)
         .errorAlert(error: $viewModel.state.error)
         .navigationViewStyle(.stack)
         .buttonStyle(.plain)
         .padding()
-        .navigationTitle(viewModel.file.name)
+        .navigationTitle(viewModel.state.folder.name)
         .navigationBarTitleDisplayMode(.inline)
-        .navigationBar(
-            fileActionType: fileSelectDelegate?.type,
-            file: viewModel.file,
-            chooseAction: {
-            fileSelectDelegate?.selected(viewModel.file)
-        })
+        .toolbar {
+            navigationBar(
+                chooseAction: {
+                    fileSelectDelegate?.selected(viewModel.state.folder)
+            })
+        }
     }
 }
 
@@ -96,35 +126,65 @@ private extension FolderView {
             }
         }
     }
-}
-
-extension View {
+    
+    func actionMenuBarForChosenFiles() -> some View {
+        Group {
+            if viewModel.state.filesChooseInProgress {
+                VStack {
+                    Spacer()
+                    HStack {
+                        Button(R.string.localizable.copy_to.callAsFunction()) {
+                            viewModel.copy()
+                        }
+                        .buttonStyle(.automatic)
+                        Button(R.string.localizable.move_to.callAsFunction()) {
+                            viewModel.move()
+                        }
+                        .buttonStyle(.automatic)
+                    }
+                    .disabled(viewModel.filesForAction.isEmpty)
+                }
+            }
+        }
+    }
+    // TODO: make func for file choose toggle
+    //    func filesChooseToggle(file: File) -> some View {
+    //        Group {
+    //            if viewModel.state.filesChooseInProgress {
+    //                Toggle(isOn: .constant(file.fileChosen)) {
+    //                    Image(systemName: file.fileChosen ? "checkmark.square.fill" : "square")
+    //                        .foregroundColor(file.fileChosen ? .blue : .gray)
+    //                        .font(.system(size: 30))
+    //                        .toggleStyle(.button)
+    //                }
+    //            }
+    //        }
+    //    }
+    // TODO: make cancel button
     func navigationBar(
-        fileActionType: FileActionType?,
-        file: File,
         chooseAction: @escaping () -> Void
     ) -> some View {
-        toolbar {
+        HStack {
             Button {
                 
             } label: {
                 Image(systemName: "square.grid.3x3.square")
             }
-            if fileActionType == nil {
-                Button("Choose") {
-                }
+            if fileSelectDelegate?.type == nil {
+                let isChoosing = $viewModel.state.filesChooseInProgress
+                Toggle(nameChangeOfChoose(isChoosing: isChoosing.wrappedValue), isOn: isChoosing)
             }
             
             Button {
-                
             } label: {
                 Image(systemName: "magnifyingglass")
             }
             
-            if let fileActionType = fileActionType {
-                Button(nameOfActionSelection(fileActionType: fileActionType)) {
+            if let fileSelectDelegate = fileSelectDelegate {
+                Button(nameOfActionSelection(fileActionType: fileSelectDelegate.type)) {
                     chooseAction()
                 }
+                .disabled(viewModel.isChosenFilesInCurrentView(files: fileSelectDelegate.selectedFiles))
             }
         }
     }
@@ -135,6 +195,43 @@ extension View {
             return R.string.localizable.copy_to.callAsFunction()
         case .move:
             return R.string.localizable.move_to.callAsFunction()
+        }
+    }
+    
+    func nameChangeOfChoose(isChoosing: Bool) -> String {
+        if !isChoosing {
+            return R.string.localizable.choose.callAsFunction()
+        } else {
+            return R.string.localizable.done.callAsFunction()
+        }
+    }
+}
+
+extension View {
+
+    func conflictAlertFolder(viewModule: FolderViewModel) -> some View {
+        let nameConflict = viewModule.state.nameConflict
+        return alert("File with name \(viewModule.state.nameConflict?.file?.name ?? "") is exist", isPresented: .constant(nameConflict != nil)) {
+            HStack {
+                Button("Cancel") {
+                    viewModule.userConflictResolveChoice(nameResult: .cancel)
+                }
+                Button("Replace") {
+                    viewModule.userConflictResolveChoice(nameResult: .replace)
+                }
+                Button("New Name") {
+                    viewModule.userConflictResolveChoice(nameResult: .newName)
+                }
+            }
+        }
+    }
+    
+    func destinationPopoverFileFolder(viewModule: FolderViewModel) -> some View {
+        let fileActionType = viewModule.state.fileActionType
+        return sheet(isPresented: .constant(fileActionType != nil)) {
+            RootView(fileSelectDelegate: FileSelectDelegate(type: fileActionType ?? .move, selectedFiles: viewModule.filesForAction, selected: { file in
+                viewModule.moveOrCopyWithUserChosen(folder: file)
+            }))
         }
     }
 }
