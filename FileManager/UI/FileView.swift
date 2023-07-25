@@ -28,10 +28,10 @@ struct FileView: View {
     }
 }
 
-//struct FileView_Previews: PreviewProvider {
-//    static var previews: some View {
-//        FileView(file: PreviewFiles.downloadsFolder)
-//    }
-//}
+struct FileView_Previews: PreviewProvider {
+    static var previews: some View {
+        FileView(file: PreviewFiles.downloadsFolder)
+    }
+}
 
 

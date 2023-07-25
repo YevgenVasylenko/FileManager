@@ -9,7 +9,7 @@ import SwiftUI
 
 struct SideBarView: View {
     let fileSelectDelegate: FileSelectDelegate?
-
+    
     init(fileSelectDelegate: FileSelectDelegate? = nil) {
         self.fileSelectDelegate = fileSelectDelegate
     }

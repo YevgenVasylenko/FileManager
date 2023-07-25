@@ -15,7 +15,7 @@ final class LocalFileManager {
         static let trash = "Trash"
         static let downloads = "Downloads"
     }
-
+    
     private let fileManagerRootPath: FileManagerRootPath
     private lazy var documentsURL = fileManagerRootPath.documentsURL
     private(set) lazy var rootFolder = makeDefaultFolder(name: Constants.root, destination: documentsURL)
@@ -100,7 +100,7 @@ extension LocalFileManager: FileManager {
                     completion(.success(.cancelled))
                     return
                 }
-               let files = files.dropFirst()
+                let files = files.dropFirst()
                 self?.copy(files: Array(files), destination: destination, conflictResolver: conflictResolver, completion: completion)
             case .failure(let error):
                 completion(.failure(error))
@@ -218,7 +218,7 @@ extension LocalFileManager: FileManager {
 // MARK: - Private
 
 private extension LocalFileManager {
-
+    
     func makeDefaultFolder(name: String, destination: URL) -> File {
         var file = File(path: destination.appendingPathComponent(name))
         if SystemFileManger.default.fileExists(atPath: file.path.path) {
@@ -229,7 +229,7 @@ private extension LocalFileManager {
         } catch {
             fatalError("Failed to create directory with error: \(error)")
         }
-       updateFileActions(file: &file)
+        updateFileActions(file: &file)
         return file
     }
     
@@ -259,7 +259,7 @@ private extension LocalFileManager {
             return .failure(Error.nameExist)
         }
     }
-
+    
     func replaceFile(fileToCopy: File, destination: File) -> Result<Void, Error> {
         let destinationPath = destination
         do {

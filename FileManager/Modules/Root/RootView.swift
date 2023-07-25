@@ -24,15 +24,15 @@ struct RootView: View {
             SideBarView()
                 .navigationBarItems(
                     trailing: cancelButtonForFolderSelection(chooseAction: {
-                    fileSelectDelegate?.selected(nil)
-                }))
+                        fileSelectDelegate?.selected(nil)
+                    }))
         } detail: {
             FolderView(file: file, fileSelectDelegate: fileSelectDelegate)
         }
         .padding()
         
     }
-        
+    
 }
 
 private extension RootView {

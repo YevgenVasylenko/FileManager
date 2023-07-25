@@ -9,7 +9,7 @@ import Foundation
 
 struct File {
     // enum case system
-         // case trash...
+    // case trash...
     enum ObjectType {
         case folder
         case image
@@ -29,7 +29,7 @@ struct File {
     var fileChosen: Bool = false
     
     var actions: [FileAction] = []
-
+    
     init(path: URL) {
         self.path = path
     }
