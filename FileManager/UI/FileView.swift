@@ -8,8 +8,12 @@
 import SwiftUI
 
 struct FileView: View {
-
+    
     var file: File
+    
+    init(file: File) {
+        self.file = file
+    }
     
     var body: some View {
         VStack {
@@ -20,14 +24,14 @@ struct FileView: View {
                 .font(.headline)
                 .lineLimit(2, reservesSpace: true)
         }
-        .frame(width: 75)
+        .frame(width: 80)
     }
 }
 
-struct FileView_Previews: PreviewProvider {
-    static var previews: some View {
-        FileView(file: PreviewFiles.downloadsFolder)
-    }
-}
+//struct FileView_Previews: PreviewProvider {
+//    static var previews: some View {
+//        FileView(file: PreviewFiles.downloadsFolder)
+//    }
+//}
 
 

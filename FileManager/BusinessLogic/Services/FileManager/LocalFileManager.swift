@@ -247,7 +247,7 @@ private extension LocalFileManager {
         var destinationPath = destination
         var numberOfCopy = 1
         repeat {
-            let newName = destinationPath.name + (" Copy_\(numberOfCopy)")
+            let newName = destination.name + (" Copy_") + "\(numberOfCopy)"
             destinationPath = destinationPath.rename(name: newName)
             numberOfCopy += 1
         } while SystemFileManger.default.fileExists(atPath: destinationPath.path.path)

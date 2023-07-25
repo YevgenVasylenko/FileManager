@@ -39,7 +39,6 @@
 		5DACCB532A44568B000A0CA9 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 5DACCB522A44568B000A0CA9 /* Preview Assets.xcassets */; };
 		5DD776162A544B5600F9B55D /* FileManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DD776152A544B5600F9B55D /* FileManager.swift */; };
 		5DEDB9062A5ACAC2003CC86B /* FileAction.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DEDB9052A5ACAC2003CC86B /* FileAction.swift */; };
-		5DEDB90B2A5AD0C7003CC86B /* FileOptionsButtonViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DEDB90A2A5AD0C7003CC86B /* FileOptionsButtonViewModel.swift */; };
 		5DEDB90E2A5AEDD2003CC86B /* EnvironmenttUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DEDB90D2A5AEDD2003CC86B /* EnvironmenttUtils.swift */; };
 /* End PBXBuildFile section */
 
@@ -81,7 +80,6 @@
 		5DACCB522A44568B000A0CA9 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		5DD776152A544B5600F9B55D /* FileManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileManager.swift; sourceTree = "<group>"; };
 		5DEDB9052A5ACAC2003CC86B /* FileAction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileAction.swift; sourceTree = "<group>"; };
-		5DEDB90A2A5AD0C7003CC86B /* FileOptionsButtonViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileOptionsButtonViewModel.swift; sourceTree = "<group>"; };
 		5DEDB90D2A5AEDD2003CC86B /* EnvironmenttUtils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EnvironmenttUtils.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -176,7 +174,6 @@
 			isa = PBXGroup;
 			children = (
 				5D954CB72A58062300A221DB /* FileOptionsButtonView.swift */,
-				5DEDB90A2A5AD0C7003CC86B /* FileOptionsButtonViewModel.swift */,
 			);
 			path = ContextMenu;
 			sourceTree = "<group>";
@@ -404,7 +401,6 @@
 				5D0B9CA92A446D080099021C /* LocalFileManager.swift in Sources */,
 				5D221D5C2A5DA1170072AA35 /* LocalizedError.swift in Sources */,
 				5DD776162A544B5600F9B55D /* FileManager.swift in Sources */,
-				5DEDB90B2A5AD0C7003CC86B /* FileOptionsButtonViewModel.swift in Sources */,
 				5D0B9CA52A4466460099021C /* FileView.swift in Sources */,
 				5D78B1B52A4ECEDC00A76D0F /* ConflictResolver.swift in Sources */,
 				5DACCB4E2A445689000A0CA9 /* RootView.swift in Sources */,

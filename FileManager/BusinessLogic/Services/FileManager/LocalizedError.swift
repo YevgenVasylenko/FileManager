@@ -11,22 +11,21 @@ enum Error: LocalizedError {
         case nameExist
         case unknown
     
-// make Rswift string
         var errorDescription: String? {
             switch self {
             case .nameExist:
-                return "Name is exist"
+                return R.string.localizable.name_is_exist.callAsFunction()
             case .unknown:
-                return "Unknown error"
+                return R.string.localizable.unknown_error.callAsFunction()
             }
         }
 
         var recoverySuggestion: String? {
             switch self {
             case .nameExist:
-                return "File with same name is already exist"
+                return R.string.localizable.file_with_same_name_is_already_exist.callAsFunction()
             case .unknown:
-                return "Try smth else"
+                return R.string.localizable.try_smth_else.callAsFunction()
             }
         }
     // remake on init

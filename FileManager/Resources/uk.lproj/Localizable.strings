@@ -12,3 +12,14 @@
 
 "choose" = "Вибрати";
 "done" = "Готово";
+
+"nameExistAlertTitle" = " таке ім'я вже існує";
+"cancel" = "Відміна";
+"replace" = "Замінити";
+"new_name" = "Нове ім'я";
+
+"name_is_exist" = "Ім'я вже існує";
+"unknown_error" = "Невідома помилка";
+
+"file_with_same_name_is_already_exist" = "Файл з таким ім'ям вже існує";
+"try_smth_else" = "Спробуйте інакше";

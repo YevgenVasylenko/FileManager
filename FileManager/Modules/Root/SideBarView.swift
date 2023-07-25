@@ -8,6 +8,12 @@
 import SwiftUI
 
 struct SideBarView: View {
+    let fileSelectDelegate: FileSelectDelegate?
+
+    init(fileSelectDelegate: FileSelectDelegate? = nil) {
+        self.fileSelectDelegate = fileSelectDelegate
+    }
+    
     var body: some View {
         NavigationView {
             Text("My Files")

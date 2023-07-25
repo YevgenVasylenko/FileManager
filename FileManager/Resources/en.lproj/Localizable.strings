@@ -12,4 +12,14 @@
 
 "choose" = "Choose";
 "done" = "Done";
+ 
+"nameExistAlertTitle" = " such file's name is already exist";
+"cancel" = "Cancel";
+"replace" = "Replace";
+"new_name" = "New name";
 
+"name_is_exist" = "Name is exist";
+"unknown_error" = "Unknown error";
+
+"file_with_same_name_is_already_exist" = "File with same name is already exist";
+"try_smth_else" = "Try smth else";

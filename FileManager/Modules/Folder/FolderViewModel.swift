@@ -27,9 +27,9 @@ enum FileActionType {
 }
 
 struct FileSelectDelegate {
-    let type: FileActionType
+    var type: FileActionType
     let selectedFiles: [File]
-    let selected: (File) -> Void
+    let selected: (File?) -> Void
 }
 
 
@@ -44,8 +44,8 @@ class FolderViewModel: ObservableObject {
         var nameConflict: NameConflict?
         var fileActionType: FileActionType?
         var file: File?
+        var fileRenameInProgress: Bool = false
     }
-    
     private let file: File
     private let fileManager = LocalFileManager(fileManagerRootPath: LocalFileMangerRootPath())
     private var conflictCompletion: ((ConflictNameResult) -> Void)?
@@ -79,14 +79,18 @@ class FolderViewModel: ObservableObject {
         conflictCompletion?(nameResult)
     }
     
-    func moveOrCopyWithUserChosen(folder: File) {
-        switch self.state.fileActionType {
-        case .copy:
-            copyFilesToChosen(folder: folder)
-        case .move:
-            moveFilesToChosen(folder: folder)
-        case .none:
-            break
+    func moveOrCopyWithUserChosen(folder: File?) {
+        if let folder = folder {
+            switch self.state.fileActionType {
+            case .copy:
+                copyFilesToChosen(folder: folder)
+            case .move:
+                moveFilesToChosen(folder: folder)
+            case .none:
+                break
+            }
+        } else {
+            state.fileActionType = nil
         }
     }
     
@@ -128,7 +132,13 @@ class FolderViewModel: ObservableObject {
         self.state.fileActionType = .move
     }
     
-    func rename(newName: String = "Hello") {
+    func startRename(file: File) {
+        state.file = file
+        self.state.fileRenameInProgress = true
+    }
+    
+    func rename(newName: String) {
+        state.fileRenameInProgress = false
         fileManager.rename(file: state.file!, newName: newName) { result in
             switch result {
             case .success:
@@ -176,7 +186,7 @@ class FolderViewModel: ObservableObject {
         guard let isFolderDestinationChose = isFolderDestinationChose else {
             return state.filesChooseInProgress
         }
-            return isFileDefault(file: file) || isFolderDestinationChose.selectedFiles.contains(file)
+            return file == fileManager.trashFolder || isFolderDestinationChose.selectedFiles.contains(file)
     }
     
     func isFileDefault(file: File) -> Bool {
@@ -184,7 +194,11 @@ class FolderViewModel: ObservableObject {
     }
     
     func isChosenFilesInCurrentView(files: [File]) -> Bool {
-        return state.files.contains(files)
+        if state.loading {
+            return true
+        } else {
+            return state.files.contains(files)
+        }
     }
 }
 

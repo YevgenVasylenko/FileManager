@@ -9,7 +9,7 @@ import SwiftUI
 
 struct RootView: View {
     let file: File
-    let fileSelectDelegate: FileSelectDelegate?
+    var fileSelectDelegate: FileSelectDelegate?
     
     init(
         file: File = LocalFileManager().rootFolder,
@@ -22,10 +22,28 @@ struct RootView: View {
     var body: some View {
         NavigationSplitView {
             SideBarView()
+                .navigationBarItems(
+                    trailing: cancelButtonForFolderSelection(chooseAction: {
+                    fileSelectDelegate?.selected(nil)
+                }))
         } detail: {
             FolderView(file: file, fileSelectDelegate: fileSelectDelegate)
         }
         .padding()
+        
+    }
+        
+}
+
+private extension RootView {
+    func cancelButtonForFolderSelection(chooseAction: @escaping () -> Void) -> some View {
+        Group {
+            if fileSelectDelegate != nil {
+                Button(R.string.localizable.cancel.callAsFunction()) {
+                    chooseAction()
+                }
+            }
+        }
     }
 }
 
