@@ -17,14 +17,24 @@ struct FileView: View {
     
     var body: some View {
         VStack {
-            Image(file.imageName)
-                .resizable()
-                .frame(width: 75, height: 75)
-            Text(file.name)
-                .font(.headline)
-                .lineLimit(2, reservesSpace: true)
+            imageOfFile(imageName: file.imageName)
+            nameOfFile(fileName: file.name)
         }
         .frame(width: 80)
+    }
+}
+
+private extension FileView {
+    func imageOfFile(imageName: String) -> some View {
+        return Image(imageName)
+            .resizable()
+            .frame(width: 75, height: 75)
+    }
+    
+    func nameOfFile(fileName: String) -> some View {
+        return Text(fileName)
+            .font(.headline)
+            .lineLimit(2, reservesSpace: false)
     }
 }
 

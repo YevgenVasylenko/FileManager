@@ -7,8 +7,6 @@
 
 import Foundation
 
-// make protocol in new file describe functions
-
 final class LocalFileManager {
     enum Constants {
         static let root = "Root"
@@ -38,11 +36,12 @@ extension LocalFileManager: FileManager {
             for path in try SystemFileManger.default.contentsOfDirectory(at: file.path, includingPropertiesForKeys: nil) {
                 var file = File(path: path)
                 updateFileActions(file: &file)
+                updateFolderAffiliation(file: &file)
                 files.append(file)
             }
             completion(.success(files))
         } catch {
-            completion(.failure(Error.nameExist))
+            completion(.failure(Error(error: error)))
         }
     }
     
@@ -51,7 +50,7 @@ extension LocalFileManager: FileManager {
             try SystemFileManger.default.createDirectory(at: file.path, withIntermediateDirectories: false)
             completion(.success(()))
         } catch {
-            completion(.failure(Error.errorHandling(error: error as NSError)))
+            completion(.failure(Error(error: error)))
         }
     }
     
@@ -61,14 +60,15 @@ extension LocalFileManager: FileManager {
         conflictResolver: NameConflictResolver,
         completion: @escaping (Result<OperationResult, Error>) -> Void)
     {
-        let destination = destinationSubFile(fileToTransfer: file, targetFile: destination)
+        let destination = destination.makeSubfile(name: file.name)
         if SystemFileManger.default.fileExists(atPath: destination.path.path) {
             conflictResolve(fileToCopy: file, destination: destination, conflictResolver: conflictResolver) { conflictResolveResult in
                 switch conflictResolveResult {
                 case .success(let choice):
                     completion(.success(choice))
                 case .failure(let error):
-                    completion(.failure(Error.errorHandling(error: error as NSError)))
+                    //not sure
+                    completion(.failure(Error(error: error)))
                 }
             }
         } else {
@@ -76,7 +76,7 @@ extension LocalFileManager: FileManager {
                 try SystemFileManger.default.copyItem(at: file.path, to: destination.path)
                 completion(.success(.finished))
             } catch {
-                completion(.failure(Error.errorHandling(error: error as NSError)))
+                completion(.failure(Error(error: error)))
             }
         }
     }
@@ -88,7 +88,6 @@ extension LocalFileManager: FileManager {
         completion: @escaping (Result<OperationResult, Error>) -> Void)
     {
         guard let file = files.first else {
-            // some sheet
             completion(.success(.finished))
             return
         }
@@ -103,7 +102,7 @@ extension LocalFileManager: FileManager {
                 let files = files.dropFirst()
                 self?.copy(files: Array(files), destination: destination, conflictResolver: conflictResolver, completion: completion)
             case .failure(let error):
-                completion(.failure(error))
+                completion(.failure(Error(error: error)))
             }
         }
         
@@ -130,7 +129,7 @@ extension LocalFileManager: FileManager {
                 let files = files.dropFirst()
                 self?.move(files: Array(files), destination: destination, conflictResolver: conflictResolver, completion: completion)
             case .failure(let error):
-                completion(.failure(error))
+                completion(.failure(Error(error: error)))
             }
         }
     }
@@ -153,16 +152,16 @@ extension LocalFileManager: FileManager {
                     case .success:
                         completion(.success(.finished))
                     case .failure(let error):
-                        completion(.failure(error))
+                        completion(.failure(Error(error: error)))
                     }
                 }
             case .failure(let error):
-                completion(.failure(error))
+                completion(.failure(Error(error: error)))
             }
         }
     }
-    
-    func moveToTrash(filesToTrash: [File], completion: (Result<File, Error>) -> Void) {
+
+    func moveToTrash(filesToTrash: [File], completion: (Result<Void, Error>) -> Void) {
         for file in filesToTrash {
             var fileToTrashTemp = file
             var trashedFilePath: URL {
@@ -173,11 +172,11 @@ extension LocalFileManager: FileManager {
                     fileToTrashTemp.addTimeToName()
                 }
                 try SystemFileManger.default.moveItem(at: file.path, to: trashedFilePath)
-                completion(.success(fileToTrashTemp))
             } catch {
-                completion(.failure(Error.errorHandling(error: error as NSError)))
+                completion(.failure(Error(error: error)))
             }
         }
+        completion(.success(()))
     }
     
     func deleteFile(files: [File], completion: (Result<Void, Error>) -> Void) {
@@ -186,7 +185,7 @@ extension LocalFileManager: FileManager {
                 try SystemFileManger.default.removeItem(at: file.path)
             }
             catch {
-                completion(.failure(Error.errorHandling(error: error as NSError)))
+                completion(.failure(Error(error: error)))
                 return
             }
         }
@@ -198,8 +197,8 @@ extension LocalFileManager: FileManager {
             switch result {
             case .success(let files):
                 deleteFile(files: files, completion: completion)
-            case .failure(let failure):
-                completion(.failure(failure))
+            case .failure(let error):
+                completion(.failure(Error(error: error)))
             }
         }
     }
@@ -210,7 +209,7 @@ extension LocalFileManager: FileManager {
             try SystemFileManger.default.moveItem(at: file.path, to: renamedFile.path)
             completion(.success(()))
         } catch {
-            completion(.failure(Error.errorHandling(error: error as NSError)))
+            completion(.failure(Error(error: error)))
         }
     }
 }
@@ -230,6 +229,7 @@ private extension LocalFileManager {
             fatalError("Failed to create directory with error: \(error)")
         }
         updateFileActions(file: &file)
+        updateFolderAffiliation(file: &file)
         return file
     }
     
@@ -243,11 +243,19 @@ private extension LocalFileManager {
         }
     }
     
+    func updateFolderAffiliation(file: inout File) {
+        if file == trashFolder {
+            file.folderAffiliation = .system
+        } else if file == downloadsFolder {
+            file.folderAffiliation = .system
+        }
+    }
+    
     func copyFileWithNewName(file: File, destination: File) -> Result<Void, Error> {
         var destinationPath = destination
         var numberOfCopy = 1
         repeat {
-            let newName = destination.name + (" Copy_") + "\(numberOfCopy)"
+            let newName = destination.name + R.string.localizable.copyInName.callAsFunction() + "\(numberOfCopy)"
             destinationPath = destinationPath.rename(name: newName)
             numberOfCopy += 1
         } while SystemFileManger.default.fileExists(atPath: destinationPath.path.path)
@@ -256,7 +264,7 @@ private extension LocalFileManager {
             try SystemFileManger.default.copyItem(at: file.path, to: destinationPath.path)
             return .success(())
         } catch {
-            return .failure(Error.nameExist)
+            return .failure(Error(error: error))
         }
     }
     
@@ -267,7 +275,7 @@ private extension LocalFileManager {
             try SystemFileManger.default.copyItem(at: fileToCopy.path, to: destinationPath.path)
             return .success(())
         } catch {
-            return .failure(Error.nameExist)
+            return .failure(Error(error: error))
         }
     }
     
@@ -281,21 +289,17 @@ private extension LocalFileManager {
                 case .success:
                     completion(.success(.finished))
                 case .failure(let error):
-                    completion(.failure(error))
+                    completion(.failure(Error(error: error)))
                 }
             case .newName:
                 switch self.copyFileWithNewName(file: fileToCopy, destination: destination) {
                 case .success():
                     completion(.success(.finished))
                 case .failure(let error):
-                    completion(.failure(error))
+                    completion(.failure(Error(error: error)))
                 }
             }
         }
-    }
-    
-    func destinationSubFile(fileToTransfer: File, targetFile: File) -> File {
-        return File(path: targetFile.path.appendingPathComponent(fileToTransfer.name))
     }
 }
 

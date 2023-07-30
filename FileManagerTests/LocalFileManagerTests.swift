@@ -7,8 +7,13 @@
 
 import XCTest
 
+// remove comments code or uncomment and fix
+
 final class LocalFileManagerTests: XCTestCase {
 
+    // in test we do not care about private
+    // so we omit this in favor of simplicity
+    // just for you to know
     var fileManager: LocalFileManager!
     var conflictResolver: ConflictResolverMock!
 
@@ -49,6 +54,7 @@ final class LocalFileManagerTests: XCTestCase {
             switch result {
             case .success(let files):
                 XCTAssertTrue(files.count == 2)
+                // uncomment?
 //                XCTAssertTrue(files.contains(file1))
 //                XCTAssertTrue(files.contains(file2))
             case .failure:
@@ -460,3 +466,4 @@ extension File {
     }
 }
 // move to create file
+// yes, move)

@@ -1,5 +1,5 @@
 //
-//  FileManagerUtilities.swift
+//  FileManagerUtilities.swift // should be the same as file name
 //  FileManager
 //
 //  Created by Yevgen Vasylenko on 30.06.2023.
@@ -18,12 +18,6 @@ extension Result {
     }
     
     var isFailure: Bool {
-        switch self {
-        case .success:
-            return false
-        case .failure:
-            return true
-        }
+       return !isSuccess
     }
-    
 }

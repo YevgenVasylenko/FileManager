@@ -46,7 +46,7 @@ protocol FileManager {
         conflictResolver: NameConflictResolver,
         completion: @escaping (Result<OperationResult, Error>) -> Void)
     
-    func moveToTrash(filesToTrash: [File], completion: @escaping (Result<File, Error>) -> Void)
+    func moveToTrash(filesToTrash: [File], completion: @escaping (Result<Void, Error>) -> Void)
     
     func deleteFile(files: [File], completion: @escaping (Result<Void, Error>) -> Void)
 }

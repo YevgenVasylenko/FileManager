@@ -8,11 +8,13 @@
 import SwiftUI
 
 struct FolderView: View {
-    @ObservedObject var viewModel: FolderViewModel
-    @State var newName: String = ""
+    
+    @ObservedObject private var viewModel: FolderViewModel
+    
+    @State private var newName: String = ""
 
-    let fileSelectDelegate: FileSelectDelegate?
-    let columns = [
+    private let fileSelectDelegate: FileSelectDelegate?
+    private let columns = [
         GridItem(.flexible()),
         GridItem(.flexible()),
         GridItem(.flexible()),
@@ -39,20 +41,23 @@ struct FolderView: View {
                 ScrollView {
                     LazyVGrid(columns: columns, spacing: 20) {
                         ForEach($viewModel.state.files, id: \.self) { $file in
+                           
                             VStack {
                                 NavigationLink {
                                     viewToShow(file: file)
                                 } label: {
                                     FileView(file: file)
                                 }
+                                Spacer()
                                 if fileSelectDelegate == nil {
                                     fileActionsMenuView(file: file)
                                 }
                             }
                             .disabled(viewModel.isFilesDisabledInFolder(isFolderDestinationChose: fileSelectDelegate, file: file))
-                            .overlay(alignment: .center) {
-                                filesChooseToggle(file: $file)
+                            .overlay(alignment: Alignment(horizontal: .leading, vertical: .top)) {
+                                filesChooseToggle(file: file)
                             }
+                            
                         }
                     }
                 }
@@ -60,12 +65,14 @@ struct FolderView: View {
                 actionMenuBarForChosenFiles()
             }
         }
-        
         .onAppear {
             if EnvironmentUtils.isPreview == false {
                 viewModel.load()
             }
         }
+//        .onChange(of: viewModel.state.folder, perform: { newValue in
+//            viewModel.load()
+//        })
         .renamePopover(viewModel: viewModel, newName: $newName)
         .destinationPopoverFileFolder(viewModule: viewModel)
         .conflictAlertFolder(viewModule: viewModel)
@@ -110,16 +117,20 @@ private extension FolderView {
     
     func actionMenuBarForChosenFiles() -> some View {
         Group {
-            if viewModel.state.filesChooseInProgress {
+            if chooseInProgressBinding().wrappedValue {
                 VStack {
                     Spacer()
                     HStack {
                         Button(R.string.localizable.copy_to.callAsFunction()) {
-                            viewModel.copy()
+                            viewModel.copyChosen()
                         }
                         .buttonStyle(.automatic)
                         Button(R.string.localizable.move_to.callAsFunction()) {
-                            viewModel.move()
+                            viewModel.moveChosen()
+                        }
+                        .buttonStyle(.automatic)
+                        Button(R.string.localizable.move_to_trash.callAsFunction()) {
+                            viewModel.moveToTrashChosen()
                         }
                         .buttonStyle(.automatic)
                     }
@@ -129,18 +140,18 @@ private extension FolderView {
         }
     }
     
-    func filesChooseToggle(file: Binding<File>) -> some View {
-            Group {
-                if viewModel.state.filesChooseInProgress && !viewModel.isFileDefault(file: file.wrappedValue) {
-                    Toggle(isOn: file.fileChosen) {
-                        Image(systemName: file.fileChosen.wrappedValue ? "checkmark.square.fill" : "square")
-                            .foregroundColor(file.fileChosen.wrappedValue ? .blue : .gray)
-                            .font(.system(size: 30))
-                    }
-                    .toggleStyle(.button)
+    func filesChooseToggle(file: File) -> some View {
+        Group {
+            if chooseInProgressBinding().wrappedValue && !viewModel.isFileDefault(file: file) {
+                Toggle(isOn: selectedFileBinding(for: file)) {
+                    Image(systemName: selectedFileBinding(for: file).wrappedValue ? "checkmark.square.fill" : "square")
+                        .foregroundColor(selectedFileBinding(for: file).wrappedValue ? .blue : .gray)
+                        .font(.system(size: 30))
                 }
+                .toggleStyle(.button)
             }
         }
+    }
     
     func navigationBar(
         chooseAction: @escaping () -> Void
@@ -150,38 +161,39 @@ private extension FolderView {
             } label: {
                 Image(systemName: "square.grid.3x3.square")
             }
+            
             if fileSelectDelegate?.type == nil {
-                let isChoosing = $viewModel.state.filesChooseInProgress
+                let isChoosing = chooseInProgressBinding()
                 Toggle(nameChangeOfChoose(isChoosing: isChoosing.wrappedValue), isOn: isChoosing)
             }
+            
             Button {
             } label: {
                 Image(systemName: "magnifyingglass")
             }
+            
             if let fileSelectDelegate = fileSelectDelegate {
                 Button(nameOfActionSelection(fileActionType: fileSelectDelegate.type)) {
                     chooseAction()
                 }
-                .disabled(viewModel.isChosenFilesInCurrentView(files: fileSelectDelegate.selectedFiles))
+                .disabled(viewModel.isFilesInCurrentFolder(files: fileSelectDelegate.selectedFiles) ?? true)
             }
         }
     }
     
     func fileActionsMenuView(file: File) -> some View {
         FileOptionsButtonView(file: file) { action in
-            // make file in funcs
-            viewModel.state.file = file
             switch action {
             case .rename:
                 viewModel.startRename(file: file)
             case .move:
-                viewModel.move()
+                viewModel.moveOne(file: file)
             case .copy:
-                viewModel.copy()
+                viewModel.copyOne(file: file)
             case .moveToTrash:
-                viewModel.moveToTrash()
+                viewModel.moveToTrashOne(file: file)
             case .delete:
-                viewModel.delete()
+                viewModel.delete(file: file)
             case .clean:
                 viewModel.clear()
             }
@@ -204,9 +216,37 @@ private extension FolderView {
             return R.string.localizable.done.callAsFunction()
         }
     }
+    
+    func selectedFileBinding(for file: File) -> Binding<Bool> {
+        return Binding(
+            get: {
+                viewModel.state.chosenFiles?.contains(file) ?? false
+            },
+            set: { selected in
+                if selected {
+                    viewModel.state.chosenFiles?.insert(file)
+                } else {
+                    viewModel.state.chosenFiles?.remove(file)
+                }
+            })
+    }
+    
+    func chooseInProgressBinding() -> Binding<Bool> {
+        Binding(
+            get: {
+                viewModel.state.chosenFiles != nil
+            },
+            set: { selected in
+                if selected {
+                    viewModel.state.chosenFiles = Set<File>()
+                } else {
+                    viewModel.state.chosenFiles = nil
+                }
+            })
+    }
 }
 
-extension View {
+private extension View {
 
     func conflictAlertFolder(viewModule: FolderViewModel) -> some View {
         let nameConflict = viewModule.state.nameConflict

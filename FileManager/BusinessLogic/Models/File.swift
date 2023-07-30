@@ -8,30 +8,32 @@
 import Foundation
 
 struct File {
-    // enum case system
-    // case trash...
+
+    enum FolderAffiliation {
+        case user
+        case system
+    }
+    
     enum ObjectType {
         case folder
         case image
         case text
     }
     
+    var folderAffiliation: FolderAffiliation = .user
+    var path: URL
+    var actions: [FileAction] = []
+
+    init(path: URL) {
+        self.path = path
+    }
+    
     var name: String {
         path.lastPathComponent
     }
     
-    var path: URL
-    
     var fileType: ObjectType {
         typeDefine()
-    }
-    
-    var fileChosen: Bool = false
-    
-    var actions: [FileAction] = []
-    
-    init(path: URL) {
-        self.path = path
     }
     
     func makeSubfile(name: String) -> File {
@@ -44,7 +46,7 @@ struct File {
     
     mutating func addTimeToName() {
         let newName = name + Date.now.formatted(date: .omitted, time: .standard)
-        path = path.deletingLastPathComponent().appendingPathComponent(newName)
+        path = self.rename(name: newName).path
     }
     
     func typeDefine() -> ObjectType {
@@ -65,3 +67,4 @@ extension File: Hashable {
         hasher.combine(path)
     }
 }
+

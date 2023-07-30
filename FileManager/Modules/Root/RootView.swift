@@ -7,9 +7,16 @@
 
 import SwiftUI
 
+struct DataSource {
+    let file: File
+    let fileSelectedDelegate: FileSelectDelegate
+}
+
 struct RootView: View {
     let file: File
     var fileSelectDelegate: FileSelectDelegate?
+    @State private var files: [File] = [LocalFileManager().rootFolder, LocalFileManager().trashFolder, LocalFileManager().downloadsFolder]
+    @State private var selectedFile: File?
     
     init(
         file: File = LocalFileManager().rootFolder,
@@ -21,13 +28,19 @@ struct RootView: View {
     
     var body: some View {
         NavigationSplitView {
-            SideBarView()
-                .navigationBarItems(
-                    trailing: cancelButtonForFolderSelection(chooseAction: {
-                        fileSelectDelegate?.selected(nil)
-                    }))
+            List(files, id: \.self, selection: $selectedFile) { file in
+                           Text(file.name).tag(file)
+//                NavigationLink(value: file) {
+//                    Text(file.name).tag(file)
+//                }
+            }
+            .navigationBarItems(
+                trailing: cancelButtonForFolderSelection(chooseAction: {
+                    fileSelectDelegate?.selected(nil)
+                }))
         } detail: {
-            FolderView(file: file, fileSelectDelegate: fileSelectDelegate)
+            FolderView(file: selectedFile ?? LocalFileManager().rootFolder, fileSelectDelegate: fileSelectDelegate)
+                .id(selectedFile)
         }
         .padding()
         

@@ -22,6 +22,7 @@ struct FileOptionsButtonView: View {
                 Menu {
                     Group {
                         ForEach(file.actions, id: \.self) { action in
+
                             switch action {
                             case .rename:
                                 renameButton()
@@ -36,6 +37,7 @@ struct FileOptionsButtonView: View {
                             case .clean:
                                 cleanButton()
                             }
+
                         }
                     }
                     .buttonStyle(.plain)
@@ -99,9 +101,24 @@ private extension FileOptionsButtonView {
     }
 }
 
-//struct FileOptionsButtonView_Previews: PreviewProvider {
-//    static var previews: some View {
-//        FileOptionsButtonView(file: PreviewFiles.trashFolder)
-//    }
-//}
+struct FileOptionsButtonView_Previews: PreviewProvider {
+    static var previews: some View {
+        FileOptionsButtonView(file: PreviewFiles.trashFolder) { action in
+            switch action {
+            case .rename:
+                break
+            case .move:
+                break
+            case .copy:
+                break
+            case .moveToTrash:
+                break
+            case .delete:
+                break
+            case .clean:
+                break
+            }
+        }
+    }
+}
 

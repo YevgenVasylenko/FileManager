@@ -11,7 +11,7 @@ class FolderMonitor {
     
     private var monitoredFolderFileDescriptor: CInt = -1
     private var folderMonitorSource: DispatchSourceFileSystemObject?
-    let url: Foundation.URL
+    private let url: Foundation.URL
     
     var folderDidChange: (() -> Void)?
     
@@ -39,6 +39,14 @@ class FolderMonitor {
             strongSelf.folderMonitorSource = nil
         }
         folderMonitorSource?.resume()
+        
+        // instead of unwrapping variable each time, write like this:
+        /// ```
+        /// let value = makeValue()
+        /// self.value = value
+        /// value.callFun1()
+        /// value.callFun1()
+        /// ```
     }
     
     func stopMonitoring() {

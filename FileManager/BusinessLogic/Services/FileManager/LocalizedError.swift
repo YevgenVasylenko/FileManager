@@ -28,13 +28,14 @@ enum Error: LocalizedError {
                 return R.string.localizable.try_smth_else.callAsFunction()
             }
         }
-    // remake on init
-    static func errorHandling(error: NSError) -> Self {
+  
+    init(error: Swift.Error) {
+        let error = error as NSError
         switch error.code {
         case NSFileWriteFileExistsError:
-            return .nameExist
+            self = .nameExist
         default:
-            return .unknown
+            self = .unknown
         }
     }
 }

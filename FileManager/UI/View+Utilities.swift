@@ -12,7 +12,7 @@ extension View {
     func errorAlert(error: Binding<Error?>) -> some View {
         let localizedAlertError = error.wrappedValue
         return alert(isPresented: .constant(localizedAlertError != nil), error: localizedAlertError) { _ in
-            Button("Ok") {
+            Button(R.string.localizable.ok.callAsFunction()) {
              error.wrappedValue = nil
             }
         } message: { error in

@@ -1,5 +1,5 @@
 //
-//  FIleManagerRootPath.swift
+//  FIleManagerRootPath.swift // typo
 //  FileManager
 //
 //  Created by Yevgen Vasylenko on 29.06.2023.
