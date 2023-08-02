@@ -9,9 +9,9 @@ import Foundation
 
 final class LocalFileManager {
     enum Constants {
-        static let root = "Root"
-        static let trash = "Trash"
-        static let downloads = "Downloads"
+        static let root = "root"
+        static let trash = "trash"
+        static let downloads = "downloads"
     }
     
     private let fileManagerRootPath: FileManagerRootPath
@@ -34,7 +34,7 @@ extension LocalFileManager: FileManager {
         do {
             var files: [File] = []
             for path in try SystemFileManger.default.contentsOfDirectory(at: file.path, includingPropertiesForKeys: nil) {
-                var file = File(path: path)
+                var file = File(path: path, storageType: .local(LocalStorageData()))
                 updateFileActions(file: &file)
                 updateFolderAffiliation(file: &file)
                 files.append(file)
@@ -212,6 +212,10 @@ extension LocalFileManager: FileManager {
             completion(.failure(Error(error: error)))
         }
     }
+    
+    func makeFolderMonitor(file: File) -> FolderMonitor? {
+        return LocalFolderMonitor(url: file.path)
+    }
 }
 
 // MARK: - Private
@@ -219,7 +223,7 @@ extension LocalFileManager: FileManager {
 private extension LocalFileManager {
     
     func makeDefaultFolder(name: String, destination: URL) -> File {
-        var file = File(path: destination.appendingPathComponent(name))
+        var file = File(path: destination.appendingPathComponent(name), storageType: .local(LocalStorageData()))
         if SystemFileManger.default.fileExists(atPath: file.path.path) {
             return file
         }
@@ -245,9 +249,11 @@ private extension LocalFileManager {
     
     func updateFolderAffiliation(file: inout File) {
         if file == trashFolder {
-            file.folderAffiliation = .system
+            file.folderAffiliation = .system(.trash)
         } else if file == downloadsFolder {
-            file.folderAffiliation = .system
+            file.folderAffiliation = .system(.download)
+        } else if file == rootFolder {
+            file.folderAffiliation = .system(.root)
         }
     }
     

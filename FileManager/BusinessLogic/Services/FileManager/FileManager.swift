@@ -48,5 +48,19 @@ protocol FileManager {
     
     func moveToTrash(filesToTrash: [File], completion: @escaping (Result<Void, Error>) -> Void)
     
+    func cleanTrashFolder(completion: (Result<Void, Error>) -> Void)
+    
     func deleteFile(files: [File], completion: @escaping (Result<Void, Error>) -> Void)
+    
+    func makeFolderMonitor(file: File) -> FolderMonitor?
+}
+
+extension FileManager {
+    func cleanTrashFolder(completion: (Result<Void, Error>) -> Void) {
+        return
+    }
+    
+    func makeFolderMonitor(file: File) -> FolderMonitor? {
+        return nil
+    }
 }

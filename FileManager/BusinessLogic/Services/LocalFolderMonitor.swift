@@ -1,5 +1,5 @@
 //
-//  FolderMonitor.swift
+//  LocalFolderMonitor.swift
 //  FileManager
 //
 //  Created by Yevgen Vasylenko on 07.07.2023.
@@ -7,7 +7,7 @@
 
 import Foundation
 
-class FolderMonitor {
+class LocalFolderMonitor: FolderMonitor {
     
     private var monitoredFolderFileDescriptor: CInt = -1
     private var folderMonitorSource: DispatchSourceFileSystemObject?
@@ -28,25 +28,18 @@ class FolderMonitor {
             return
         }
         monitoredFolderFileDescriptor = open(url.path, O_EVTONLY)
-        folderMonitorSource = DispatchSource.makeFileSystemObjectSource(fileDescriptor: monitoredFolderFileDescriptor, eventMask: .write, queue: .main)
-        folderMonitorSource?.setEventHandler { [weak self] in
+        let folderMonitorSource = DispatchSource.makeFileSystemObjectSource(fileDescriptor: monitoredFolderFileDescriptor, eventMask: .write, queue: .main)
+        self.folderMonitorSource = folderMonitorSource
+        folderMonitorSource.setEventHandler { [weak self] in
                 self?.folderDidChange?()
         }
-        folderMonitorSource?.setCancelHandler { [weak self] in
+        folderMonitorSource.setCancelHandler { [weak self] in
             guard let strongSelf = self else { return }
             close(strongSelf.monitoredFolderFileDescriptor)
             strongSelf.monitoredFolderFileDescriptor = -1
             strongSelf.folderMonitorSource = nil
         }
-        folderMonitorSource?.resume()
-        
-        // instead of unwrapping variable each time, write like this:
-        /// ```
-        /// let value = makeValue()
-        /// self.value = value
-        /// value.callFun1()
-        /// value.callFun1()
-        /// ```
+        folderMonitorSource.resume()
     }
     
     func stopMonitoring() {

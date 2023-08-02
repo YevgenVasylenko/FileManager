@@ -28,7 +28,7 @@ struct FileSelectDelegate {
 }
 
 class FolderViewModel: ObservableObject {
-    
+ 
     struct State {
         var folder: File
         var files: [File] = []
@@ -41,9 +41,9 @@ class FolderViewModel: ObservableObject {
         var chosenFiles: Set<File>?
     }
     private let file: File
-    private let fileManager = LocalFileManager(fileManagerRootPath: LocalFileMangerRootPath())
+    private let fileManager: FileManager
     private var conflictCompletion: ((ConflictNameResult) -> Void)?
-    private lazy var folderMonitor = FolderMonitor(url: self.file.path)
+    private lazy var folderMonitor = fileManager.makeFolderMonitor(file: file)
     
     @Published
     var state: State
@@ -51,7 +51,8 @@ class FolderViewModel: ObservableObject {
     init(file: File, state: State) {
         self.file = file
         self.state = state
-        folderMonitor.folderDidChange = { [weak self] in
+        self.fileManager = FolderViewModel.makeFileManager(file: file)
+        folderMonitor?.folderDidChange = { [weak self] in
             self?.load()
         }
     }
@@ -90,7 +91,7 @@ class FolderViewModel: ObservableObject {
     }
     
     func load() {
-        folderMonitor.startMonitoring()
+        folderMonitor?.startMonitoring()
         state.loading = true
         fileManager.contents(of: file) { result in
             switch result {
@@ -99,10 +100,9 @@ class FolderViewModel: ObservableObject {
                 self.state.files = files
                 //                }
             case .failure(let failure):
-                state.error = failure
+                self.state.error = failure
             }
-            state.loading = false
-//            folderMonitor.stopMonitoring()
+            self.state.loading = false
         }
     }
     
@@ -114,9 +114,9 @@ class FolderViewModel: ObservableObject {
             case .success:
                 break
             case .failure(let failure):
-                state.error = failure
+                self.state.error = failure
             }
-            state.loading = false
+            self.state.loading = false
         }
     }
     
@@ -191,11 +191,12 @@ class FolderViewModel: ObservableObject {
         guard let isFolderDestinationChose = isFolderDestinationChose else {
             return state.chosenFiles != nil
         }
-        return file == fileManager.trashFolder || isFolderDestinationChose.selectedFiles.contains(file)
+        // not shure
+        return file == LocalFileManager().trashFolder || isFolderDestinationChose.selectedFiles.contains(file)
     }
     
     func isFileDefault(file: File) -> Bool {
-        return file.folderAffiliation == .system
+        return file.folderAffiliation == .system(.download) || file.folderAffiliation == .system(.trash)
     }
     
     func isFilesInCurrentFolder(files: [File]) -> Bool? {
@@ -248,6 +249,15 @@ private extension FolderViewModel {
             case .failure(let failure):
                 self.state.error = failure
             }
+        }
+    }
+    
+   static func makeFileManager(file: File) -> FileManager {
+        switch file.storageType {
+        case .local:
+            return LocalFileManager()
+        case .dropbox:
+            return DropboxFileManager()
         }
     }
 }

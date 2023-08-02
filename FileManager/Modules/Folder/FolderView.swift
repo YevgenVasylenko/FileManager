@@ -70,9 +70,6 @@ struct FolderView: View {
                 viewModel.load()
             }
         }
-//        .onChange(of: viewModel.state.folder, perform: { newValue in
-//            viewModel.load()
-//        })
         .renamePopover(viewModel: viewModel, newName: $newName)
         .destinationPopoverFileFolder(viewModule: viewModel)
         .conflictAlertFolder(viewModule: viewModel)
@@ -80,7 +77,7 @@ struct FolderView: View {
         .navigationViewStyle(.stack)
         .buttonStyle(.plain)
         .padding()
-        .navigationTitle(viewModel.state.folder.name)
+        .navigationTitle(viewModel.state.folder.displayedName())
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             navigationBar(

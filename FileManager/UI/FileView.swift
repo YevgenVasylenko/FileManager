@@ -18,7 +18,7 @@ struct FileView: View {
     var body: some View {
         VStack {
             imageOfFile(imageName: file.imageName)
-            nameOfFile(fileName: file.name)
+            nameOfFile(fileName: file.displayedName())
         }
         .frame(width: 80)
     }

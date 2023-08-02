@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		5D04653D2A71071900BE768E /* FileActionType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D04653C2A71071900BE768E /* FileActionType.swift */; };
+		5D0AFC152A7685AF000AA28F /* SwiftyDropbox in Frameworks */ = {isa = PBXBuildFile; productRef = 5D0AFC142A7685AF000AA28F /* SwiftyDropbox */; };
 		5D0B9CA32A4464530099021C /* FolderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D0B9CA22A4464530099021C /* FolderView.swift */; };
 		5D0B9CA52A4466460099021C /* FileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D0B9CA42A4466460099021C /* FileView.swift */; };
 		5D0B9CA72A4466BD0099021C /* File.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D0B9CA62A4466BD0099021C /* File.swift */; };
@@ -21,13 +22,14 @@
 		5D616B672A4AE58300E1360A /* FileManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D616B662A4AE58300E1360A /* FileManagerTests.swift */; };
 		5D616B6F2A4AE5B000E1360A /* LocalFileManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D616B6E2A4AE5B000E1360A /* LocalFileManagerTests.swift */; };
 		5D616B702A4AE64800E1360A /* LocalFileManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D0B9CA82A446D080099021C /* LocalFileManager.swift */; };
+		5D627D8B2A79875100170451 /* FolderMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D627D8A2A79875000170451 /* FolderMonitor.swift */; };
 		5D78B1B12A4ECDAA00A76D0F /* Result+Utilities.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D78B1B02A4ECDAA00A76D0F /* Result+Utilities.swift */; };
 		5D78B1B32A4ECDD000A76D0F /* Result+Utilities.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D78B1B02A4ECDAA00A76D0F /* Result+Utilities.swift */; };
 		5D78B1B52A4ECEDC00A76D0F /* ConflictResolver.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D78B1B42A4ECEDC00A76D0F /* ConflictResolver.swift */; };
 		5D78B1B62A4ECEDF00A76D0F /* ConflictResolver.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D78B1B42A4ECEDC00A76D0F /* ConflictResolver.swift */; };
 		5D954CAC2A56D45A00A221DB /* FolderViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D954CAB2A56D45A00A221DB /* FolderViewModel.swift */; };
 		5D954CB82A58062300A221DB /* FileOptionsButtonView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D954CB72A58062300A221DB /* FileOptionsButtonView.swift */; };
-		5D954CC82A58559800A221DB /* FolderMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D954CC72A58559800A221DB /* FolderMonitor.swift */; };
+		5D954CC82A58559800A221DB /* LocalFolderMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D954CC72A58559800A221DB /* LocalFolderMonitor.swift */; };
 		5D954CCC2A59753E00A221DB /* PreviewFiles.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D954CCB2A59753D00A221DB /* PreviewFiles.swift */; };
 		5D954CD22A597B5B00A221DB /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 5DA435042A459C22003B8E3A /* Localizable.strings */; };
 		5D954CD52A597FF800A221DB /* File+UI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D954CD42A597FF800A221DB /* File+UI.swift */; };
@@ -41,6 +43,7 @@
 		5DD776162A544B5600F9B55D /* FileManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DD776152A544B5600F9B55D /* FileManager.swift */; };
 		5DEDB9062A5ACAC2003CC86B /* FileAction.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DEDB9052A5ACAC2003CC86B /* FileAction.swift */; };
 		5DEDB90E2A5AEDD2003CC86B /* EnvironmenttUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DEDB90D2A5AEDD2003CC86B /* EnvironmenttUtils.swift */; };
+		5DF870D32A77ADAA00F9E5D5 /* DropboxFIleManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DF870D22A77ADAA00F9E5D5 /* DropboxFIleManager.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -65,11 +68,12 @@
 		5D616B642A4AE58300E1360A /* FileManagerTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = FileManagerTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		5D616B662A4AE58300E1360A /* FileManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileManagerTests.swift; sourceTree = "<group>"; };
 		5D616B6E2A4AE5B000E1360A /* LocalFileManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalFileManagerTests.swift; sourceTree = "<group>"; };
+		5D627D8A2A79875000170451 /* FolderMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = FolderMonitor.swift; path = FileManager/FolderMonitor.swift; sourceTree = "<group>"; };
 		5D78B1B02A4ECDAA00A76D0F /* Result+Utilities.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Result+Utilities.swift"; sourceTree = "<group>"; };
 		5D78B1B42A4ECEDC00A76D0F /* ConflictResolver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConflictResolver.swift; sourceTree = "<group>"; };
 		5D954CAB2A56D45A00A221DB /* FolderViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FolderViewModel.swift; sourceTree = "<group>"; };
 		5D954CB72A58062300A221DB /* FileOptionsButtonView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileOptionsButtonView.swift; sourceTree = "<group>"; };
-		5D954CC72A58559800A221DB /* FolderMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FolderMonitor.swift; sourceTree = "<group>"; };
+		5D954CC72A58559800A221DB /* LocalFolderMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalFolderMonitor.swift; sourceTree = "<group>"; };
 		5D954CCB2A59753D00A221DB /* PreviewFiles.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreviewFiles.swift; sourceTree = "<group>"; };
 		5D954CD42A597FF800A221DB /* File+UI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "File+UI.swift"; sourceTree = "<group>"; };
 		5DA435032A459C22003B8E3A /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
@@ -83,6 +87,8 @@
 		5DD776152A544B5600F9B55D /* FileManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileManager.swift; sourceTree = "<group>"; };
 		5DEDB9052A5ACAC2003CC86B /* FileAction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileAction.swift; sourceTree = "<group>"; };
 		5DEDB90D2A5AEDD2003CC86B /* EnvironmenttUtils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EnvironmenttUtils.swift; sourceTree = "<group>"; };
+		5DF870CF2A76E06900F9E5D5 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		5DF870D22A77ADAA00F9E5D5 /* DropboxFIleManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DropboxFIleManager.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -98,6 +104,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				5DA434F62A4587DC003B8E3A /* RswiftLibrary in Frameworks */,
+				5D0AFC152A7685AF000AA28F /* SwiftyDropbox in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -128,6 +135,7 @@
 			children = (
 				5DD776152A544B5600F9B55D /* FileManager.swift */,
 				5D0B9CA82A446D080099021C /* LocalFileManager.swift */,
+				5DF870D22A77ADAA00F9E5D5 /* DropboxFIleManager.swift */,
 				5D2499732A4D7CFD003D66F3 /* FIleManagerRootPath.swift */,
 				5D78B1B42A4ECEDC00A76D0F /* ConflictResolver.swift */,
 				5D221D5B2A5DA1170072AA35 /* LocalizedError.swift */,
@@ -181,13 +189,6 @@
 			path = ContextMenu;
 			sourceTree = "<group>";
 		};
-		5DA434F42A4587DC003B8E3A /* Frameworks */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			name = Frameworks;
-			sourceTree = "<group>";
-		};
 		5DACCB3F2A445689000A0CA9 = {
 			isa = PBXGroup;
 			children = (
@@ -195,7 +196,6 @@
 				5DACCB512A44568B000A0CA9 /* Preview Content */,
 				5D616B652A4AE58300E1360A /* FileManagerTests */,
 				5DACCB492A445689000A0CA9 /* Products */,
-				5DA434F42A4587DC003B8E3A /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -211,6 +211,7 @@
 		5DACCB4A2A445689000A0CA9 /* FileManager */ = {
 			isa = PBXGroup;
 			children = (
+				5DF870CF2A76E06900F9E5D5 /* Info.plist */,
 				5DACCB4B2A445689000A0CA9 /* FileManagerApp.swift */,
 				5D954CD92A5AC78B00A221DB /* Modules */,
 				5DEDB9092A5ACC69003CC86B /* BusinessLogic */,
@@ -233,7 +234,8 @@
 		5DEDB9032A5AC9D5003CC86B /* Services */ = {
 			isa = PBXGroup;
 			children = (
-				5D954CC72A58559800A221DB /* FolderMonitor.swift */,
+				5D954CC72A58559800A221DB /* LocalFolderMonitor.swift */,
+				5D627D8A2A79875000170451 /* FolderMonitor.swift */,
 				5D954CC52A5854AC00A221DB /* FileManager */,
 			);
 			path = Services;
@@ -303,6 +305,7 @@
 			name = FileManager;
 			packageProductDependencies = (
 				5DA434F52A4587DC003B8E3A /* RswiftLibrary */,
+				5D0AFC142A7685AF000AA28F /* SwiftyDropbox */,
 			);
 			productName = FileManager;
 			productReference = 5DACCB482A445689000A0CA9 /* FileManager.app */;
@@ -339,6 +342,7 @@
 			mainGroup = 5DACCB3F2A445689000A0CA9;
 			packageReferences = (
 				5DA434EF2A45878D003B8E3A /* XCRemoteSwiftPackageReference "R" */,
+				5D0AFC132A7685AF000AA28F /* XCRemoteSwiftPackageReference "SwiftyDropbox" */,
 			);
 			productRefGroup = 5DACCB492A445689000A0CA9 /* Products */;
 			projectDirPath = "";
@@ -394,11 +398,12 @@
 				5D954CB82A58062300A221DB /* FileOptionsButtonView.swift in Sources */,
 				5D221D592A5D416A0072AA35 /* View+Utilities.swift in Sources */,
 				5DEDB9062A5ACAC2003CC86B /* FileAction.swift in Sources */,
-				5D954CC82A58559800A221DB /* FolderMonitor.swift in Sources */,
+				5D954CC82A58559800A221DB /* LocalFolderMonitor.swift in Sources */,
 				5D954CCC2A59753E00A221DB /* PreviewFiles.swift in Sources */,
 				5D0B9CA72A4466BD0099021C /* File.swift in Sources */,
 				5D2499742A4D7CFD003D66F3 /* FIleManagerRootPath.swift in Sources */,
 				5DA435082A45D642003B8E3A /* SideBarView.swift in Sources */,
+				5DF870D32A77ADAA00F9E5D5 /* DropboxFIleManager.swift in Sources */,
 				5D954CAC2A56D45A00A221DB /* FolderViewModel.swift in Sources */,
 				5D954CD52A597FF800A221DB /* File+UI.swift in Sources */,
 				5D0B9CA92A446D080099021C /* LocalFileManager.swift in Sources */,
@@ -407,6 +412,7 @@
 				5DD776162A544B5600F9B55D /* FileManager.swift in Sources */,
 				5D0B9CA52A4466460099021C /* FileView.swift in Sources */,
 				5D78B1B52A4ECEDC00A76D0F /* ConflictResolver.swift in Sources */,
+				5D627D8B2A79875100170451 /* FolderMonitor.swift in Sources */,
 				5DACCB4E2A445689000A0CA9 /* RootView.swift in Sources */,
 				5DACCB4C2A445689000A0CA9 /* FileManagerApp.swift in Sources */,
 				5D78B1B12A4ECDAA00A76D0F /* Result+Utilities.swift in Sources */,
@@ -610,6 +616,7 @@
 				DEVELOPMENT_ASSET_PATHS = "\"Preview Content\"";
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = FileManager/Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -638,6 +645,7 @@
 				DEVELOPMENT_ASSET_PATHS = "\"Preview Content\"";
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = FileManager/Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -689,6 +697,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		5D0AFC132A7685AF000AA28F /* XCRemoteSwiftPackageReference "SwiftyDropbox" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/dropbox/SwiftyDropbox.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 9.0.0;
+			};
+		};
 		5DA434EF2A45878D003B8E3A /* XCRemoteSwiftPackageReference "R" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/mac-cain13/R.swift";
@@ -700,6 +716,11 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		5D0AFC142A7685AF000AA28F /* SwiftyDropbox */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 5D0AFC132A7685AF000AA28F /* XCRemoteSwiftPackageReference "SwiftyDropbox" */;
+			productName = SwiftyDropbox;
+		};
 		5DA434F52A4587DC003B8E3A /* RswiftLibrary */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 5DA434EF2A45878D003B8E3A /* XCRemoteSwiftPackageReference "R" */;

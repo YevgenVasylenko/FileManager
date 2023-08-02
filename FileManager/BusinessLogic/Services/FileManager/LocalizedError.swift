@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import SwiftyDropbox
 
 enum Error: LocalizedError {
         case nameExist
@@ -34,6 +35,14 @@ enum Error: LocalizedError {
         switch error.code {
         case NSFileWriteFileExistsError:
             self = .nameExist
+        default:
+            self = .unknown
+        }
+    }
+    
+    init(error: CallError<Files.ListFolderError>) {
+        switch error {
+            
         default:
             self = .unknown
         }
