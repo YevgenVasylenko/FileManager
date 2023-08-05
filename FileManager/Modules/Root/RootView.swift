@@ -6,7 +6,6 @@
 //
 
 import SwiftUI
-import SwiftyDropbox
 
 struct DataSource {
     let file: File
@@ -18,9 +17,8 @@ struct RootView: View {
     let fileSelectDelegate: FileSelectDelegate?
     @State private var files: [File] = [LocalFileManager().rootFolder, DropboxFileManager().rootFolder]
     @State private var selectedFile: File?
-    @State var isShown = false
     
-    init(file: File = LocalFileManager().rootFolder, fileSelectDelegate: FileSelectDelegate? = nil){
+    init(file: File = LocalFileManager().rootFolder, fileSelectDelegate: FileSelectDelegate? = nil) {
         self.file = file
         self.fileSelectDelegate = fileSelectDelegate
     }
@@ -33,24 +31,11 @@ struct RootView: View {
         } detail: {
             FolderView(file: selectedFile ?? LocalFileManager().rootFolder, fileSelectDelegate: fileSelectDelegate)
                 .id(selectedFile)
-            DropboxView(isShown: $isShown)
         }
         .padding()
-        .onOpenURL { url in
-            let oauthCompletion: DropboxOAuthCompletion = {
-                if let authResult = $0 {
-                    switch authResult {
-                    case .success:
-                        print("Success! User is logged into DropboxClientsManager.")
-                    case .cancel:
-                        print("Authorisation flow was manually canceled by user!")
-                    case .error(_, let description):
-                        print("Error: \(String(describing: description))")
-                    }
-                }
-            }
-            DropboxClientsManager.handleRedirectURL(url, completion: oauthCompletion)
-        }
+        .onOpenURL(perform: { url in
+            DropboxLoginManager.openUrl(url: url)
+        })
     }
 }
 
@@ -64,16 +49,16 @@ private extension RootView {
                 .contextMenu {
                     if file.storageType.isDropbox {
                         Button {
-                            self.isShown = true
+                            DropboxLoginManager.login()
                         } label: {
-                            Text("Connect")
+                            Text(R.string.localizable.connect.callAsFunction())
                         }
-                        .disabled(DropboxClientsManager.authorizedClient != nil)
+                        .disabled(DropboxLoginManager.isLogged)
                         
-                        Button("Disconnect", role: .destructive) {
-                            DropboxClientsManager.unlinkClients()
+                        Button(R.string.localizable.disconnect.callAsFunction(), role: .destructive) {
+                            DropboxLoginManager.logout()
                         }
-                        .disabled(DropboxClientsManager.authorizedClient == nil)
+                        .disabled(!DropboxLoginManager.isLogged)
                     }
                 }
         }).tag(file)
@@ -94,28 +79,5 @@ private extension RootView {
 struct RootView_Previews: PreviewProvider {
     static var previews: some View {
         RootView(file: PreviewFiles.rootFolder)
-    }
-}
-
-struct DropboxView: UIViewControllerRepresentable {
-    typealias UIViewControllerType = UIViewController
-    
-    @Binding var isShown : Bool
-    
-    func updateUIViewController(_ uiViewController: UIViewController, context: Context) {
-        
-        if isShown {
-            let scopeRequest = ScopeRequest(scopeType: .user, scopes: ["account_info.read", "files.metadata.write", "files.metadata.read", "files.content.write", "files.content.read"], includeGrantedScopes: false)
-            DropboxClientsManager.authorizeFromControllerV2(
-                UIApplication.shared,
-                controller: uiViewController,
-                loadingStatusDelegate: nil,
-                openURL: { (url: URL) -> Void in UIApplication.shared.open(url, options: [:], completionHandler: nil) },
-                scopeRequest: scopeRequest)
-        }
-    }
-    
-    func makeUIViewController(context _: Self.Context) -> UIViewController {
-        return UIViewController()
     }
 }

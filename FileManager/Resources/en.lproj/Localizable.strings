@@ -29,3 +29,6 @@
 "copyInName" = " Copy_";
 
 "dropbox" = "Dropbox";
+
+"connect" = "Connect";
+"disconnect" = "Disconnect";

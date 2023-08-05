@@ -29,3 +29,6 @@
 "copyInName" = " Копія_";
 
 "dropbox" = "Dropbox";
+
+"connect" = "Підєднати";
+"disconnect" = "Розєднати";
