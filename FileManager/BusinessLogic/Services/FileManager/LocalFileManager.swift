@@ -216,6 +216,16 @@ extension LocalFileManager: FileManager {
     func makeFolderMonitor(file: File) -> FolderMonitor? {
         return LocalFolderMonitor(url: file.path)
     }
+    
+    func send(files: [File], completion: @escaping (Result<URL, Error>) -> Void) {
+        
+    }
+    
+    func receive(filesToReceive: [File], fileToPlace: File, conflictResolver: NameConflictResolver) {
+        move(files: filesToReceive, destination: fileToPlace, conflictResolver: conflictResolver) { result in
+            
+        }
+    }
 }
 
 // MARK: - Private

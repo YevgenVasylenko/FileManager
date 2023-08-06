@@ -53,6 +53,10 @@ protocol FileManager {
     func deleteFile(files: [File], completion: @escaping (Result<Void, Error>) -> Void)
     
     func makeFolderMonitor(file: File) -> FolderMonitor?
+    
+    func send(files: [File], completion: @escaping (Result<URL, Error>) -> Void)
+    
+    func receive(filesToReceive: [File], fileToPlace: File, conflictResolver: NameConflictResolver)
 }
 
 extension FileManager {

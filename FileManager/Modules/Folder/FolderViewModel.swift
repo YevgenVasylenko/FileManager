@@ -93,7 +93,7 @@ class FolderViewModel: ObservableObject {
     func load() {
         folderMonitor?.startMonitoring()
         state.loading = true
-        fileManager.contents(of: file) { result in
+        FileManagerCommutator().contents(of: file) { result in
             switch result {
             case .success(let files):
                 //                DispatchQueue.main.asyncAfter(deadline: .now() + .seconds(1)) { [self] in
@@ -228,7 +228,8 @@ private extension FolderViewModel {
     func copyFilesToChosen(folder: File) {
         self.state.fileActionType = nil
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.5)  {
-            self.fileManager.copy(files: self.filesForAction, destination: folder, conflictResolver: self) { result in
+            FileManagerCommutator().copy(files: self.filesForAction, destination: folder, conflictResolver: self) { result in
+//            self.fileManager.copy(files: self.filesForAction, destination: folder, conflictResolver: self) { result in
                 switch result {
                 case .success:
                     self.state.chosenFiles = nil

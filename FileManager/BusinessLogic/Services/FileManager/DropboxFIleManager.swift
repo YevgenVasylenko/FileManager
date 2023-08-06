@@ -72,7 +72,7 @@ extension DropboxFileManager: FileManager {
         }
         let renamedFilePath = file.rename(name: newName).path.path
         let path = makePathToRootOrElse(file: file)
-        client.files.moveV2(fromPath: path, toPath: renamedFilePath).response { ResponseCacher, error in
+        client.files.moveV2(fromPath: path, toPath: renamedFilePath).response { response, error in
             if let error = error {
                 completion(.failure(Error(dropboxError: error)))
                 return
@@ -107,15 +107,18 @@ extension DropboxFileManager: FileManager {
             return
         }
         let copyFilePath = makePathToRootOrElse(file: file)
-        let destinationPath = makePathToRootOrElse(file: destination.makeSubfile(name: file.name))
-        client.files.copyV2(fromPath: copyFilePath, toPath: destinationPath).response { response, error in
-            if let error = error {
-                completion(.failure(Error(dropboxError: error)))
-                return
+        let destinationFile = destination.makeSubfile(name: file.name)
+        
+        let destinationPath = makePathToRootOrElse(file: destinationFile)
+        
+            client.files.copyV2(fromPath: copyFilePath, toPath: destinationPath).response { response, error in
+                if let error = error {
+                    completion(.failure(Error(dropboxError: error)))
+                    return
+                }
+                completion(.success(.finished))
             }
-            completion(.success(.finished))
         }
-    }
     
     func move(files: [File], destination: File, conflictResolver: NameConflictResolver, completion: @escaping (Result<OperationResult, Error>) -> Void) {
         
@@ -130,6 +133,30 @@ extension DropboxFileManager: FileManager {
     }
     
     func deleteFile(files: [File], completion: @escaping (Result<Void, Error>) -> Void) {
+        
+    }
+    
+    func send(files: [File], completion: @escaping (Result<URL, Error>) -> Void) {
+        guard let client = DropboxClientsManager.authorizedClient else {
+            completion(.failure(.unknown))
+            return
+        }
+        let file = File(path: files[0].path, storageType: files[0].storageType)
+        let copyFilePath = makePathToRootOrElse(file: file)
+        let destinationFile = SystemFileManger.default.temporaryDirectory.appending(component: file.name)
+        let destination: (URL, HTTPURLResponse) -> URL = { temporaryURL, response in
+            return destinationFile
+        }
+        client.files.download(path: copyFilePath, destination: destination).response { response, error in
+            if let error = error {
+                completion(.failure(Error(dropboxError: error)))
+                return
+            }
+            completion(.success(destinationFile))
+        }
+    }
+    
+    func receive(filesToReceive: [File], fileToPlace: File, conflictResolver: NameConflictResolver) {
         
     }
 }

@@ -26,7 +26,20 @@ struct File {
         case text
     }
     
-    enum StorageType {
+    enum StorageType: Equatable {
+        static func == (lhs: File.StorageType, rhs: File.StorageType) -> Bool {
+            switch (lhs, rhs) {
+            case (.local, .dropbox):
+                return false
+            case (.dropbox, .dropbox):
+                return true
+            case (.local, .local):
+                return true
+            case (.dropbox, .local):
+                return false
+            }
+        }
+        
         case local(LocalStorageData)
         case dropbox(DropboxStorageData)
         
@@ -87,6 +100,10 @@ struct File {
     
     func makeSubfile(name: String) -> File {
         return File(path: self.path.appendingPathComponent(name, isDirectory: true), storageType: storageType)
+    }
+    
+    func isFolder() -> Bool {
+        return path.hasDirectoryPath
     }
     
     func rename(name: String) -> File {

@@ -24,6 +24,8 @@
 		5D616B702A4AE64800E1360A /* LocalFileManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D0B9CA82A446D080099021C /* LocalFileManager.swift */; };
 		5D627D8B2A79875100170451 /* FolderMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D627D8A2A79875000170451 /* FolderMonitor.swift */; };
 		5D627D8E2A7C31CE00170451 /* DropboxLoginManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D627D8D2A7C31CE00170451 /* DropboxLoginManager.swift */; };
+		5D627D912A7E73CA00170451 /* FileManagerFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D627D902A7E73CA00170451 /* FileManagerFactory.swift */; };
+		5D627D942A7F871C00170451 /* FileManagerCommutator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D627D932A7F871C00170451 /* FileManagerCommutator.swift */; };
 		5D78B1B12A4ECDAA00A76D0F /* Result+Utilities.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D78B1B02A4ECDAA00A76D0F /* Result+Utilities.swift */; };
 		5D78B1B32A4ECDD000A76D0F /* Result+Utilities.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D78B1B02A4ECDAA00A76D0F /* Result+Utilities.swift */; };
 		5D78B1B52A4ECEDC00A76D0F /* ConflictResolver.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D78B1B42A4ECEDC00A76D0F /* ConflictResolver.swift */; };
@@ -71,6 +73,8 @@
 		5D616B6E2A4AE5B000E1360A /* LocalFileManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalFileManagerTests.swift; sourceTree = "<group>"; };
 		5D627D8A2A79875000170451 /* FolderMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = FolderMonitor.swift; path = FileManager/FolderMonitor.swift; sourceTree = "<group>"; };
 		5D627D8D2A7C31CE00170451 /* DropboxLoginManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DropboxLoginManager.swift; sourceTree = "<group>"; };
+		5D627D902A7E73CA00170451 /* FileManagerFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileManagerFactory.swift; sourceTree = "<group>"; };
+		5D627D932A7F871C00170451 /* FileManagerCommutator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileManagerCommutator.swift; sourceTree = "<group>"; };
 		5D78B1B02A4ECDAA00A76D0F /* Result+Utilities.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Result+Utilities.swift"; sourceTree = "<group>"; };
 		5D78B1B42A4ECEDC00A76D0F /* ConflictResolver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConflictResolver.swift; sourceTree = "<group>"; };
 		5D954CAB2A56D45A00A221DB /* FolderViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FolderViewModel.swift; sourceTree = "<group>"; };
@@ -136,6 +140,8 @@
 			isa = PBXGroup;
 			children = (
 				5DD776152A544B5600F9B55D /* FileManager.swift */,
+				5D627D902A7E73CA00170451 /* FileManagerFactory.swift */,
+				5D627D932A7F871C00170451 /* FileManagerCommutator.swift */,
 				5D0B9CA82A446D080099021C /* LocalFileManager.swift */,
 				5DF870D22A77ADAA00F9E5D5 /* DropboxFIleManager.swift */,
 				5D2499732A4D7CFD003D66F3 /* FIleManagerRootPath.swift */,
@@ -398,6 +404,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				5D627D942A7F871C00170451 /* FileManagerCommutator.swift in Sources */,
 				5D954CB82A58062300A221DB /* FileOptionsButtonView.swift in Sources */,
 				5D221D592A5D416A0072AA35 /* View+Utilities.swift in Sources */,
 				5DEDB9062A5ACAC2003CC86B /* FileAction.swift in Sources */,
@@ -416,6 +423,7 @@
 				5DD776162A544B5600F9B55D /* FileManager.swift in Sources */,
 				5D0B9CA52A4466460099021C /* FileView.swift in Sources */,
 				5D78B1B52A4ECEDC00A76D0F /* ConflictResolver.swift in Sources */,
+				5D627D912A7E73CA00170451 /* FileManagerFactory.swift in Sources */,
 				5D627D8B2A79875100170451 /* FolderMonitor.swift in Sources */,
 				5DACCB4E2A445689000A0CA9 /* RootView.swift in Sources */,
 				5DACCB4C2A445689000A0CA9 /* FileManagerApp.swift in Sources */,
