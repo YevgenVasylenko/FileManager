@@ -48,22 +48,23 @@ protocol FileManager {
     
     func moveToTrash(filesToTrash: [File], completion: @escaping (Result<Void, Error>) -> Void)
     
-    func cleanTrashFolder(completion: (Result<Void, Error>) -> Void)
-    
+    func cleanTrashFolder(fileForFileManager: File, completion: @escaping (Result<Void, Error>) -> Void)
+
     func deleteFile(files: [File], completion: @escaping (Result<Void, Error>) -> Void)
     
     func makeFolderMonitor(file: File) -> FolderMonitor?
     
-    func send(files: [File], completion: @escaping (Result<URL, Error>) -> Void)
+    func copyToLocalTemporary(files: [File], conflictResolver: NameConflictResolver, completion: @escaping (Result<[URL], Error>) -> Void)
     
-    func receive(filesToReceive: [File], fileToPlace: File, conflictResolver: NameConflictResolver)
+    func saveFromLocalTemporary(
+        files: [File],
+        destination: File,
+        conflictResolver: NameConflictResolver,
+        completion: @escaping (Result<OperationResult, Error>) -> Void
+    )
 }
 
 extension FileManager {
-    func cleanTrashFolder(completion: (Result<Void, Error>) -> Void) {
-        return
-    }
-    
     func makeFolderMonitor(file: File) -> FolderMonitor? {
         return nil
     }

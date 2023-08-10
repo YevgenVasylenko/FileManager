@@ -27,28 +27,36 @@ extension FileManagerCommutator: FileManager {
     }
     
     func rename(file: File, newName: String, completion: @escaping (Result<Void, Error>) -> Void) {
-        
+        FileManagerFactory.makeFileManager(file: file).rename(file: file, newName: newName, completion: completion)
     }
     
     func copy(files: [File], destination: File, conflictResolver: NameConflictResolver, completion: @escaping (Result<OperationResult, Error>) -> Void) {
-        var fileManager: FileManager {
-            return FileManagerFactory.makeFileManager(file: files[0])
+        guard let firstFile = files.first else {
+            completion(.success(.finished))
+            return
         }
-        if destination.storageType == files.first?.storageType {
+        let fileManager = FileManagerFactory.makeFileManager(file: firstFile)
+        // For now application doesn't support multi storage type in files array
+        if destination.storageType == firstFile.storageType {
             fileManager.copy(files: files, destination: destination, conflictResolver: conflictResolver, completion: completion)
-        } else {
-            fileManager.send(files: files) { result in
-                switch result {
-                case .success(let fileToReceivePath):
-                    FileManagerFactory.makeFileManager(file: destination).receive(
-                        filesToReceive: [File(
-                            path: fileToReceivePath,
-                            storageType: destination.storageType)],
-                            fileToPlace: destination, conflictResolver: conflictResolver
-                    )
-                case .failure(let error):
-                    completion(.failure(Error(error: error)))
+            return
+        }
+        fileManager.copyToLocalTemporary(files: files, conflictResolver: conflictResolver) { result in
+            switch result {
+            case .success(let sentFileURLs):
+                var downloadedFiles: [File] = []
+                for addressURL in sentFileURLs {
+                    downloadedFiles.append(File(path: addressURL, storageType: destination.storageType))
                 }
+                let destinationFileManager = FileManagerFactory.makeFileManager(file: destination)
+                destinationFileManager.saveFromLocalTemporary(
+                    files: downloadedFiles,
+                    destination: destination,
+                    conflictResolver: conflictResolver,
+                    completion: completion
+                )
+            case .failure(let error):
+                completion(.failure(Error(error: error)))
             }
         }
     }
@@ -58,7 +66,16 @@ extension FileManagerCommutator: FileManager {
     }
     
     func move(files: [File], destination: File, conflictResolver: NameConflictResolver, completion: @escaping (Result<OperationResult, Error>) -> Void) {
-        
+        guard let firstFile = files.first else {
+            completion(.success(.finished))
+            return
+        }
+        let fileManager = FileManagerFactory.makeFileManager(file: firstFile)
+        // For now application doesn't support multi storage type in files array
+        if destination.storageType == firstFile.storageType {
+            fileManager.move(files: files, destination: destination, conflictResolver: conflictResolver, completion: completion)
+            return
+        }
     }
     
     func move(file: File, destination: File, conflictResolver: NameConflictResolver, completion: @escaping (Result<OperationResult, Error>) -> Void) {
@@ -66,18 +83,38 @@ extension FileManagerCommutator: FileManager {
     }
     
     func moveToTrash(filesToTrash: [File], completion: @escaping (Result<Void, Error>) -> Void) {
-        
+        guard let firstFile = filesToTrash.first else {
+            completion(.success(()))
+            return
+        }
+        let fileManager = FileManagerFactory.makeFileManager(file: firstFile)
+        fileManager.moveToTrash(filesToTrash: filesToTrash, completion: completion)
     }
     
     func deleteFile(files: [File], completion: @escaping (Result<Void, Error>) -> Void) {
+        guard let firstFile = files.first else {
+            completion(.success(()))
+            return
+        }
+        let fileManager = FileManagerFactory.makeFileManager(file: firstFile)
+        fileManager.deleteFile(files: files, completion: completion)
+    }
+    
+    func cleanTrashFolder(fileForFileManager: File, completion: @escaping (Result<Void, Error>) -> Void) {
+        let fileManager = FileManagerFactory.makeFileManager(file: fileForFileManager)
+        fileManager.cleanTrashFolder(fileForFileManager: fileForFileManager, completion: completion)
+    }
+
+    func copyToLocalTemporary(files: [File], conflictResolver: NameConflictResolver, completion: @escaping (Result<[URL], Error>) -> Void) {
         
     }
     
-    func send(files: [File], completion: @escaping (Result<URL, Error>) -> Void) {
-        
-    }
-    
-    func receive(filesToReceive: [File], fileToPlace: File, conflictResolver: NameConflictResolver) {
+    func saveFromLocalTemporary(
+        files: [File],
+        destination: File,
+        conflictResolver: NameConflictResolver,
+        completion: @escaping (Result<OperationResult, Error>) -> Void
+    ) {
         
     }
     

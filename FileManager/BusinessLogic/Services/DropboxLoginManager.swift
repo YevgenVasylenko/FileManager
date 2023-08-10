@@ -23,7 +23,9 @@ enum DropboxLoginManager {
                 "files.metadata.write",
                 "files.metadata.read",
                 "files.content.write",
-                "files.content.read"
+                "files.content.read",
+//                "files.permanent_delete",
+//                "team_data.member"
             ],
             includeGrantedScopes: false
         )

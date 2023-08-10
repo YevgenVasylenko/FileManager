@@ -99,7 +99,7 @@ struct File {
     }
     
     func makeSubfile(name: String) -> File {
-        return File(path: self.path.appendingPathComponent(name, isDirectory: true), storageType: storageType)
+        return File(path: self.path.appendingPathComponent(name, isDirectory: false), storageType: storageType)
     }
     
     func isFolder() -> Bool {

@@ -105,7 +105,6 @@ extension LocalFileManager: FileManager {
                 completion(.failure(Error(error: error)))
             }
         }
-        
     }
     
     func move(
@@ -192,7 +191,7 @@ extension LocalFileManager: FileManager {
         completion(.success(()))
     }
     
-    func cleanTrashFolder(completion: (Result<Void, Error>) -> Void) {
+    func cleanTrashFolder(fileForFileManager: File, completion: (Result<Void, Error>) -> Void) {
         contents(of: trashFolder) { result in
             switch result {
             case .success(let files):
@@ -217,13 +216,36 @@ extension LocalFileManager: FileManager {
         return LocalFolderMonitor(url: file.path)
     }
     
-    func send(files: [File], completion: @escaping (Result<URL, Error>) -> Void) {
-        
+    func copyToLocalTemporary(files: [File], conflictResolver: NameConflictResolver, completion: @escaping (Result<[URL], Error>) -> Void) {
+        let group = DispatchGroup()
+        var destinationFileURLs: [URL] = []
+        for file in files {
+            group.enter()
+            let temporaryStorage = File(path: SystemFileManger.default.temporaryDirectory, storageType: .local(LocalStorageData()))
+            let destinationPath = temporaryStorage.makeSubfile(name: file.name).path
+            copy(file: file, destination: temporaryStorage, conflictResolver: conflictResolver) { result in
+                switch result {
+                case .success:
+                    defer { group.leave() }
+                    destinationFileURLs.append(destinationPath)
+                case .failure(let error):
+                    defer { group.leave() }
+                    completion(.failure(Error(error: error)))
+                    return
+                }
+            }
+        }
+        group.notify(queue: DispatchQueue.main) {
+            completion(.success(destinationFileURLs))
+        }
     }
     
-    func receive(filesToReceive: [File], fileToPlace: File, conflictResolver: NameConflictResolver) {
-        move(files: filesToReceive, destination: fileToPlace, conflictResolver: conflictResolver) { result in
-            
+    func saveFromLocalTemporary(
+        files: [File],
+        destination: File,
+        conflictResolver: NameConflictResolver,
+        completion: @escaping (Result<OperationResult, Error>) -> Void) {
+        move(files: files, destination: destination, conflictResolver: conflictResolver) { result in
         }
     }
 }
