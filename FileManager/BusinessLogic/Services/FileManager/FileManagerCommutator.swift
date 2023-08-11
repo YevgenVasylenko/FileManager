@@ -91,6 +91,15 @@ extension FileManagerCommutator: FileManager {
         fileManager.moveToTrash(filesToTrash: filesToTrash, completion: completion)
     }
     
+    func restoreFromTrash(filesToRestore: [File], completion: @escaping (Result<Void, Error>) -> Void) {
+        guard let firstFile = filesToRestore.first else {
+            completion(.success(()))
+            return
+        }
+        let fileManager = FileManagerFactory.makeFileManager(file: firstFile)
+        fileManager.restoreFromTrash(filesToRestore: filesToRestore, completion: completion)
+    }
+    
     func deleteFile(files: [File], completion: @escaping (Result<Void, Error>) -> Void) {
         guard let firstFile = files.first else {
             completion(.success(()))

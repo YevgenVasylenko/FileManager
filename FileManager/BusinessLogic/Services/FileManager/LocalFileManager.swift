@@ -178,6 +178,9 @@ extension LocalFileManager: FileManager {
         completion(.success(()))
     }
     
+    func restoreFromTrash(filesToRestore: [File], completion: @escaping (Result<Void, Error>) -> Void) {
+    }
+    
     func deleteFile(files: [File], completion: (Result<Void, Error>) -> Void) {
         for file in files {
             do {

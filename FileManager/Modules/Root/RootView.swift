@@ -63,6 +63,11 @@ private extension RootView {
                 }
         }).tag(file)
             .buttonStyle(.plain)
+            .navigationBarItems(
+                trailing: cancelButtonForFolderSelection(chooseAction: {
+                    fileSelectDelegate?.selected(nil)
+                }))
+
     }
     
     func cancelButtonForFolderSelection(chooseAction: @escaping () -> Void) -> some View {

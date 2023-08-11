@@ -189,6 +189,8 @@ private extension FolderView {
                 viewModel.copyOne(file: file)
             case .moveToTrash:
                 viewModel.moveToTrashOne(file: file)
+            case .restoreFromTrash:
+                viewModel.restoreFromTrashOne(file: file)
             case .delete:
                 viewModel.delete(file: file)
             case .clean:

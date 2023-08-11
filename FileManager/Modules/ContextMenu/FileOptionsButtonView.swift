@@ -32,6 +32,8 @@ struct FileOptionsButtonView: View {
                                 copyButton()
                             case .moveToTrash:
                                 moveToTrashButton()
+                            case .restoreFromTrash:
+                                restoreFromTrash()
                             case .delete:
                                 deleteButton()
                             case .clean:
@@ -84,6 +86,14 @@ private extension FileOptionsButtonView {
         }
     }
     
+    func restoreFromTrash() -> some View {
+        Button {
+            delegate(.restoreFromTrash)
+        } label: {
+            Label("Restore", systemImage: "trash")
+        }
+    }
+    
     func deleteButton() -> some View {
         Button {
             delegate(.delete)
@@ -112,6 +122,8 @@ struct FileOptionsButtonView_Previews: PreviewProvider {
             case .copy:
                 break
             case .moveToTrash:
+                break
+            case .restoreFromTrash:
                 break
             case .delete:
                 break

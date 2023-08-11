@@ -48,6 +48,8 @@ protocol FileManager {
     
     func moveToTrash(filesToTrash: [File], completion: @escaping (Result<Void, Error>) -> Void)
     
+    func restoreFromTrash(filesToRestore: [File], completion: @escaping (Result<Void, Error>) -> Void)
+    
     func cleanTrashFolder(fileForFileManager: File, completion: @escaping (Result<Void, Error>) -> Void)
 
     func deleteFile(files: [File], completion: @escaping (Result<Void, Error>) -> Void)

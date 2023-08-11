@@ -96,9 +96,7 @@ class FolderViewModel: ObservableObject {
         FileManagerCommutator().contents(of: file) { result in
             switch result {
             case .success(let files):
-                //                DispatchQueue.main.asyncAfter(deadline: .now() + .seconds(1)) { [self] in
                 self.state.files = files
-                //                }
             case .failure(let failure):
                 self.state.error = failure
             }
@@ -187,6 +185,15 @@ class FolderViewModel: ObservableObject {
         moveToTrash()
     }
     
+    func restoreFromTrashChosen() {
+        restoreFromTrash()
+    }
+    
+    func restoreFromTrashOne(file: File) {
+        state.file = file
+        restoreFromTrash()
+    }
+    
     func isFilesDisabledInFolder(isFolderDestinationChose: FileSelectDelegate?, file: File) -> Bool {
         guard let isFolderDestinationChose = isFolderDestinationChose else {
             return state.chosenFiles != nil
@@ -212,20 +219,36 @@ private extension FolderViewModel {
     
     func moveFilesToChosen(folder: File) {
         self.state.fileActionType = nil
-        FileManagerCommutator().move(files: self.filesForAction, destination: folder, conflictResolver: self) { result in
-            switch result {
-            case .success:
-                self.state.chosenFiles = nil
-                break
-            case .failure(let failure):
-                self.state.error = failure
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5)  {
+            FileManagerCommutator().move(files: self.filesForAction, destination: folder, conflictResolver: self) { result in
+                switch result {
+                case .success:
+                    self.state.chosenFiles = nil
+                    break
+                case .failure(let failure):
+                    self.state.error = failure
+                }
             }
         }
     }
     
     func copyFilesToChosen(folder: File) {
         self.state.fileActionType = nil
-        FileManagerCommutator().copy(files: self.filesForAction, destination: folder, conflictResolver: self) { result in
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5)  {
+            FileManagerCommutator().copy(files: self.filesForAction, destination: folder, conflictResolver: self) { result in
+                switch result {
+                case .success:
+                    self.state.chosenFiles = nil
+                    break
+                case .failure(let failure):
+                    self.state.error = failure
+                }
+            }
+        }
+    }
+    
+    func moveToTrash() {
+        FileManagerCommutator().moveToTrash(filesToTrash: filesForAction) { result in
             switch result {
             case .success:
                 self.state.chosenFiles = nil
@@ -236,8 +259,8 @@ private extension FolderViewModel {
         }
     }
     
-    func moveToTrash() {
-        FileManagerCommutator().moveToTrash(filesToTrash: filesForAction) { result in
+    func restoreFromTrash() {
+        FileManagerCommutator().restoreFromTrash(filesToRestore: filesForAction) { result in
             switch result {
             case .success:
                 self.state.chosenFiles = nil

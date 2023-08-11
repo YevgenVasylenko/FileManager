@@ -30,7 +30,6 @@ extension DropboxFileManager: FileManager {
             contentOfTrashFolder(completion: completion)
             return
         }
-        
         client.files.listFolder(path: path).response { response, error in
             if let error = error {
                 completion(.failure(Error(dropboxError: error)))
@@ -132,7 +131,10 @@ extension DropboxFileManager: FileManager {
     }
     
     func moveToTrash(filesToTrash: [File], completion: @escaping (Result<Void, Error>) -> Void) {
-        guard let client = DropboxClientsManager.authorizedClient else { return }
+        guard let client = DropboxClientsManager.authorizedClient else {
+            completion(.failure(.unknown))
+            return
+        }
         for file in filesToTrash {
             let path = makePathToRootOrElse(file: file)
             client.files.deleteV2(path: path).response { response, error in
@@ -145,8 +147,37 @@ extension DropboxFileManager: FileManager {
         }
     }
     
+    func restoreFromTrash(filesToRestore: [File], completion: @escaping (Result<Void, Error>) -> Void) {
+        guard let client = DropboxClientsManager.authorizedClient else {
+            completion(.failure(.unknown))
+            return
+        }
+        for file in filesToRestore {
+            let path = makePathToRootOrElse(file: file)
+//            var revOfFile = ""
+            client.files.listRevisions(path: path).response { response, error in
+                if let error = error {
+                    completion(.failure(Error(dropboxError: error)))
+                    return
+                }
+                if let lastRevision = response?.entries.last {
+                    client.files.restore(path: path, rev: lastRevision.rev).response { response, error in
+                        if let error = error {
+                            completion(.failure(Error(dropboxError: error)))
+                            return
+                        }
+                    }
+                }
+            }
+        }
+        completion(.success(()))
+    }
+    
     func deleteFile(files: [File], completion: @escaping (Result<Void, Error>) -> Void) {
-        guard let client = DropboxClientsManager.authorizedClient else { return }
+        guard let client = DropboxClientsManager.authorizedClient else {
+            completion(.failure(.unknown))
+            return
+        }
         for file in files {
             let path = makePathToRootOrElse(file: file)
             client.files.permanentlyDelete(path: path).response { response, error in

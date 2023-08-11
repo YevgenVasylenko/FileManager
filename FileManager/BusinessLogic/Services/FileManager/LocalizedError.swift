@@ -48,143 +48,19 @@ enum Error: LocalizedError {
     init<T>(dropboxError: CallError<T>) {
         switch dropboxError {
         case .internalServerError(let int, let string, let string2):
-            self = .unknown
+            self = .dropbox(string ?? "")
         case .badInputError(let string, let string2):
-            self = .unknown
+            self = .dropbox(string ?? "")
         case .rateLimitError(let rateLimitError, let string, let string2, let string3):
-            self = .unknown
+            self = .dropbox(string ?? "")
         case .httpError(let int, let string, let string2):
-            self = .unknown
+            self = .dropbox(string ?? "")
         case .authError(let authError, let string, let string2, let string3):
-            self = .unknown
+            self = .dropbox(string ?? "")
         case .accessError(let accessError, let string, let string2, let string3):
-            self = .unknown
+            self = .dropbox(string ?? "")
         case .routeError(let box, let string, let string2, let string3):
-            switch box.unboxed as? Files.RelocationError {
-            case .fromLookup(_):
-                self = .unknown
-            case .fromWrite(let writeError):
-                switch writeError {
-                case .malformedPath(_):
-                    self = .unknown
-                case .conflict(let conflict):
-                    switch conflict {
-                    case .file:
-                        self = .nameExist
-                    case .folder:
-                        self = .nameExist
-                    case .fileAncestor:
-                        self = .unknown
-                    case .other:
-                        self = .unknown
-                    }
-                case .noWritePermission:
-                    self = .unknown
-                case .insufficientSpace:
-                    self = .unknown
-                case .disallowedName:
-                    self = .unknown
-                case .teamFolder:
-                    self = .unknown
-                case .operationSuppressed:
-                    self = .unknown
-                case .tooManyWriteOperations:
-                    self = .unknown
-                case .other:
-                    self = .unknown
-                }
-            case .to(let toError):
-                switch toError {
-                case .malformedPath(_):
-                    self = .unknown
-                case .conflict(let conflictError):
-                    switch conflictError {
-                    case .file:
-                        self = .nameExist
-                    case .folder:
-                        self = .nameExist
-                    case .fileAncestor:
-                        self = .unknown
-                    case .other:
-                        self = .unknown
-                    }
-                case .noWritePermission:
-                    self = .unknown
-                case .insufficientSpace:
-                    self = .unknown
-                case .disallowedName:
-                    self = .unknown
-                case .teamFolder:
-                    self = .unknown
-                case .operationSuppressed:
-                    self = .unknown
-                case .tooManyWriteOperations:
-                    self = .unknown
-                case .other:
-                    self = .unknown
-                }
-            case .cantCopySharedFolder:
-                self = .unknown
-            case .cantNestSharedFolder:
-                self = .unknown
-            case .cantMoveFolderIntoItself:
-                self = .unknown
-            case .tooManyFiles:
-                self = .unknown
-            case .duplicatedOrNestedPaths:
-                self = .unknown
-            case .cantTransferOwnership:
-                self = .unknown
-            case .insufficientQuota:
-                self = .unknown
-            case .internalError:
-                self = .unknown
-            case .cantMoveSharedFolder:
-                self = .unknown
-            case .cantMoveIntoVault(_):
-                self = .unknown
-            case .cantMoveIntoFamily(_):
-                self = .unknown
-            case .other:
-                self = .unknown
-            case .none:
-                self = .unknown
-
-            }
-            switch box.unboxed as? Files.CreateFolderError {
-            case .path(let writeError):
-                switch writeError {
-                case .conflict(let conflictError):
-                    switch conflictError {
-                    case .folder:
-                        self = .nameExist
-                    case .file:
-                        self = .nameExist
-                    case .fileAncestor:
-                        self = .unknown
-                    case .other:
-                        self = .unknown
-                    }
-                case .malformedPath(_):
-                    self = .unknown
-                case .noWritePermission:
-                    self = .unknown
-                case .insufficientSpace:
-                    self = .unknown
-                case .disallowedName:
-                    self = .unknown
-                case .teamFolder:
-                    self = .unknown
-                case .operationSuppressed:
-                    self = .unknown
-                case .tooManyWriteOperations:
-                    self = .unknown
-                case .other:
-                    self = .unknown
-                }
-            case .none:
-                break
-            }
+            self = .dropbox(string2 ?? "")
         case .clientError(let error):
             self = .unknown
         }
