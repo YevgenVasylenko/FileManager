@@ -118,18 +118,33 @@ private extension FolderView {
                 VStack {
                     Spacer()
                     HStack {
-                        Button(R.string.localizable.copy_to.callAsFunction()) {
-                            viewModel.copyChosen()
+                        if viewModel.state.folder.folderAffiliation != .system(.trash) {
+                            Button(R.string.localizable.copy_to.callAsFunction()) {
+                                viewModel.copyChosen()
+                            }
+                            .buttonStyle(.automatic)
+                            Spacer()
+                            Button(R.string.localizable.move_to.callAsFunction()) {
+                                viewModel.moveChosen()
+                            }
+                            .buttonStyle(.automatic)
+                            Spacer()
+                            Button(R.string.localizable.move_to_trash.callAsFunction()) {
+                                viewModel.moveToTrashChosen()
+                            }
+                            .buttonStyle(.automatic)
+                            Spacer()
+                        } else if viewModel.state.folder.storageType.isDropbox {
+                            Button(R.string.localizable.restore.callAsFunction()) {
+                                viewModel.restoreFromTrashChosen()
+                            }
+                            .buttonStyle(.automatic)
+                        } else if viewModel.state.folder.storageType.isLocal {
+                            Button(R.string.localizable.delete.callAsFunction()) {
+                                viewModel.deleteChosen()
+                            }
+                            .buttonStyle(.automatic)
                         }
-                        .buttonStyle(.automatic)
-                        Button(R.string.localizable.move_to.callAsFunction()) {
-                            viewModel.moveChosen()
-                        }
-                        .buttonStyle(.automatic)
-                        Button(R.string.localizable.move_to_trash.callAsFunction()) {
-                            viewModel.moveToTrashChosen()
-                        }
-                        .buttonStyle(.automatic)
                     }
                     .disabled(viewModel.filesForAction.isEmpty)
                 }
@@ -192,7 +207,7 @@ private extension FolderView {
             case .restoreFromTrash:
                 viewModel.restoreFromTrashOne(file: file)
             case .delete:
-                viewModel.delete(file: file)
+                viewModel.deleteOne(file: file)
             case .clean:
                 viewModel.clear()
             }

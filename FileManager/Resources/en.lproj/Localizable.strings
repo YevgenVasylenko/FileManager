@@ -4,6 +4,7 @@
 "copy_to" = "Copy to";
 "delete" = "Delete";
 "move_to_trash" = "Move to trash";
+"restore" = "Restore";
 "clean" = "Clean";
 
 "root" = "Root";
@@ -32,3 +33,4 @@
 
 "connect" = "Connect";
 "disconnect" = "Disconnect";
+

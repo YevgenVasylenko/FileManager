@@ -35,7 +35,7 @@ extension LocalFileManager: FileManager {
             var files: [File] = []
             for path in try SystemFileManger.default.contentsOfDirectory(at: file.path, includingPropertiesForKeys: nil) {
                 var file = File(path: path, storageType: .local(LocalStorageData()))
-                updateFileActions(file: &file)
+                updateFileActionsAndDeleteStatus(file: &file)
                 updateFolderAffiliation(file: &file)
                 files.append(file)
             }
@@ -174,11 +174,24 @@ extension LocalFileManager: FileManager {
             } catch {
                 completion(.failure(Error(error: error)))
             }
+            do {
+                try SystemFileManger.default.setAttributes([.groupOwnerAccountName : trashedFilePath.path], ofItemAtPath: trashedFilePath.path)
+            } catch {
+                completion(.failure(Error(error: error)))
+            }
         }
         completion(.success(()))
     }
     
     func restoreFromTrash(filesToRestore: [File], completion: @escaping (Result<Void, Error>) -> Void) {
+        for file in filesToRestore {
+            do {
+                try print(SystemFileManger.default.attributesOfItem(atPath: file.path.path))
+            } catch {
+                completion(.failure(Error(error: error)))
+            }
+        }
+        completion(.success(()))
     }
     
     func deleteFile(files: [File], completion: (Result<Void, Error>) -> Void) {
@@ -267,16 +280,20 @@ private extension LocalFileManager {
         } catch {
             fatalError("Failed to create directory with error: \(error)")
         }
-        updateFileActions(file: &file)
+        updateFileActionsAndDeleteStatus(file: &file)
         updateFolderAffiliation(file: &file)
         return file
     }
     
-    func updateFileActions(file: inout File) {
+    func updateFileActionsAndDeleteStatus(file: inout File) {
         if file == trashFolder {
             file.actions = FileAction.trashFolderActions
         } else if file == downloadsFolder {
             file.actions = FileAction.downloadsFolderActions
+        } else if file == trashFolder.makeSubfile(name: file.name) ||
+                    file == trashFolder.makeSubfile(name: file.name, isDirectory: true) {
+            file.actions = [FileAction.delete]
+            file.isDeleted = true
         } else {
             file.actions = FileAction.regularFolder
         }

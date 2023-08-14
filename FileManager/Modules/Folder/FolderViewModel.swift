@@ -41,9 +41,9 @@ class FolderViewModel: ObservableObject {
         var chosenFiles: Set<File>?
     }
     private let file: File
-    private let fileManager: FileManager
+//    private let fileManager: FileManager
     private var conflictCompletion: ((ConflictNameResult) -> Void)?
-    private lazy var folderMonitor = fileManager.makeFolderMonitor(file: file)
+    private lazy var folderMonitor = FileManagerFactory.makeFileManager(file: file).makeFolderMonitor(file: file)
     
     @Published
     var state: State
@@ -51,7 +51,7 @@ class FolderViewModel: ObservableObject {
     init(file: File, state: State) {
         self.file = file
         self.state = state
-        self.fileManager = FolderViewModel.makeFileManager(file: file)
+//        self.fileManager = FolderViewModel.makeFileManager(file: file)
         folderMonitor?.folderDidChange = { [weak self] in
             self?.load()
         }
@@ -153,18 +153,6 @@ class FolderViewModel: ObservableObject {
         }
     }
     
-    func delete(file: File) {
-        state.file = file
-        FileManagerCommutator().deleteFile(files: filesForAction) { result in
-            switch result {
-            case .success:
-                break
-            case .failure(let failure):
-                self.state.error = failure
-            }
-        }
-    }
-    
     func clear() {
         FileManagerCommutator().cleanTrashFolder(fileForFileManager: file) { result in
             switch result {
@@ -192,6 +180,15 @@ class FolderViewModel: ObservableObject {
     func restoreFromTrashOne(file: File) {
         state.file = file
         restoreFromTrash()
+    }
+    
+    func deleteChosen() {
+        delete()
+    }
+    
+    func deleteOne(file: File) {
+        state.file = file
+        delete()
     }
     
     func isFilesDisabledInFolder(isFolderDestinationChose: FileSelectDelegate?, file: File) -> Bool {
@@ -264,6 +261,17 @@ private extension FolderViewModel {
             switch result {
             case .success:
                 self.state.chosenFiles = nil
+                break
+            case .failure(let failure):
+                self.state.error = failure
+            }
+        }
+    }
+    
+    func delete() {
+        FileManagerCommutator().deleteFile(files: filesForAction) { result in
+            switch result {
+            case .success:
                 break
             case .failure(let failure):
                 self.state.error = failure

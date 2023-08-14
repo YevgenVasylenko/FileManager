@@ -19,5 +19,5 @@ enum FileAction {
     
     static let trashFolderActions: [Self] = [.clean]
     static let downloadsFolderActions: [Self] = []
-    static let regularFolder: [Self] = [.rename, .move, .copy, .moveToTrash, restoreFromTrash]
+    static let regularFolder: [Self] = [.rename, .move, .copy, .moveToTrash]
 }

@@ -154,7 +154,6 @@ extension DropboxFileManager: FileManager {
         }
         for file in filesToRestore {
             let path = makePathToRootOrElse(file: file)
-//            var revOfFile = ""
             client.files.listRevisions(path: path).response { response, error in
                 if let error = error {
                     completion(.failure(Error(dropboxError: error)))
@@ -301,7 +300,8 @@ private extension DropboxFileManager {
                             path: URL(fileURLWithPath: deletedMetadata.pathLower!),
                             storageType: .dropbox(DropboxStorageData())
                         )
-                        fileInFolder.actions = FileAction.regularFolder
+                        fileInFolder.actions = [FileAction.restoreFromTrash]
+                        fileInFolder.isDeleted = true
                         files.append(fileInFolder)
                     default:
                         continue
@@ -314,7 +314,8 @@ private extension DropboxFileManager {
     
     func addTrashFolderToRoot(file: File, files: inout [File]) {
         if file == self.rootFolder {
-            trashFolder.actions = FileAction.trashFolderActions
+//            trashFolder.actions = FileAction.trashFolderActions
+            trashFolder.folderAffiliation = .system(.trash)
             files.append(self.trashFolder)
         }
     }

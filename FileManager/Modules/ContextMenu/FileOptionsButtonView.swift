@@ -90,7 +90,7 @@ private extension FileOptionsButtonView {
         Button {
             delegate(.restoreFromTrash)
         } label: {
-            Label("Restore", systemImage: "trash")
+            Label(R.string.localizable.restore.callAsFunction(), systemImage: "tray.and.arrow.up")
         }
     }
     

@@ -81,9 +81,10 @@ struct File {
     }
     
     var folderAffiliation: FolderAffiliation = .user
-    var path: URL
     var actions: [FileAction] = []
     let storageType: StorageType
+    var path: URL
+    var isDeleted = false
 
     init(path: URL, storageType: StorageType) {
         self.path = path
@@ -98,8 +99,8 @@ struct File {
         typeDefine()
     }
     
-    func makeSubfile(name: String) -> File {
-        return File(path: self.path.appendingPathComponent(name, isDirectory: false), storageType: storageType)
+    func makeSubfile(name: String, isDirectory: Bool = false) -> File {
+        return File(path: self.path.appendingPathComponent(name, isDirectory: isDirectory), storageType: storageType)
     }
     
     func isFolder() -> Bool {
