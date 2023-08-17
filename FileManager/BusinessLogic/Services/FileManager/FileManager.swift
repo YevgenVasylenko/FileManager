@@ -20,6 +20,8 @@ protocol FileManager {
     
     func createFolder(at file: File, completion: @escaping (Result<Void, Error>) -> Void)
     
+    func newNameForCreationOfFolder(at file: File, completion: @escaping (Result<File, Error>) -> Void)
+    
     func rename(file: File, newName: String, completion: @escaping (Result<Void, Error>) -> Void)
     
     func copy(
@@ -66,8 +68,3 @@ protocol FileManager {
     )
 }
 
-extension FileManager {
-    func makeFolderMonitor(file: File) -> FolderMonitor? {
-        return nil
-    }
-}

@@ -34,10 +34,13 @@ extension LocalFileManager: FileManager {
         do {
             var files: [File] = []
             for path in try SystemFileManger.default.contentsOfDirectory(at: file.path, includingPropertiesForKeys: nil) {
-                var file = File(path: path, storageType: .local(LocalStorageData()))
-                updateFileActionsAndDeleteStatus(file: &file)
-                updateFolderAffiliation(file: &file)
-                files.append(file)
+                var newFile = File(path: path, storageType: .local(LocalStorageData()))
+                if file.isDeleted {
+                    newFile.isDeleted = true
+                }
+                updateFileActionsAndDeleteStatus(file: &newFile)
+                updateFolderAffiliation(file: &newFile)
+                files.append(newFile)
             }
             completion(.success(files))
         } catch {
@@ -52,6 +55,19 @@ extension LocalFileManager: FileManager {
         } catch {
             completion(.failure(Error(error: error)))
         }
+    }
+    
+    func newNameForCreationOfFolder(at file: File, completion: @escaping (Result<File, Error>) -> Void) {
+        let destinationFile = file.makeSubfile(name: R.string.localizable.newFolder.callAsFunction(), isDirectory: true)
+        var fileForChanges = destinationFile
+        var numberOfFolder = 0
+        repeat {
+            let suffixToName = numberOfFolder == 0 ? "" : " \(numberOfFolder)"
+            let newName = destinationFile.name + suffixToName
+            fileForChanges = fileForChanges.rename(name: newName)
+            numberOfFolder += 1
+        } while SystemFileManger.default.fileExists(atPath: fileForChanges.path.path)
+        completion(.success(fileForChanges))
     }
     
     func copy(
@@ -291,7 +307,7 @@ private extension LocalFileManager {
         } else if file == downloadsFolder {
             file.actions = FileAction.downloadsFolderActions
         } else if file == trashFolder.makeSubfile(name: file.name) ||
-                    file == trashFolder.makeSubfile(name: file.name, isDirectory: true) {
+                    file == trashFolder.makeSubfile(name: file.name, isDirectory: true) || file.isDeleted {
             file.actions = [FileAction.delete]
             file.isDeleted = true
         } else {
@@ -304,8 +320,6 @@ private extension LocalFileManager {
             file.folderAffiliation = .system(.trash)
         } else if file == downloadsFolder {
             file.folderAffiliation = .system(.download)
-        } else if file == rootFolder {
-            file.folderAffiliation = .system(.root)
         }
     }
     
@@ -338,7 +352,8 @@ private extension LocalFileManager {
     }
     
     func conflictResolve(fileToCopy: File, destination: File, conflictResolver: NameConflictResolver, completion: @escaping (Result<OperationResult, Error>) -> Void)  {
-        conflictResolver.resolve { result in
+        let placeOfConflict = File(path: destination.path.deletingLastPathComponent(), storageType: .local(LocalStorageData()))
+        conflictResolver.resolve(conflictedFile: fileToCopy, placeOfConflict: placeOfConflict) { result in
             switch result {
             case .cancel:
                 completion(.success(.cancelled))

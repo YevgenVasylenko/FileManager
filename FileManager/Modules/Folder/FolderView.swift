@@ -61,7 +61,9 @@ struct FolderView: View {
                         }
                     }
                 }
-                createFolderButton()
+                if !(viewModel.state.folder.folderAffiliation == .system(.trash)) {
+                    createFolderButton()
+                }
                 actionMenuBarForChosenFiles()
             }
         }
@@ -71,6 +73,7 @@ struct FolderView: View {
             }
         }
         .renamePopover(viewModel: viewModel, newName: $newName)
+        .fileCreatingPopover(viewModel: viewModel, newName: $newName)
         .destinationPopoverFileFolder(viewModule: viewModel)
         .conflictAlertFolder(viewModule: viewModel)
         .errorAlert(error: $viewModel.state.error)
@@ -102,10 +105,11 @@ private extension FolderView {
             HStack {
                 Spacer()
                 Button {
-                    viewModel.createFolder()
+                    viewModel.startCreatingFolder()
                 } label: {
                     Image(systemName: "plus.circle.fill")
                         .font(.system(size: 70))
+                        .foregroundColor(.blue)
                 }
                 .padding()
             }
@@ -119,6 +123,7 @@ private extension FolderView {
                     Spacer()
                     HStack {
                         if viewModel.state.folder.folderAffiliation != .system(.trash) {
+                            Spacer()
                             Button(R.string.localizable.copy_to.callAsFunction()) {
                                 viewModel.copyChosen()
                             }
@@ -264,7 +269,12 @@ private extension View {
 
     func conflictAlertFolder(viewModule: FolderViewModel) -> some View {
         let nameConflict = viewModule.state.nameConflict
-        return alert("File with name \(viewModule.state.nameConflict?.file?.name ?? "") is exist", isPresented: .constant(nameConflict != nil)) {
+        return alert(
+            R.string.localizable.conflictAlertTitlePart1.callAsFunction() + (viewModule.state.nameConflict?.placeOfConflict?.displayedName() ?? "") +
+            R.string.localizable.conflictAlertTitlePart2.callAsFunction() +
+            (viewModule.state.nameConflict?.conflictedFile?.name ?? ""),
+            isPresented: .constant(nameConflict != nil)
+        ) {
             HStack {
                 Button(R.string.localizable.cancel.callAsFunction()) {
                     viewModule.userConflictResolveChoice(nameResult: .cancel)
@@ -293,19 +303,49 @@ private extension View {
     }
     
     func renamePopover(viewModel: FolderViewModel, newName: Binding<String>) -> some View {
-        return alert("Enter new name for \(viewModel.state.file?.name ?? "")",
+        return alert(R.string.localizable.renamePopupTitle.callAsFunction() + (viewModel.state.file?.name ?? ""),
                      isPresented: .constant(viewModel.state.fileRenameInProgress),
                      actions: {
             TextField(R.string.localizable.new_name.callAsFunction(), text: newName)
                 .padding()
                 .interactiveDismissDisabled()
+                .autocorrectionDisabled()
             HStack {
-                Button(R.string.localizable.cancel.callAsFunction()) {
-                    viewModel.state.fileRenameInProgress = false
-                }
-                Spacer()
                 Button(R.string.localizable.rename.callAsFunction()) {
                     viewModel.rename(newName: newName.wrappedValue)
+                    newName.wrappedValue = ""
+                }
+                Spacer()
+                Button(R.string.localizable.cancel.callAsFunction()) {
+                    viewModel.state.fileRenameInProgress = false
+                    newName.wrappedValue = ""
+                }
+            }
+            .padding()
+        })
+    }
+    
+    func fileCreatingPopover(viewModel: FolderViewModel, newName: Binding<String>) -> some View {
+        return alert(R.string.localizable.folderCreating.callAsFunction(),
+                     isPresented: .constant((viewModel.state.folderCreating != nil)),
+                     actions: {
+            TextField(viewModel.state.folderCreating ?? "", text: newName)
+                .padding()
+                .interactiveDismissDisabled()
+                .autocorrectionDisabled()
+            HStack {
+                Button(R.string.localizable.createFolder.callAsFunction()) {
+                    if newName.wrappedValue.isEmpty {
+                        viewModel.createFolder(newName: viewModel.state.folderCreating ?? "")
+                    } else {
+                        viewModel.createFolder(newName: newName.wrappedValue)
+                    }
+                    newName.wrappedValue = ""
+                }
+                Spacer()
+                Button(R.string.localizable.cancel.callAsFunction()) {
+                    viewModel.state.folderCreating = nil
+                    newName.wrappedValue = ""
                 }
             }
             .padding()

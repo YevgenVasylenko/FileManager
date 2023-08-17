@@ -11,7 +11,6 @@ struct File {
 
     enum FolderAffiliation: Equatable {
         enum systemFolderName {
-            case root
             case trash
             case download
         }
@@ -127,11 +126,12 @@ struct File {
         if self.name == "/" {
             return R.string.localizable.dropbox.callAsFunction()
         }
+        if self.name == "root" {
+            return R.string.localizable.root.callAsFunction()
+        }
         switch self.folderAffiliation {
         case .user:
             return self.name
-        case .system(.root):
-            return R.string.localizable.root.callAsFunction()
         case .system(.trash):
             return R.string.localizable.trash.callAsFunction()
         case .system(.download):

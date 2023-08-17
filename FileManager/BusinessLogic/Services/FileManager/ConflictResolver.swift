@@ -14,13 +14,13 @@ enum ConflictNameResult {
 }
 
 protocol NameConflictResolver {
-    func resolve(completion: @escaping (ConflictNameResult) -> Void)
+    func resolve(conflictedFile: File, placeOfConflict: File, completion: @escaping (ConflictNameResult) -> Void)
 }
 
 struct NameConflictResolverMock: NameConflictResolver {
     var mockResult: ConflictNameResult!
 
-    func resolve(completion: @escaping (ConflictNameResult) -> Void) {
+    func resolve(conflictedFile: File, placeOfConflict: File, completion: @escaping (ConflictNameResult) -> Void) {
         completion(mockResult)
     }
 

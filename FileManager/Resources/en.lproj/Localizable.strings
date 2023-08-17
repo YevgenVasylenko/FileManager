@@ -14,7 +14,10 @@
 "choose" = "Choose";
 "done" = "Done";
  
+"renamePopupTitle" = "Enter new name for ";
 "nameExistAlertTitle" = " such file's name is already exist";
+"conflictAlertTitlePart1" = "In folder ";
+"conflictAlertTitlePart2" = " already exist file with name ";
 "cancel" = "Cancel";
 "replace" = "Replace";
 "new_name" = "New name";
@@ -33,4 +36,8 @@
 
 "connect" = "Connect";
 "disconnect" = "Disconnect";
+
+"newFolder" = "New folder";
+"folderCreating" = "Tap name for new folder";
+"createFolder" = "Create";
 

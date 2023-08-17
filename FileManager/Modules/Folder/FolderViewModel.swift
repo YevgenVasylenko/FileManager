@@ -8,12 +8,21 @@
 import Foundation
 
 enum NameConflict {
-    case resolving(File)
+    case resolving(File, File)
     case resolved(ConflictNameResult)
     
-    var file: File? {
+    var conflictedFile: File? {
         switch self {
-        case .resolving(let file):
+        case .resolving(let file, _):
+            return file
+        case .resolved:
+            return nil
+        }
+    }
+    
+    var placeOfConflict: File? {
+        switch self {
+        case .resolving(_, let file):
             return file
         case .resolved:
             return nil
@@ -39,11 +48,11 @@ class FolderViewModel: ObservableObject {
         var file: File?
         var fileRenameInProgress = false
         var chosenFiles: Set<File>?
+        var folderCreating: String?
     }
     private let file: File
-//    private let fileManager: FileManager
     private var conflictCompletion: ((ConflictNameResult) -> Void)?
-    private lazy var folderMonitor = FileManagerFactory.makeFileManager(file: file).makeFolderMonitor(file: file)
+    private lazy var folderMonitor = FileManagerCommutator().makeFolderMonitor(file: file)
     
     @Published
     var state: State
@@ -51,7 +60,6 @@ class FolderViewModel: ObservableObject {
     init(file: File, state: State) {
         self.file = file
         self.state = state
-//        self.fileManager = FolderViewModel.makeFileManager(file: file)
         folderMonitor?.folderDidChange = { [weak self] in
             self?.load()
         }
@@ -104,8 +112,20 @@ class FolderViewModel: ObservableObject {
         }
     }
     
-    func createFolder() {
-        let createdFile = file.makeSubfile(name: "NewFolder")
+    func startCreatingFolder() {
+        FileManagerCommutator().newNameForCreationOfFolder(at: file) { result in
+            switch result {
+            case .success(let file):
+                self.state.folderCreating = file.name
+            case .failure:
+                return
+            }
+        }
+    }
+    
+    func createFolder(newName: String) {
+        state.folderCreating = nil
+        let createdFile = file.makeSubfile(name: newName, isDirectory: true)
         state.loading = true
         FileManagerCommutator().createFolder(at: createdFile) { result in
             switch result {
@@ -278,20 +298,11 @@ private extension FolderViewModel {
             }
         }
     }
-    
-   static func makeFileManager(file: File) -> FileManager {
-        switch file.storageType {
-        case .local:
-            return LocalFileManager()
-        case .dropbox:
-            return DropboxFileManager()
-        }
-    }
 }
 
 extension FolderViewModel: NameConflictResolver {
-    func resolve(completion: @escaping (ConflictNameResult) -> Void) {
-        self.state.nameConflict = .resolving(file)
+    func resolve(conflictedFile: File, placeOfConflict: File, completion: @escaping (ConflictNameResult) -> Void) {
+        self.state.nameConflict = .resolving(conflictedFile, placeOfConflict)
         self.conflictCompletion = completion
     }
 }

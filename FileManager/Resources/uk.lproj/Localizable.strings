@@ -14,7 +14,10 @@
 "choose" = "Вибрати";
 "done" = "Готово";
 
+"renamePopupTitle" = "Введіть нове ім'я для ";
 "nameExistAlertTitle" = " таке ім'я вже існує";
+"conflictAlertTitlePart1" = "В папці ";
+"conflictAlertTitlePart2" = " вже існує файл з ім'ям ";
 "cancel" = "Відміна";
 "replace" = "Замінити";
 "new_name" = "Нове ім'я";
@@ -33,3 +36,7 @@
 
 "connect" = "Підєднати";
 "disconnect" = "Розєднати";
+
+"newFolder" = "Нова папка";
+"folderCreating" = "Введіть ім'я для нової папки";
+"createFolder" = "Створити";

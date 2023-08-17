@@ -41,7 +41,7 @@ extension DropboxFileManager: FileManager {
             if let result = response {
                 for fileInResult in result.entries {
                     var fileInFolder = File(
-                        path: URL(fileURLWithPath: fileInResult.pathLower!),
+                        path: URL(fileURLWithPath: fileInResult.pathDisplay!),
                         storageType: .dropbox(DropboxStorageData())
                     )
                     fileInFolder.actions = FileAction.regularFolder
@@ -64,6 +64,29 @@ extension DropboxFileManager: FileManager {
         }
     }
     
+    func newNameForCreationOfFolder(at file: File, completion: @escaping (Result<File, Error>) -> Void) {
+        var destinationFile = file.makeSubfile(name: R.string.localizable.newFolder.callAsFunction())
+        if file == rootFolder {
+            destinationFile = File(path: URL(fileURLWithPath: "/\(R.string.localizable.newFolder.callAsFunction())"), storageType: .dropbox(DropboxStorageData()))
+        }
+        var fileForChanges = destinationFile
+        var numberOfFolder = 0
+        contents(of: file) { result in
+            switch result {
+            case .success(let files):
+                repeat {
+                    let suffixToName = numberOfFolder == 0 ? "" : " \(numberOfFolder)"
+                    let newName = destinationFile.name + suffixToName
+                    fileForChanges = fileForChanges.rename(name: newName)
+                    numberOfFolder += 1
+                } while files.contains(fileForChanges)
+                completion(.success(fileForChanges))
+            case .failure(let error):
+                completion(.failure(Error(error: error)))
+            }
+        }
+    }
+
     func rename(file: File, newName: String, completion: @escaping (Result<Void, Error>) -> Void) {
         guard let client = DropboxClientsManager.authorizedClient else {
             completion(.failure(.unknown))
@@ -199,6 +222,10 @@ extension DropboxFileManager: FileManager {
                 completion(.failure(Error(error: error)))
             }
         }
+    }
+    
+    func makeFolderMonitor(file: File) -> FolderMonitor? {
+        return DropboxFolderMonitor(url: file.path)
     }
     
     func copyToLocalTemporary(files: [File], conflictResolver: NameConflictResolver, completion: @escaping (Result<[URL], Error>) -> Void) {

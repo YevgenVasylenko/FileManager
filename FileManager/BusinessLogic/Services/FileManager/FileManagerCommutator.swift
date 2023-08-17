@@ -26,6 +26,10 @@ extension FileManagerCommutator: FileManager {
         FileManagerFactory.makeFileManager(file: file).createFolder(at: file, completion: completion)
     }
     
+    func newNameForCreationOfFolder(at file: File, completion: @escaping (Result<File, Error>) -> Void) {
+        FileManagerFactory.makeFileManager(file: file).newNameForCreationOfFolder(at: file, completion: completion)
+    }
+    
     func rename(file: File, newName: String, completion: @escaping (Result<Void, Error>) -> Void) {
         FileManagerFactory.makeFileManager(file: file).rename(file: file, newName: newName, completion: completion)
     }
@@ -112,6 +116,11 @@ extension FileManagerCommutator: FileManager {
     func cleanTrashFolder(fileForFileManager: File, completion: @escaping (Result<Void, Error>) -> Void) {
         let fileManager = FileManagerFactory.makeFileManager(file: fileForFileManager)
         fileManager.cleanTrashFolder(fileForFileManager: fileForFileManager, completion: completion)
+    }
+    
+    func makeFolderMonitor(file: File) -> FolderMonitor? {
+        let fileManager = FileManagerFactory.makeFileManager(file: file)
+        return fileManager.makeFolderMonitor(file: file)
     }
 
     func copyToLocalTemporary(files: [File], conflictResolver: NameConflictResolver, completion: @escaping (Result<[URL], Error>) -> Void) {
