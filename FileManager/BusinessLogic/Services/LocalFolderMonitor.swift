@@ -31,7 +31,7 @@ class LocalFolderMonitor: FolderMonitor {
         let folderMonitorSource = DispatchSource.makeFileSystemObjectSource(fileDescriptor: monitoredFolderFileDescriptor, eventMask: .write, queue: .main)
         self.folderMonitorSource = folderMonitorSource
         folderMonitorSource.setEventHandler { [weak self] in
-                self?.folderDidChange?()
+            self?.folderDidChange?()
         }
         folderMonitorSource.setCancelHandler { [weak self] in
             guard let strongSelf = self else { return }

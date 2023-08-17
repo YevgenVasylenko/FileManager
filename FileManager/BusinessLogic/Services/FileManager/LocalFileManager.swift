@@ -83,7 +83,6 @@ extension LocalFileManager: FileManager {
                 case .success(let choice):
                     completion(.success(choice))
                 case .failure(let error):
-                    //not sure
                     completion(.failure(Error(error: error)))
                 }
             }

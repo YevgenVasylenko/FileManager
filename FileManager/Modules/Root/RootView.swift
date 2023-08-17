@@ -67,7 +67,6 @@ private extension RootView {
                 trailing: cancelButtonForFolderSelection(chooseAction: {
                     fileSelectDelegate?.selected(nil)
                 }))
-
     }
     
     func cancelButtonForFolderSelection(chooseAction: @escaping () -> Void) -> some View {

@@ -37,7 +37,7 @@ struct FileSelectDelegate {
 }
 
 class FolderViewModel: ObservableObject {
- 
+    
     struct State {
         var folder: File
         var files: [File] = []
@@ -50,6 +50,7 @@ class FolderViewModel: ObservableObject {
         var chosenFiles: Set<File>?
         var folderCreating: String?
     }
+    
     private let file: File
     private var conflictCompletion: ((ConflictNameResult) -> Void)?
     private lazy var folderMonitor = FileManagerCommutator().makeFolderMonitor(file: file)
@@ -215,7 +216,6 @@ class FolderViewModel: ObservableObject {
         guard let isFolderDestinationChose = isFolderDestinationChose else {
             return state.chosenFiles != nil
         }
-        // not shure
         return file == LocalFileManager().trashFolder || isFolderDestinationChose.selectedFiles.contains(file)
     }
     

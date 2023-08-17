@@ -24,6 +24,8 @@ struct FileView: View {
     }
 }
 
+// MARK: - Private
+
 private extension FileView {
     func imageOfFile(imageName: String) -> some View {
         return Image(imageName)

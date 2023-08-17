@@ -12,7 +12,7 @@ struct FolderView: View {
     @ObservedObject private var viewModel: FolderViewModel
     
     @State private var newName: String = ""
-
+    
     private let fileSelectDelegate: FileSelectDelegate?
     private let columns = [
         GridItem(.flexible()),
@@ -41,7 +41,7 @@ struct FolderView: View {
                 ScrollView {
                     LazyVGrid(columns: columns, spacing: 20) {
                         ForEach($viewModel.state.files, id: \.self) { $file in
-                           
+                            
                             VStack {
                                 NavigationLink {
                                     viewToShow(file: file)
@@ -53,7 +53,9 @@ struct FolderView: View {
                                     fileActionsMenuView(file: file)
                                 }
                             }
-                            .disabled(viewModel.isFilesDisabledInFolder(isFolderDestinationChose: fileSelectDelegate, file: file))
+                            .disabled(viewModel.isFilesDisabledInFolder(
+                                isFolderDestinationChose: fileSelectDelegate, file: file)
+                            )
                             .overlay(alignment: Alignment(horizontal: .leading, vertical: .top)) {
                                 filesChooseToggle(file: file)
                             }
@@ -86,7 +88,7 @@ struct FolderView: View {
             navigationBar(
                 chooseAction: {
                     fileSelectDelegate?.selected(viewModel.state.folder)
-            })
+                })
         }
     }
 }
@@ -270,7 +272,8 @@ private extension View {
     func conflictAlertFolder(viewModule: FolderViewModel) -> some View {
         let nameConflict = viewModule.state.nameConflict
         return alert(
-            R.string.localizable.conflictAlertTitlePart1.callAsFunction() + (viewModule.state.nameConflict?.placeOfConflict?.displayedName() ?? "") +
+            R.string.localizable.conflictAlertTitlePart1.callAsFunction() +
+            (viewModule.state.nameConflict?.placeOfConflict?.displayedName() ?? "") +
             R.string.localizable.conflictAlertTitlePart2.callAsFunction() +
             (viewModule.state.nameConflict?.conflictedFile?.name ?? ""),
             isPresented: .constant(nameConflict != nil)

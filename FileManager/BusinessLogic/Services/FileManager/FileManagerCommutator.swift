@@ -8,12 +8,6 @@
 import Foundation
 
 final class FileManagerCommutator {
-//    private let fileOfAction: File
-//    let fileOfDestination: File? = nil
-//
-//    init(fileOfAction: File) {
-//        self.fileOfAction = fileOfAction
-//    }
 }
 
 extension FileManagerCommutator: FileManager {
@@ -66,7 +60,6 @@ extension FileManagerCommutator: FileManager {
     }
     
     func copy(file: File, destination: File, conflictResolver: NameConflictResolver, completion: @escaping (Result<OperationResult, Error>) -> Void) {
-        
     }
     
     func move(files: [File], destination: File, conflictResolver: NameConflictResolver, completion: @escaping (Result<OperationResult, Error>) -> Void) {
@@ -83,7 +76,6 @@ extension FileManagerCommutator: FileManager {
     }
     
     func move(file: File, destination: File, conflictResolver: NameConflictResolver, completion: @escaping (Result<OperationResult, Error>) -> Void) {
-        
     }
     
     func moveToTrash(filesToTrash: [File], completion: @escaping (Result<Void, Error>) -> Void) {
@@ -124,7 +116,6 @@ extension FileManagerCommutator: FileManager {
     }
 
     func copyToLocalTemporary(files: [File], conflictResolver: NameConflictResolver, completion: @escaping (Result<[URL], Error>) -> Void) {
-        
     }
     
     func saveFromLocalTemporary(
@@ -133,7 +124,5 @@ extension FileManagerCommutator: FileManager {
         conflictResolver: NameConflictResolver,
         completion: @escaping (Result<OperationResult, Error>) -> Void
     ) {
-        
     }
-    
 }

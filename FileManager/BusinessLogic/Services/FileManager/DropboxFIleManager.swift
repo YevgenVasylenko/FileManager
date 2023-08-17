@@ -182,12 +182,11 @@ extension DropboxFileManager: FileManager {
                     completion(.failure(Error(dropboxError: error)))
                     return
                 }
-                if let lastRevision = response?.entries.last {
-                    client.files.restore(path: path, rev: lastRevision.rev).response { response, error in
-                        if let error = error {
-                            completion(.failure(Error(dropboxError: error)))
-                            return
-                        }
+                guard let lastRevision = response?.entries.last else { return }
+                client.files.restore(path: path, rev: lastRevision.rev).response { response, error in
+                    if let error = error {
+                        completion(.failure(Error(dropboxError: error)))
+                        return
                     }
                 }
             }
@@ -270,7 +269,7 @@ extension DropboxFileManager: FileManager {
             return
         }
         var filesCommitInfo = [URL : Files.CommitInfo]()
-
+        
         for file in files {
             let fileUrl: URL = file.path
             let uploadToPath = destination.makeSubfile(name: file.name).path.path
@@ -302,6 +301,8 @@ extension DropboxFileManager: FileManager {
             })
     }
 }
+
+// MARK: - Private
 
 private extension DropboxFileManager {
     func makePathToRootOrElse(file: File) -> String {
@@ -341,7 +342,6 @@ private extension DropboxFileManager {
     
     func addTrashFolderToRoot(file: File, files: inout [File]) {
         if file == self.rootFolder {
-//            trashFolder.actions = FileAction.trashFolderActions
             trashFolder.folderAffiliation = .system(.trash)
             files.append(self.trashFolder)
         }

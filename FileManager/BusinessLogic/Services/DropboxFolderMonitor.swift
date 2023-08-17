@@ -39,8 +39,5 @@ class DropboxFolderMonitor: FolderMonitor {
     }
     
     func stopMonitoring() {
-        
     }
-    
-    
 }

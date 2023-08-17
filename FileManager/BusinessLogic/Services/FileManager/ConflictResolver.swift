@@ -23,5 +23,4 @@ struct NameConflictResolverMock: NameConflictResolver {
     func resolve(conflictedFile: File, placeOfConflict: File, completion: @escaping (ConflictNameResult) -> Void) {
         completion(mockResult)
     }
-
 }
