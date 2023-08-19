@@ -9,10 +9,14 @@ import Foundation
 import SwiftyDropbox
 
 final class DropboxFileManager {
+    enum Constants {
+        static let trash = "trash"
+    }
+    
     private(set) lazy var rootFolder = File(path: URL(fileURLWithPath: ""),
                                             storageType: .dropbox(DropboxStorageData()))
     private(set) lazy var trashFolder = File(
-        path: URL(fileURLWithPath: "/\(R.string.localizable.trash.callAsFunction())"),
+        path: URL(fileURLWithPath: "/\(Constants.trash)"),
         storageType: .dropbox(DropboxStorageData())
     )
 }
@@ -24,7 +28,7 @@ extension DropboxFileManager: FileManager {
             completion(.failure(.unknown))
             return
         }
-        let path = makePathToRootOrElse(file: file)
+        let path = dropboxPath(file: file)
         
         if path == self.trashFolder.path.path {
             contentOfTrashFolder(completion: completion)
@@ -54,7 +58,7 @@ extension DropboxFileManager: FileManager {
     
     func createFolder(at file: File, completion: @escaping (Result<Void, Error>) -> Void) {
         guard let client = DropboxClientsManager.authorizedClient else { return }
-        let path = makePathToRootOrElse(file: file)
+        let path = dropboxPath(file: file)
         client.files.createFolderV2(path: path).response { response, error in
             if let error = error {
                 completion(.failure(Error(dropboxError: error)))
@@ -64,16 +68,22 @@ extension DropboxFileManager: FileManager {
         }
     }
     
-    func newNameForCreationOfFolder(at file: File, completion: @escaping (Result<File, Error>) -> Void) {
-        var destinationFile = file.makeSubfile(name: R.string.localizable.newFolder.callAsFunction())
+    func newNameForCreationOfFolder(
+        at file: File,
+        newFolderName: String,
+        completion: @escaping (Result<File, Error>) -> Void
+    ) {
+        let destinationFile: File
         if file == rootFolder {
-            destinationFile = File(path: URL(fileURLWithPath: "/\(R.string.localizable.newFolder.callAsFunction())"), storageType: .dropbox(DropboxStorageData()))
+            destinationFile = File(path: URL(fileURLWithPath: "/\(newFolderName)"), storageType: .dropbox(DropboxStorageData()))
+        } else {
+            destinationFile = file.makeSubfile(name: newFolderName)
         }
-        var fileForChanges = destinationFile
-        var numberOfFolder = 0
         contents(of: file) { result in
             switch result {
             case .success(let files):
+                var fileForChanges = destinationFile
+                var numberOfFolder = 0
                 repeat {
                     let suffixToName = numberOfFolder == 0 ? "" : " \(numberOfFolder)"
                     let newName = destinationFile.name + suffixToName
@@ -93,7 +103,7 @@ extension DropboxFileManager: FileManager {
             return
         }
         let renamedFilePath = file.rename(name: newName).path.path
-        let path = makePathToRootOrElse(file: file)
+        let path = dropboxPath(file: file)
         client.files.moveV2(fromPath: path, toPath: renamedFilePath).response { response, error in
             if let error = error {
                 completion(.failure(Error(dropboxError: error)))
@@ -103,54 +113,34 @@ extension DropboxFileManager: FileManager {
         }
     }
     
-    func copy(files: [File], destination: File, conflictResolver: NameConflictResolver, completion: @escaping (Result<OperationResult, Error>) -> Void) {
-        guard let client = DropboxClientsManager.authorizedClient else {
-            completion(.failure(.unknown))
-            return
+    func copy(
+        files: [File],
+        destination: File,
+        conflictResolver: NameConflictResolver,
+        isForOneFile: Bool,
+        completion: @escaping (Result<OperationResult, Error>) -> Void
+    ) {
+        if isForOneFile {
+            guard let oneFile = files.last else { return }
+            copyOne(file: oneFile, destination: destination, conflictResolver: conflictResolver, completion: completion)
+        } else {
+            copyBatch(files: files, destination: destination, conflictResolver: conflictResolver, completion: completion)
         }
-        var filesRelocationPaths:  Array<Files.RelocationPath> = []
-        for file in files {
-            let copyFilePath = makePathToRootOrElse(file: file)
-            let destinationFile = destination.makeSubfile(name: file.name)
-            let destinationPath = makePathToRootOrElse(file: destinationFile)
-            filesRelocationPaths.append(Files.RelocationPath(fromPath: copyFilePath, toPath: destinationPath))
-        }
-        client.files.copyBatchV2(entries: filesRelocationPaths).response { response, error in
-            if let error = error {
-                print(error)
-                completion(.failure(Error(dropboxError: error)))
-                return
-            }
-        }
-        completion(.success(.finished))
     }
-    
-    func copy(file: File, destination: File, conflictResolver: NameConflictResolver, completion: @escaping (Result<OperationResult, Error>) -> Void) {
-    }
-    
-    func move(files: [File], destination: File, conflictResolver: NameConflictResolver, completion: @escaping (Result<OperationResult, Error>) -> Void) {
-        guard let client = DropboxClientsManager.authorizedClient else {
-            completion(.failure(.unknown))
-            return
+
+    func move(
+        files: [File],
+        destination: File,
+        conflictResolver: NameConflictResolver,
+        isForOneFile: Bool,
+        completion: @escaping (Result<OperationResult, Error>) -> Void
+    ) {
+        if isForOneFile {
+            guard let oneFile = files.last else { return }
+            moveOne(file: oneFile, destination: destination, conflictResolver: conflictResolver, completion: completion)
+        } else {
+            moveBatch(files: files, destination: destination, conflictResolver: conflictResolver, completion: completion)
         }
-        var filesRelocationPaths:  Array<Files.RelocationPath> = []
-        for file in files {
-            let copyFilePath = makePathToRootOrElse(file: file)
-            let destinationFile = destination.makeSubfile(name: file.name)
-            let destinationPath = makePathToRootOrElse(file: destinationFile)
-            filesRelocationPaths.append(Files.RelocationPath(fromPath: copyFilePath, toPath: destinationPath))
-        }
-        client.files.moveBatchV2(entries: filesRelocationPaths).response { response, error in
-            if let error = error {
-                print(error)
-                completion(.failure(Error(dropboxError: error)))
-                return
-            }
-        }
-        completion(.success(.finished))
-    }
-    
-    func move(file: File, destination: File, conflictResolver: NameConflictResolver, completion: @escaping (Result<OperationResult, Error>) -> Void) {
     }
     
     func moveToTrash(filesToTrash: [File], completion: @escaping (Result<Void, Error>) -> Void) {
@@ -159,7 +149,7 @@ extension DropboxFileManager: FileManager {
             return
         }
         for file in filesToTrash {
-            let path = makePathToRootOrElse(file: file)
+            let path = dropboxPath(file: file)
             client.files.deleteV2(path: path).response { response, error in
                 if let error = error {
                     completion(.failure(Error(dropboxError: error)))
@@ -175,8 +165,10 @@ extension DropboxFileManager: FileManager {
             completion(.failure(.unknown))
             return
         }
+        let group = DispatchGroup()
         for file in filesToRestore {
-            let path = makePathToRootOrElse(file: file)
+            group.enter()
+            let path = dropboxPath(file: file)
             client.files.listRevisions(path: path).response { response, error in
                 if let error = error {
                     completion(.failure(Error(dropboxError: error)))
@@ -184,6 +176,7 @@ extension DropboxFileManager: FileManager {
                 }
                 guard let lastRevision = response?.entries.last else { return }
                 client.files.restore(path: path, rev: lastRevision.rev).response { response, error in
+                    defer { group.leave() }
                     if let error = error {
                         completion(.failure(Error(dropboxError: error)))
                         return
@@ -191,7 +184,9 @@ extension DropboxFileManager: FileManager {
                 }
             }
         }
-        completion(.success(()))
+        group.notify(queue: DispatchQueue.main) {
+            completion(.success(()))
+        }
     }
     
     func deleteFile(files: [File], completion: @escaping (Result<Void, Error>) -> Void) {
@@ -200,7 +195,7 @@ extension DropboxFileManager: FileManager {
             return
         }
         for file in files {
-            let path = makePathToRootOrElse(file: file)
+            let path = dropboxPath(file: file)
             client.files.permanentlyDelete(path: path).response { response, error in
                 if let error = error {
                     print(error)
@@ -226,40 +221,90 @@ extension DropboxFileManager: FileManager {
     func makeFolderMonitor(file: File) -> FolderMonitor? {
         return DropboxFolderMonitor(url: file.path)
     }
+}
+
+extension DropboxFileManager: LocalTemporaryFolderConnector {
     
-    func copyToLocalTemporary(files: [File], conflictResolver: NameConflictResolver, completion: @escaping (Result<[URL], Error>) -> Void) {
+    func copyToLocalTemporary(
+        files: [File],
+        conflictResolver: NameConflictResolver,
+        completion: @escaping (Result<[URL], Error>) -> Void
+    ) {
         guard let client = DropboxClientsManager.authorizedClient else {
             completion(.failure(.unknown))
             return
         }
         let group = DispatchGroup()
         var destinationFileURLs: [URL] = []
+        var lastError: Error?
         for file in files {
             group.enter()
-            let copyFilePath = makePathToRootOrElse(file: file)
-            let destinationFileURL = SystemFileManger.default.temporaryDirectory.appending(component: file.name)
+            let copyFilePath = dropboxPath(file: file)
             let destination: (URL, HTTPURLResponse) -> URL = { temporaryURL, response in
-                return destinationFileURL
+                return SystemFileManger.default.temporaryDirectory.appending(component: file.name)
             }
             client.files.download(path: copyFilePath, destination: destination).response { response, error in
+                defer { group.leave() }
                 if let error = error {
-                    defer { group.leave() }
-                    completion(.failure(Error(dropboxError: error)))
+                    lastError = Error(dropboxError: error)
                     return
                 }
                 if let result = response {
-                    defer { group.leave() }
                     destinationFileURLs.append(result.1)
                 }
             }
         }
         group.notify(queue: DispatchQueue.main) {
-            completion(.success(destinationFileURLs))
+            if let error = lastError {
+                completion(.failure(error))
+            } else {
+                completion(.success(destinationFileURLs))
+            }
         }
     }
     
     func saveFromLocalTemporary(
         files: [File],
+        destination: File,
+        conflictResolver: NameConflictResolver,
+        isForOneFile: Bool,
+        completion: @escaping (Result<OperationResult, Error>) -> Void
+    ) {
+        guard let client = DropboxClientsManager.authorizedClient else {
+            completion(.failure(.unknown))
+            return
+        }
+        var filesCommitInfo = [URL: Files.CommitInfo]()
+        
+        for file in files {
+            let fileUrl = file.path
+            let uploadToPath = destination.makeSubfile(name: file.name).path.path
+            filesCommitInfo[fileUrl] = Files.CommitInfo(path: uploadToPath, mode: .overwrite)
+        }
+        
+        client.files.batchUploadFiles(
+            fileUrlsToCommitInfo: filesCommitInfo,
+            responseBlock: { uploadResults, finishBatchRequestError, fileUrlsToRequestErrors in
+                
+                if let finishBatchRequestError = finishBatchRequestError {
+                    completion(.failure(Error(dropboxError: finishBatchRequestError)))
+                    return
+                }
+                if let error = fileUrlsToRequestErrors.first?.value {
+                    completion(.failure(Error(dropboxError: error)))
+                    return
+                }
+                completion(.success(.finished))
+            })
+    }
+}
+
+// MARK: - Private
+
+private extension DropboxFileManager {
+    
+    func copyOne(
+        file: File,
         destination: File,
         conflictResolver: NameConflictResolver,
         completion: @escaping (Result<OperationResult, Error>) -> Void
@@ -268,44 +313,87 @@ extension DropboxFileManager: FileManager {
             completion(.failure(.unknown))
             return
         }
-        var filesCommitInfo = [URL : Files.CommitInfo]()
-        
-        for file in files {
-            let fileUrl: URL = file.path
-            let uploadToPath = destination.makeSubfile(name: file.name).path.path
-            filesCommitInfo[fileUrl] = Files.CommitInfo(path: uploadToPath, mode: Files.WriteMode.overwrite)
+        let destinationFile = destination.makeSubfile(name: file.name)
+        client.files.copyV2(fromPath: file.path.path, toPath: destinationFile.path.path).response { response, error in
+            if let error = error {
+                completion(.failure(Error(dropboxError: error)))
+                return
+            }
+            completion(.success(.finished))
         }
-        
-        client.files.batchUploadFiles(
-            fileUrlsToCommitInfo: filesCommitInfo,
-            responseBlock: { (uploadResults: [URL: Files.UploadSessionFinishBatchResultEntry]?,
-                              finishBatchRequestError: CallError<Async.PollError>?,
-                              fileUrlsToRequestErrors: [URL: CallError<Async.PollError>]) -> Void in
-                
-                if let uploadResults = uploadResults {
-                    for (clientSideFileUrl, result) in uploadResults {
-                        switch(result) {
-                        case .success(let metadata):
-                            let dropboxFilePath = metadata.pathDisplay!
-                            print("Upload \(clientSideFileUrl.absoluteString) to \(dropboxFilePath) succeeded")
-                        case .failure(let error):
-                            print("Upload \(clientSideFileUrl.absoluteString) failed: \(error.description)")
-                        }
-                    }
-                }
-                else if let finishBatchRequestError = finishBatchRequestError {
-                    print("Error uploading file: possible error on Dropbox server: \(finishBatchRequestError)")
-                } else if fileUrlsToRequestErrors.count > 0 {
-                    print("Error uploading file: \(fileUrlsToRequestErrors)")
-                }
-            })
     }
-}
-
-// MARK: - Private
-
-private extension DropboxFileManager {
-    func makePathToRootOrElse(file: File) -> String {
+    
+    func copyBatch(files: [File],
+                   destination: File,
+                   conflictResolver: NameConflictResolver,
+                   completion: @escaping (Result<OperationResult, Error>) -> Void
+    ) {
+        guard let client = DropboxClientsManager.authorizedClient else {
+            completion(.failure(.unknown))
+            return
+        }
+        var filesRelocationPaths: [Files.RelocationPath] = []
+        for file in files {
+            let copyFilePath = dropboxPath(file: file)
+            let destinationFile = destination.makeSubfile(name: file.name)
+            let destinationPath = dropboxPath(file: destinationFile)
+            filesRelocationPaths.append(Files.RelocationPath(fromPath: copyFilePath, toPath: destinationPath))
+        }
+        client.files.copyBatchV2(entries: filesRelocationPaths).response { response, error in
+            if let error = error {
+                print(error)
+                completion(.failure(Error(dropboxError: error)))
+                return
+            }
+            completion(.success(.finished))
+        }
+    }
+    
+    func moveOne(
+        file: File,
+        destination: File,
+        conflictResolver: NameConflictResolver,
+        completion: @escaping (Result<OperationResult, Error>) -> Void
+    ) {
+        guard let client = DropboxClientsManager.authorizedClient else {
+            completion(.failure(.unknown))
+            return
+        }
+        let destinationFile = destination.makeSubfile(name: file.name)
+        client.files.moveV2(fromPath: file.path.path, toPath: destinationFile.path.path).response { response, error in
+            if let error = error {
+                completion(.failure(Error(dropboxError: error)))
+                return
+            }
+            completion(.success(.finished))
+        }
+    }
+    
+    func moveBatch(files: [File],
+                   destination: File,
+                   conflictResolver: NameConflictResolver,
+                   completion: @escaping (Result<OperationResult, Error>) -> Void
+    ) {
+        guard let client = DropboxClientsManager.authorizedClient else {
+            completion(.failure(.unknown))
+            return
+        }
+        var filesRelocationPaths: [Files.RelocationPath] = []
+        for file in files {
+            let copyFilePath = dropboxPath(file: file)
+            let destinationFile = destination.makeSubfile(name: file.name)
+            filesRelocationPaths.append(Files.RelocationPath(fromPath: copyFilePath, toPath: destinationFile.path.path))
+        }
+        client.files.moveBatchV2(entries: filesRelocationPaths).response { response, error in
+            if let error = error {
+                completion(.failure(Error(dropboxError: error)))
+                return
+            }
+            completion(.success(.finished))
+        }
+    }
+    
+    func dropboxPath(file: File) -> String {
         return file == rootFolder ? "" : file.path.path
     }
     
@@ -325,7 +413,7 @@ private extension DropboxFileManager {
                     switch fileInResult {
                     case let deletedMetadata as Files.DeletedMetadata:
                         var fileInFolder = File(
-                            path: URL(fileURLWithPath: deletedMetadata.pathLower!),
+                            path: URL(fileURLWithPath: deletedMetadata.pathDisplay!),
                             storageType: .dropbox(DropboxStorageData())
                         )
                         fileInFolder.actions = [FileAction.restoreFromTrash]

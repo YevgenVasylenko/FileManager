@@ -53,7 +53,8 @@ class FolderViewModel: ObservableObject {
     
     private let file: File
     private var conflictCompletion: ((ConflictNameResult) -> Void)?
-    private lazy var folderMonitor = FileManagerCommutator().makeFolderMonitor(file: file)
+    private var fileManagerCommutator = FileManagerCommutator()
+    private lazy var folderMonitor = fileManagerCommutator.makeFolderMonitor(file: file)
     
     @Published
     var state: State
@@ -102,7 +103,7 @@ class FolderViewModel: ObservableObject {
     func load() {
         folderMonitor?.startMonitoring()
         state.loading = true
-        FileManagerCommutator().contents(of: file) { result in
+        fileManagerCommutator.contents(of: file) { result in
             switch result {
             case .success(let files):
                 self.state.files = files
@@ -114,7 +115,10 @@ class FolderViewModel: ObservableObject {
     }
     
     func startCreatingFolder() {
-        FileManagerCommutator().newNameForCreationOfFolder(at: file) { result in
+        fileManagerCommutator.newNameForCreationOfFolder(
+            at: file,
+            newFolderName: R.string.localizable.newFolder.callAsFunction()
+        ) { result in
             switch result {
             case .success(let file):
                 self.state.folderCreating = file.name
@@ -128,7 +132,7 @@ class FolderViewModel: ObservableObject {
         state.folderCreating = nil
         let createdFile = file.makeSubfile(name: newName, isDirectory: true)
         state.loading = true
-        FileManagerCommutator().createFolder(at: createdFile) { result in
+        fileManagerCommutator.createFolder(at: createdFile) { result in
             switch result {
             case .success:
                 break
@@ -164,7 +168,7 @@ class FolderViewModel: ObservableObject {
     
     func rename(newName: String) {
         state.fileRenameInProgress = false
-        FileManagerCommutator().rename(file: state.file!, newName: newName) { result in
+        fileManagerCommutator.rename(file: state.file!, newName: newName) { result in
             switch result {
             case .success:
                 break
@@ -175,7 +179,7 @@ class FolderViewModel: ObservableObject {
     }
     
     func clear() {
-        FileManagerCommutator().cleanTrashFolder(fileForFileManager: file) { result in
+        fileManagerCommutator.cleanTrashFolder(fileForFileManager: file) { result in
             switch result {
             case .success:
                 break
@@ -216,7 +220,7 @@ class FolderViewModel: ObservableObject {
         guard let isFolderDestinationChose = isFolderDestinationChose else {
             return state.chosenFiles != nil
         }
-        return file == LocalFileManager().trashFolder || isFolderDestinationChose.selectedFiles.contains(file)
+        return file.folderAffiliation == .system(.trash) || isFolderDestinationChose.selectedFiles.contains(file)
     }
     
     func isFileDefault(file: File) -> Bool {
@@ -237,7 +241,12 @@ private extension FolderViewModel {
     func moveFilesToChosen(folder: File) {
         self.state.fileActionType = nil
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.5)  {
-            FileManagerCommutator().move(files: self.filesForAction, destination: folder, conflictResolver: self) { result in
+            self.fileManagerCommutator.move(
+                files: self.filesForAction,
+                destination: folder,
+                conflictResolver: self,
+                isForOneFile: self.state.chosenFiles == nil
+            ) { result in
                 switch result {
                 case .success:
                     self.state.chosenFiles = nil
@@ -252,7 +261,12 @@ private extension FolderViewModel {
     func copyFilesToChosen(folder: File) {
         self.state.fileActionType = nil
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.5)  {
-            FileManagerCommutator().copy(files: self.filesForAction, destination: folder, conflictResolver: self) { result in
+            self.fileManagerCommutator.copy(
+                files: self.filesForAction,
+                destination: folder,
+                conflictResolver: self,
+                isForOneFile: self.state.file != nil
+            ) { result in
                 switch result {
                 case .success:
                     self.state.chosenFiles = nil
@@ -265,7 +279,7 @@ private extension FolderViewModel {
     }
     
     func moveToTrash() {
-        FileManagerCommutator().moveToTrash(filesToTrash: filesForAction) { result in
+        fileManagerCommutator.moveToTrash(filesToTrash: filesForAction) { result in
             switch result {
             case .success:
                 self.state.chosenFiles = nil
@@ -277,7 +291,7 @@ private extension FolderViewModel {
     }
     
     func restoreFromTrash() {
-        FileManagerCommutator().restoreFromTrash(filesToRestore: filesForAction) { result in
+        fileManagerCommutator.restoreFromTrash(filesToRestore: filesForAction) { result in
             switch result {
             case .success:
                 self.state.chosenFiles = nil
@@ -289,7 +303,7 @@ private extension FolderViewModel {
     }
     
     func delete() {
-        FileManagerCommutator().deleteFile(files: filesForAction) { result in
+        fileManagerCommutator.deleteFile(files: filesForAction) { result in
             switch result {
             case .success:
                 break

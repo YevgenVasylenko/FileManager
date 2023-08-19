@@ -20,7 +20,10 @@ protocol FileManager {
     
     func createFolder(at file: File, completion: @escaping (Result<Void, Error>) -> Void)
     
-    func newNameForCreationOfFolder(at file: File, completion: @escaping (Result<File, Error>) -> Void)
+    func newNameForCreationOfFolder(
+        at file: File,
+        newFolderName: String,
+        completion: @escaping (Result<File, Error>) -> Void)
     
     func rename(file: File, newName: String, completion: @escaping (Result<Void, Error>) -> Void)
     
@@ -28,26 +31,16 @@ protocol FileManager {
         files: [File],
         destination: File,
         conflictResolver: NameConflictResolver,
+        isForOneFile: Bool,
         completion: @escaping (Result<OperationResult, Error>) -> Void)
-    
-    func copy(
-        file: File,
-        destination: File,
-        conflictResolver: NameConflictResolver,
-        completion: @escaping (Result<OperationResult, Error>) -> Void)
-    
+
     func move(
         files: [File],
         destination: File,
         conflictResolver: NameConflictResolver,
+        isForOneFile: Bool,
         completion: @escaping (Result<OperationResult, Error>) -> Void)
-    
-    func move(
-        file: File,
-        destination: File,
-        conflictResolver: NameConflictResolver,
-        completion: @escaping (Result<OperationResult, Error>) -> Void)
-    
+   
     func moveToTrash(filesToTrash: [File], completion: @escaping (Result<Void, Error>) -> Void)
     
     func restoreFromTrash(filesToRestore: [File], completion: @escaping (Result<Void, Error>) -> Void)
@@ -57,14 +50,6 @@ protocol FileManager {
     func deleteFile(files: [File], completion: @escaping (Result<Void, Error>) -> Void)
     
     func makeFolderMonitor(file: File) -> FolderMonitor?
-    
-    func copyToLocalTemporary(files: [File], conflictResolver: NameConflictResolver, completion: @escaping (Result<[URL], Error>) -> Void)
-    
-    func saveFromLocalTemporary(
-        files: [File],
-        destination: File,
-        conflictResolver: NameConflictResolver,
-        completion: @escaping (Result<OperationResult, Error>) -> Void
-    )
 }
+
 

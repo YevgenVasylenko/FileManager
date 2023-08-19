@@ -9,7 +9,7 @@ import Foundation
 
 class FileManagerFactory {
     
-    static func makeFileManager(file: File) -> FileManager {
+    static func makeFileManager(file: File) -> FileManager & LocalTemporaryFolderConnector {
          switch file.storageType {
          case .local:
              return LocalFileManager()

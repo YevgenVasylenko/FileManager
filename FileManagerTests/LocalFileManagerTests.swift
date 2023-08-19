@@ -15,11 +15,11 @@ final class LocalFileManagerTests: XCTestCase {
     // so we omit this in favor of simplicity
     // just for you to know
     var fileManager: LocalFileManager!
-    var conflictResolver: ConflictResolverMock!
+    var conflictResolver: NameConflictResolverMock!
 
     override func setUp() {
         fileManager = LocalFileManager(fileManagerRootPath: TestFileMangerRootPath())
-        conflictResolver = ConflictResolverMock()
+        conflictResolver = NameConflictResolverMock()
     }
     
     func testDefaultFoldersCreation() {
@@ -112,7 +112,7 @@ final class LocalFileManagerTests: XCTestCase {
             XCTAssertTrue(contentResult.isSuccess)
         }
         let fileAfterMove = destinationFolder.makeSubfile(name: fileToMove.name)
-        fileManager.moveFile(fileToCopy: fileToMove, destination: fileAfterMove, conflictResolver: conflictResolver) { result in
+        fileManager.move(files: [fileToMove], destination: fileAfterMove, conflictResolver: conflictResolver, isForOneFile: true) { result in
             switch result {
             case .success:
                 XCTAssertTrue(SystemFileManger.default.fileExists(atPath: fileAfterMove.path.path))
@@ -131,7 +131,7 @@ final class LocalFileManagerTests: XCTestCase {
         }
         let destinationFolder = fileManager.rootFolder.makeStubFile()
         let fileAfterMove = destinationFolder.makeSubfile(name: fileToMove.name)
-        fileManager.moveFile(fileToCopy: fileToMove, destination: fileAfterMove, conflictResolver: conflictResolver) { result in
+        fileManager.move(files: [fileToMove], destination: fileAfterMove, conflictResolver: conflictResolver, isForOneFile: true) { result in
             switch result {
             case .success:
                 XCTFail()
