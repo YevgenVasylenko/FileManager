@@ -13,27 +13,16 @@ enum Error: LocalizedError {
         case unknown
         case dropbox(String)
     
-        var errorDescription: String? {
-            switch self {
-            case .nameExist:
-                return R.string.localizable.name_is_exist.callAsFunction()
-            case .unknown:
-                return R.string.localizable.unknown_error.callAsFunction()
-            case .dropbox(let description):
-                return description
-            }
-        }
-
-        var recoverySuggestion: String? {
-            switch self {
-            case .nameExist:
-                return R.string.localizable.file_with_same_name_is_already_exist.callAsFunction()
-            case .unknown:
-                return R.string.localizable.try_smth_else.callAsFunction()
-            case .dropbox:
-                return R.string.localizable.try_smth_else.callAsFunction()
-            }
-        }
+//        var errorDescription: String? {
+//            switch self {
+//            case .nameExist:
+//                return R.string.localizable.name_is_exist.callAsFunction()
+//            case .unknown:
+//                return R.string.localizable.unknown_error.callAsFunction()
+//            case .dropbox(let description):
+//                return description
+//            }
+//        }
   
     init(error: Swift.Error) {
         let error = error as NSError

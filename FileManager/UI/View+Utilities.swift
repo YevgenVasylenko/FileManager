@@ -21,3 +21,15 @@ extension View {
     }
 }
 
+extension Error {
+    var recoverySuggestion: String? {
+        switch self {
+        case .nameExist:
+            return R.string.localizable.file_with_same_name_is_already_exist.callAsFunction()
+        case .unknown:
+            return R.string.localizable.try_smth_else.callAsFunction()
+        case .dropbox:
+            return R.string.localizable.try_smth_else.callAsFunction()
+        }
+    }
+}

@@ -11,9 +11,6 @@ import XCTest
 
 final class LocalFileManagerTests: XCTestCase {
 
-    // in test we do not care about private
-    // so we omit this in favor of simplicity
-    // just for you to know
     var fileManager: LocalFileManager!
     var conflictResolver: NameConflictResolverMock!
 
@@ -112,7 +109,7 @@ final class LocalFileManagerTests: XCTestCase {
             XCTAssertTrue(contentResult.isSuccess)
         }
         let fileAfterMove = destinationFolder.makeSubfile(name: fileToMove.name)
-        fileManager.move(files: [fileToMove], destination: fileAfterMove, conflictResolver: conflictResolver, isForOneFile: true) { result in
+        fileManager.move(files: [fileToMove], destination: destinationFolder, conflictResolver: conflictResolver, isForOneFile: true) { result in
             switch result {
             case .success:
                 XCTAssertTrue(SystemFileManger.default.fileExists(atPath: fileAfterMove.path.path))
@@ -130,8 +127,7 @@ final class LocalFileManagerTests: XCTestCase {
             XCTAssertTrue(contentResult.isSuccess)
         }
         let destinationFolder = fileManager.rootFolder.makeStubFile()
-        let fileAfterMove = destinationFolder.makeSubfile(name: fileToMove.name)
-        fileManager.move(files: [fileToMove], destination: fileAfterMove, conflictResolver: conflictResolver, isForOneFile: true) { result in
+        fileManager.move(files: [fileToMove], destination: destinationFolder, conflictResolver: conflictResolver, isForOneFile: true) { result in
             switch result {
             case .success:
                 XCTFail()
@@ -150,7 +146,7 @@ final class LocalFileManagerTests: XCTestCase {
             XCTAssertTrue(contentResult.isSuccess)
         }
         let fileAfterMove = destinationFolder.makeSubfile(name: fileToMove.name)
-        fileManager.moveFile(fileToCopy: fileToMove, destination: fileAfterMove, conflictResolver: conflictResolver) { result in
+        fileManager.move(files: [fileToMove], destination: destinationFolder, conflictResolver: conflictResolver, isForOneFile: true) { result in
             switch result {
             case .success:
                 XCTFail()
@@ -174,12 +170,7 @@ final class LocalFileManagerTests: XCTestCase {
         fileManager.createFolder(at: fileAfterMove) { contentResult in
             XCTAssertTrue(contentResult.isSuccess)
         }
-//        let fileInDestination = fileAfterMove.makeSubfile(name: fileToMove.name)
-//        fileManager.createFolder(at: fileInDestination) { contentResult in
-//            XCTAssertTrue(contentResult.isSuccess)
-//        }
-
-        fileManager.moveFile(fileToCopy: fileToMove, destination: fileAfterMove, conflictResolver: conflictResolver) { result in
+        fileManager.move(files: [fileToMove], destination: destinationFolder, conflictResolver: conflictResolver, isForOneFile: true) { result in
             switch result {
             case .success:
                 XCTAssertFalse(SystemFileManger.default.fileExists(atPath: fileToMove.path.path))
@@ -203,16 +194,12 @@ final class LocalFileManagerTests: XCTestCase {
         fileManager.createFolder(at: fileAfterMove) { contentResult in
             XCTAssertTrue(contentResult.isSuccess)
         }
-        
-        fileManager.copyFile(fileToCopy: fileToMove, destination: fileAfterMove, conflictResolver: conflictResolver) { result in
-            XCTAssertTrue(result.isSuccess)
-        }
-        
-        fileManager.moveFile(fileToCopy: fileToMove, destination: fileAfterMove, conflictResolver: conflictResolver) { result in
+
+        fileManager.move(files: [fileToMove], destination: destinationFolder, conflictResolver: conflictResolver, isForOneFile: true) { result in
             switch result {
             case .success:
-                break
-                //            XCTAssertTrue(fileAfterMove.name.contains("Copy"))
+                XCTAssertTrue(SystemFileManger.default.fileExists(atPath: fileAfterMove.path.path + " (1)"))
+                XCTAssertFalse(SystemFileManger.default.fileExists(atPath: fileToMove.path.path))
             case .failure:
                 XCTFail()
             }
@@ -230,7 +217,7 @@ final class LocalFileManagerTests: XCTestCase {
             XCTAssertTrue(contentResult.isSuccess)
         }
         let copiedFile = destinationFolder.makeSubfile(name: fileToCopy.name)
-        fileManager.copyFile(fileToCopy: fileToCopy, destination: copiedFile, conflictResolver: conflictResolver) { copyFileResult in
+        fileManager.copy(files: [fileToCopy], destination: destinationFolder, conflictResolver: conflictResolver, isForOneFile: true) { copyFileResult in
             switch copyFileResult {
             case .success:
                 XCTAssertTrue(SystemFileManger.default.fileExists(atPath: fileToCopy.path.path))
@@ -249,7 +236,7 @@ final class LocalFileManagerTests: XCTestCase {
         }
         let destinationFolder = fileManager.rootFolder.makeStubFile()
         let copiedFile = destinationFolder.makeSubfile(name: fileToCopy.name)
-        fileManager.copyFile(fileToCopy: fileToCopy, destination: copiedFile, conflictResolver: conflictResolver) { copyFileResult in
+        fileManager.copy(files: [fileToCopy], destination: destinationFolder, conflictResolver: conflictResolver, isForOneFile: true) { copyFileResult in
             switch copyFileResult {
             case .success:
                 XCTFail()
@@ -266,7 +253,7 @@ final class LocalFileManagerTests: XCTestCase {
             XCTAssertTrue(contentResult.isSuccess)
         }
         let copiedFile = destinationFolder.makeSubfile(name: fileToCopy.name)
-        fileManager.copyFile(fileToCopy: fileToCopy, destination: copiedFile, conflictResolver: conflictResolver) { copyFileResult in
+        fileManager.copy(files: [fileToCopy], destination: destinationFolder, conflictResolver: conflictResolver, isForOneFile: true) { copyFileResult in
             switch copyFileResult {
             case .success:
                 XCTFail()
@@ -286,19 +273,19 @@ final class LocalFileManagerTests: XCTestCase {
         fileManager.createFolder(at: destinationFolder) { contentResult in
             XCTAssertTrue(contentResult.isSuccess)
         }
-        let fileAfterMove = destinationFolder.makeSubfile(name: fileToCopy.name)
-        fileManager.createFolder(at: fileAfterMove) { contentResult in
+        let folderInDestinationWithSameName = destinationFolder.makeSubfile(name: fileToCopy.name)
+        fileManager.createFolder(at: folderInDestinationWithSameName) { contentResult in
             XCTAssertTrue(contentResult.isSuccess)
         }
-        let fileInDestination = fileAfterMove.makeSubfile(name: fileToCopy.name)
-        fileManager.createFolder(at: fileInDestination) { contentResult in
+        let fileInConflictedFolder = folderInDestinationWithSameName.makeSubfile(name: fileToCopy.name)
+        fileManager.createFolder(at: fileInConflictedFolder) { contentResult in
             XCTAssertTrue(contentResult.isSuccess)
         }
-        fileManager.copyFile(fileToCopy: fileToCopy, destination: fileAfterMove, conflictResolver: conflictResolver) { result in
+        fileManager.copy(files: [fileToCopy], destination: destinationFolder, conflictResolver: conflictResolver, isForOneFile: true) { result in
             switch result {
             case .success:
                 XCTAssertTrue(SystemFileManger.default.fileExists(atPath: fileToCopy.path.path))
-                XCTAssertFalse(SystemFileManger.default.fileExists(atPath: fileInDestination.path.path))
+                XCTAssertFalse(SystemFileManger.default.fileExists(atPath: fileInConflictedFolder.path.path))
             case .failure:
                 XCTFail()
             }
@@ -315,19 +302,14 @@ final class LocalFileManagerTests: XCTestCase {
         fileManager.createFolder(at: destinationFolder) { contentResult in
             XCTAssertTrue(contentResult.isSuccess)
         }
-        let fileAfterMove = destinationFolder.makeSubfile(name: fileToCopy.name)
-        fileManager.createFolder(at: fileAfterMove) { contentResult in
+        let folderInDestinationWithSameName = destinationFolder.makeSubfile(name: fileToCopy.name)
+        fileManager.createFolder(at: folderInDestinationWithSameName) { contentResult in
             XCTAssertTrue(contentResult.isSuccess)
         }
-        fileManager.copyFile(fileToCopy: fileToCopy, destination: fileAfterMove, conflictResolver: conflictResolver) { result in
-            XCTAssertTrue(result.isSuccess)
-        }
-
-        fileManager.copyFile(fileToCopy: fileToCopy, destination: fileAfterMove, conflictResolver: conflictResolver) { result in
+        fileManager.copy(files: [fileToCopy], destination: destinationFolder, conflictResolver: conflictResolver, isForOneFile: true) { result in
             switch result {
             case .success:
-                break
-                //            XCTAssertTrue(fileAfterMove.name.contains("Copy"))
+                SystemFileManger.default.fileExists(atPath: folderInDestinationWithSameName.path.path + " (1)")
             case .failure:
                 XCTFail()
             }
@@ -339,14 +321,12 @@ final class LocalFileManagerTests: XCTestCase {
         fileManager.createFolder(at: fileToRename) { contentResult in
             XCTAssertTrue(contentResult.isSuccess)
         }
-        var renamedFile = fileToRename
         let newName = UUID().uuidString
-        renamedFile.rename(name: newName)
-        fileManager.moveFile(fileToCopy: fileToRename, destination: renamedFile, conflictResolver: conflictResolver) { renameFileResult in
+        fileManager.rename(file: fileToRename, newName: newName) { renameFileResult in
             switch renameFileResult {
             case .success:
                 XCTAssertFalse(SystemFileManger.default.fileExists(atPath: fileToRename.path.path))
-                XCTAssertTrue(SystemFileManger.default.fileExists(atPath: renamedFile.path.path))
+                XCTAssertTrue(SystemFileManger.default.fileExists(atPath: fileToRename.rename(name: newName).path.path))
             case .failure:
                 XCTFail()
             }
@@ -355,21 +335,18 @@ final class LocalFileManagerTests: XCTestCase {
 
     func testRenameNonExistingFile() {
         let fileToRename = fileManager.rootFolder.makeStubFile()
-        var renamedFile = fileToRename
         let newName = UUID().uuidString
-        renamedFile.rename(name: newName)
-        fileManager.moveFile(fileToCopy: fileToRename, destination: renamedFile, conflictResolver: conflictResolver) { renameFileResult in
+        fileManager.rename(file: fileToRename, newName: newName) { renameFileResult in
             switch renameFileResult {
             case .success:
                 XCTFail()
             case .failure:
-                XCTAssertFalse(SystemFileManger.default.fileExists(atPath: renamedFile.path.path))
+                XCTAssertFalse(SystemFileManger.default.fileExists(atPath: fileToRename.rename(name: newName).path.path))
             }
         }
     }
 
     func testRenameFileWithExistingName() {
-        conflictResolver.mockResult = .cancel
         let file = fileManager.rootFolder.makeStubFile()
         fileManager.createFolder(at: file) { contentResult in
             XCTAssertTrue(contentResult.isSuccess)
@@ -378,15 +355,12 @@ final class LocalFileManagerTests: XCTestCase {
         fileManager.createFolder(at: fileToRename) { contentResult in
             XCTAssertTrue(contentResult.isSuccess)
         }
-        var renamedFile = fileToRename
-        renamedFile.rename(name: file.name)
-        fileManager.moveFile(fileToCopy: file, destination: fileToRename, conflictResolver: conflictResolver) { renameFileResult in
+        fileManager.rename(file: file, newName: fileToRename.name) { renameFileResult in
             switch renameFileResult {
             case .success:
-                // not correct mockResult
-                break
+                XCTFail()
             case .failure:
-                XCTAssertFalse(SystemFileManger.default.fileExists(atPath: renamedFile.path.path))
+                break
             }
         }
     }
@@ -396,10 +370,12 @@ final class LocalFileManagerTests: XCTestCase {
         fileManager.createFolder(at: fileToTrash) { contentResult in
             XCTAssertTrue(contentResult.isSuccess)
         }
-        fileManager.moveToTrash(fileToTrash: fileToTrash) { moveToTrashResult in
+        let fileInTrash = fileManager.trashFolder.makeSubfile(name: fileToTrash.name)
+        fileManager.moveToTrash(filesToTrash: [fileToTrash]) { moveToTrashResult in
             switch moveToTrashResult {
             case .success:
                 XCTAssertFalse(SystemFileManger.default.fileExists(atPath: fileToTrash.path.path))
+                XCTAssertTrue(SystemFileManger.default.fileExists(atPath: fileInTrash.path.path))
             case .failure:
                 XCTFail()
             }
@@ -412,16 +388,25 @@ final class LocalFileManagerTests: XCTestCase {
             XCTAssertTrue(contentResult.isSuccess)
         }
         let trashedFile = fileManager.trashFolder.makeSubfile(name: fileToTrash.name)
-        fileManager.moveToTrash(fileToTrash: fileToTrash) { contentResult in
+        fileManager.createFolder(at: trashedFile) { contentResult in
             XCTAssertTrue(contentResult.isSuccess)
         }
-        fileManager.createFolder(at: fileToTrash) { contentResult in
-            XCTAssertTrue(contentResult.isSuccess)
-        }
-        fileManager.moveToTrash(fileToTrash: fileToTrash) { moveToTrashResult in
+        fileManager.moveToTrash(filesToTrash: [fileToTrash]) { moveToTrashResult in
             switch moveToTrashResult {
-            case .success(let fileInTrash):
-                XCTAssertTrue(fileInTrash.name.contains(fileToTrash.name))
+            case .success:
+                fileManager.contents(of: fileManager.trashFolder) { result in
+                        switch result {
+                        case .success(let files):
+                            for file in files {
+                                if file.name.contains(fileToTrash.name) {
+                                    return
+                                }
+                            }
+                            XCTFail()
+                        case .failure:
+                            XCTFail()
+                        }
+                }
                 XCTAssertTrue(SystemFileManger.default.fileExists(atPath: trashedFile.path.path))
                 XCTAssertFalse(SystemFileManger.default.fileExists(atPath: fileToTrash.path.path))
             case .failure:
@@ -432,7 +417,7 @@ final class LocalFileManagerTests: XCTestCase {
 
     func testMoveToTrashNonExisting() {
         let fileToTrash = fileManager.rootFolder.makeStubFile()
-        fileManager.moveToTrash(fileToTrash: fileToTrash) { result in
+        fileManager.moveToTrash(filesToTrash: [fileToTrash]) { result in
             XCTAssertTrue(result.isFailure)
         }
     }
@@ -442,7 +427,7 @@ final class LocalFileManagerTests: XCTestCase {
         fileManager.createFolder(at: file, completion: { createFolderResult in
             XCTAssertTrue(createFolderResult.isSuccess)
         })
-        fileManager.deleteFile(file: file) { deleteResult in
+        fileManager.deleteFile(files: [file]) { deleteResult in
             switch deleteResult {
             case .success:
                 XCTAssertFalse(SystemFileManger.default.fileExists(atPath: file.path.path))
@@ -454,7 +439,7 @@ final class LocalFileManagerTests: XCTestCase {
     
     func testDeleteNonExisting() {
         let file = fileManager.rootFolder.makeStubFile()
-        fileManager.deleteFile(file: file) { result in
+        fileManager.deleteFile(files: [file]) { result in
             XCTAssertTrue(result.isFailure)
         }
     }

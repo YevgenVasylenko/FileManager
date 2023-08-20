@@ -15,6 +15,12 @@
 		5D0B9CA92A446D080099021C /* LocalFileManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D0B9CA82A446D080099021C /* LocalFileManager.swift */; };
 		5D1B5B0D2A8A2234004C7AA8 /* DropboxFolderMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D1B5B0C2A8A2234004C7AA8 /* DropboxFolderMonitor.swift */; };
 		5D1B5B132A8E7B56004C7AA8 /* LocalTemporaryFolderConnector.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D1B5B122A8E7B56004C7AA8 /* LocalTemporaryFolderConnector.swift */; };
+		5D1B5B152A90E08B004C7AA8 /* FileAction.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DEDB9052A5ACAC2003CC86B /* FileAction.swift */; };
+		5D1B5B172A90E106004C7AA8 /* FolderMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D627D8A2A79875000170451 /* FolderMonitor.swift */; };
+		5D1B5B192A90E126004C7AA8 /* LocalTemporaryFolderConnector.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D1B5B122A8E7B56004C7AA8 /* LocalTemporaryFolderConnector.swift */; };
+		5D1B5B1E2A910598004C7AA8 /* FileDisplayedName.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D1B5B1D2A910598004C7AA8 /* FileDisplayedName.swift */; };
+		5D1B5B212A91F8ED004C7AA8 /* LocalizedError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D221D5B2A5DA1170072AA35 /* LocalizedError.swift */; };
+		5D1B5B232A920016004C7AA8 /* LocalFolderMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D954CC72A58559800A221DB /* LocalFolderMonitor.swift */; };
 		5D221D592A5D416A0072AA35 /* View+Utilities.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D221D582A5D416A0072AA35 /* View+Utilities.swift */; };
 		5D221D5C2A5DA1170072AA35 /* LocalizedError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D221D5B2A5DA1170072AA35 /* LocalizedError.swift */; };
 		5D221D5E2A5EDB720072AA35 /* File.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D0B9CA62A4466BD0099021C /* File.swift */; };
@@ -68,6 +74,7 @@
 		5D0B9CA82A446D080099021C /* LocalFileManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalFileManager.swift; sourceTree = "<group>"; };
 		5D1B5B0C2A8A2234004C7AA8 /* DropboxFolderMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DropboxFolderMonitor.swift; sourceTree = "<group>"; };
 		5D1B5B122A8E7B56004C7AA8 /* LocalTemporaryFolderConnector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalTemporaryFolderConnector.swift; sourceTree = "<group>"; };
+		5D1B5B1D2A910598004C7AA8 /* FileDisplayedName.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileDisplayedName.swift; sourceTree = "<group>"; };
 		5D221D582A5D416A0072AA35 /* View+Utilities.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "View+Utilities.swift"; sourceTree = "<group>"; };
 		5D221D5B2A5DA1170072AA35 /* LocalizedError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalizedError.swift; sourceTree = "<group>"; };
 		5D2499732A4D7CFD003D66F3 /* FIleManagerRootPath.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FIleManagerRootPath.swift; sourceTree = "<group>"; };
@@ -134,6 +141,7 @@
 				5D0B9CA42A4466460099021C /* FileView.swift */,
 				5D954CD42A597FF800A221DB /* File+UI.swift */,
 				5D221D582A5D416A0072AA35 /* View+Utilities.swift */,
+				5D1B5B1D2A910598004C7AA8 /* FileDisplayedName.swift */,
 			);
 			path = UI;
 			sourceTree = "<group>";
@@ -392,13 +400,18 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				5D1B5B212A91F8ED004C7AA8 /* LocalizedError.swift in Sources */,
 				5D616B672A4AE58300E1360A /* FileManagerTests.swift in Sources */,
 				5D78B1B62A4ECEDF00A76D0F /* ConflictResolver.swift in Sources */,
+				5D1B5B232A920016004C7AA8 /* LocalFolderMonitor.swift in Sources */,
 				5D78B1B32A4ECDD000A76D0F /* Result+Utilities.swift in Sources */,
 				5D616B702A4AE64800E1360A /* LocalFileManager.swift in Sources */,
 				5D2499762A4D7DA8003D66F3 /* FIleManagerRootPath.swift in Sources */,
 				5D221D5E2A5EDB720072AA35 /* File.swift in Sources */,
+				5D1B5B172A90E106004C7AA8 /* FolderMonitor.swift in Sources */,
 				5D616B6F2A4AE5B000E1360A /* LocalFileManagerTests.swift in Sources */,
+				5D1B5B152A90E08B004C7AA8 /* FileAction.swift in Sources */,
+				5D1B5B192A90E126004C7AA8 /* LocalTemporaryFolderConnector.swift in Sources */,
 				5D32C0152A54687900578958 /* FileManager.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -433,6 +446,7 @@
 				5DACCB4C2A445689000A0CA9 /* FileManagerApp.swift in Sources */,
 				5D78B1B12A4ECDAA00A76D0F /* Result+Utilities.swift in Sources */,
 				5D0B9CA32A4464530099021C /* FolderView.swift in Sources */,
+				5D1B5B1E2A910598004C7AA8 /* FileDisplayedName.swift in Sources */,
 				5DEDB90E2A5AEDD2003CC86B /* EnvironmenttUtils.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

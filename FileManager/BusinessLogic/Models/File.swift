@@ -121,23 +121,7 @@ struct File {
         }
         return .folder
     }
-    
-    func displayedName() -> String {
-        if self.name == "/" {
-            return R.string.localizable.dropbox.callAsFunction()
-        }
-        if self.name == "root" {
-            return R.string.localizable.root.callAsFunction()
-        }
-        switch self.folderAffiliation {
-        case .user:
-            return self.name
-        case .system(.trash):
-            return R.string.localizable.trash.callAsFunction()
-        case .system(.download):
-            return R.string.localizable.downloads.callAsFunction()
-        }
-    }
+ 
 }
 
 extension File: Hashable {

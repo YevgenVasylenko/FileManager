@@ -153,11 +153,7 @@ extension LocalFileManager: FileManager {
                 try SystemFileManger.default.moveItem(at: file.path, to: trashedFilePath)
             } catch {
                 completion(.failure(Error(error: error)))
-            }
-            do {
-                try SystemFileManger.default.setAttributes([.groupOwnerAccountName : trashedFilePath.path], ofItemAtPath: trashedFilePath.path)
-            } catch {
-                completion(.failure(Error(error: error)))
+                return
             }
         }
         completion(.success(()))
@@ -355,7 +351,7 @@ private extension LocalFileManager {
         var destinationPath = destination
         var numberOfCopy = 1
         repeat {
-            let newName = destination.name + R.string.localizable.copyInName.callAsFunction() + "\(numberOfCopy)"
+            let newName = destination.name + " (\(numberOfCopy))"
             destinationPath = destinationPath.rename(name: newName)
             numberOfCopy += 1
         } while SystemFileManger.default.fileExists(atPath: destinationPath.path.path)
