@@ -19,12 +19,6 @@ struct File {
         case system(systemFolderName)
     }
     
-    enum ObjectType {
-        case folder
-        case image
-        case text
-    }
-    
     enum StorageType: Equatable {
         static func == (lhs: File.StorageType, rhs: File.StorageType) -> Bool {
             switch (lhs, rhs) {
@@ -114,15 +108,7 @@ struct File {
         let newName = name + Date.now.formatted(date: .omitted, time: .standard)
         path = self.rename(name: newName).path
     }
-    
-    func typeDefine() -> ObjectType {
-        if self.name.contains(".png") {
-            return .image
-        }
-        return .folder
-    }
- 
-}
+ }
 
 extension File: Hashable {
     

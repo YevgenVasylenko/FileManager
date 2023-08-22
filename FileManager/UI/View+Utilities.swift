@@ -19,6 +19,15 @@ extension View {
             Text(error.recoverySuggestion ?? "")
         }
     }
+    
+    func unreadableFileAlert(isShowing: Binding<Bool>) -> some View {
+        return alert("Not readable file", isPresented: isShowing) {
+            
+        } message: {
+            Text("Not Readable")
+        }
+
+    }
 }
 
 extension Error {

@@ -34,6 +34,9 @@
 		5D627D8E2A7C31CE00170451 /* DropboxLoginManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D627D8D2A7C31CE00170451 /* DropboxLoginManager.swift */; };
 		5D627D912A7E73CA00170451 /* FileManagerFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D627D902A7E73CA00170451 /* FileManagerFactory.swift */; };
 		5D627D942A7F871C00170451 /* FileManagerCommutator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D627D932A7F871C00170451 /* FileManagerCommutator.swift */; };
+		5D69E0062A9349C20036AE44 /* BridgingWebView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D69E0052A9349C20036AE44 /* BridgingWebView.swift */; };
+		5D69E0092A934A050036AE44 /* WebContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D69E0082A934A050036AE44 /* WebContentView.swift */; };
+		5D69E00D2A9392B20036AE44 /* FIle+Utilities.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D69E00C2A9392B20036AE44 /* FIle+Utilities.swift */; };
 		5D78B1B12A4ECDAA00A76D0F /* Result+Utilities.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D78B1B02A4ECDAA00A76D0F /* Result+Utilities.swift */; };
 		5D78B1B32A4ECDD000A76D0F /* Result+Utilities.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D78B1B02A4ECDAA00A76D0F /* Result+Utilities.swift */; };
 		5D78B1B52A4ECEDC00A76D0F /* ConflictResolver.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D78B1B42A4ECEDC00A76D0F /* ConflictResolver.swift */; };
@@ -85,6 +88,9 @@
 		5D627D8D2A7C31CE00170451 /* DropboxLoginManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DropboxLoginManager.swift; sourceTree = "<group>"; };
 		5D627D902A7E73CA00170451 /* FileManagerFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileManagerFactory.swift; sourceTree = "<group>"; };
 		5D627D932A7F871C00170451 /* FileManagerCommutator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileManagerCommutator.swift; sourceTree = "<group>"; };
+		5D69E0052A9349C20036AE44 /* BridgingWebView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BridgingWebView.swift; sourceTree = "<group>"; };
+		5D69E0082A934A050036AE44 /* WebContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebContentView.swift; sourceTree = "<group>"; };
+		5D69E00C2A9392B20036AE44 /* FIle+Utilities.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "FIle+Utilities.swift"; sourceTree = "<group>"; };
 		5D78B1B02A4ECDAA00A76D0F /* Result+Utilities.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Result+Utilities.swift"; sourceTree = "<group>"; };
 		5D78B1B42A4ECEDC00A76D0F /* ConflictResolver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConflictResolver.swift; sourceTree = "<group>"; };
 		5D954CAB2A56D45A00A221DB /* FolderViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FolderViewModel.swift; sourceTree = "<group>"; };
@@ -135,6 +141,15 @@
 			path = FileManagerTests;
 			sourceTree = "<group>";
 		};
+		5D69E0042A93497B0036AE44 /* Web */ = {
+			isa = PBXGroup;
+			children = (
+				5D69E0052A9349C20036AE44 /* BridgingWebView.swift */,
+				5D69E0082A934A050036AE44 /* WebContentView.swift */,
+			);
+			path = Web;
+			sourceTree = "<group>";
+		};
 		5D954CC42A58548300A221DB /* UI */ = {
 			isa = PBXGroup;
 			children = (
@@ -174,6 +189,7 @@
 		5D954CD92A5AC78B00A221DB /* Modules */ = {
 			isa = PBXGroup;
 			children = (
+				5D69E0042A93497B0036AE44 /* Web */,
 				5D954CDB2A5AC7AA00A221DB /* Root */,
 				5D954CDC2A5AC7B400A221DB /* Folder */,
 				5D954CDD2A5AC7BC00A221DB /* ContextMenu */,
@@ -274,6 +290,7 @@
 			isa = PBXGroup;
 			children = (
 				5D78B1B02A4ECDAA00A76D0F /* Result+Utilities.swift */,
+				5D69E00C2A9392B20036AE44 /* FIle+Utilities.swift */,
 			);
 			path = Utilities;
 			sourceTree = "<group>";
@@ -420,6 +437,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				5D69E0062A9349C20036AE44 /* BridgingWebView.swift in Sources */,
 				5D627D942A7F871C00170451 /* FileManagerCommutator.swift in Sources */,
 				5D954CB82A58062300A221DB /* FileOptionsButtonView.swift in Sources */,
 				5D221D592A5D416A0072AA35 /* View+Utilities.swift in Sources */,
@@ -437,9 +455,11 @@
 				5D221D5C2A5DA1170072AA35 /* LocalizedError.swift in Sources */,
 				5DD776162A544B5600F9B55D /* FileManager.swift in Sources */,
 				5D0B9CA52A4466460099021C /* FileView.swift in Sources */,
+				5D69E00D2A9392B20036AE44 /* FIle+Utilities.swift in Sources */,
 				5D78B1B52A4ECEDC00A76D0F /* ConflictResolver.swift in Sources */,
 				5D1B5B0D2A8A2234004C7AA8 /* DropboxFolderMonitor.swift in Sources */,
 				5D627D912A7E73CA00170451 /* FileManagerFactory.swift in Sources */,
+				5D69E0092A934A050036AE44 /* WebContentView.swift in Sources */,
 				5D1B5B132A8E7B56004C7AA8 /* LocalTemporaryFolderConnector.swift in Sources */,
 				5D627D8B2A79875100170451 /* FolderMonitor.swift in Sources */,
 				5DACCB4E2A445689000A0CA9 /* RootView.swift in Sources */,

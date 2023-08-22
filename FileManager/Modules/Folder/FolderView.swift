@@ -97,7 +97,17 @@ private extension FolderView {
     
     func viewToShow(file: File) -> some View {
         Group {
-            FolderView(file: file, fileSelectDelegate: fileSelectDelegate)
+            if file.isFolder() {
+                FolderView(file: file, fileSelectDelegate: fileSelectDelegate)
+//            } else if file.typeDefine() == .unknown {
+//                unreadableFileAlert(isShowing: .constant(true))
+            } else {
+                viewModel.getLinkForPreview(file: file)
+                if let link = viewModel.state.linkForFilePreview {
+                    WebContentView(path: link)
+                        .unreadableFileAlert(isShowing: .constant(file.typeDefine() == .unknown))
+                }
+            }
         }
     }
     

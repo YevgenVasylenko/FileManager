@@ -49,6 +49,7 @@ class FolderViewModel: ObservableObject {
         var fileRenameInProgress = false
         var chosenFiles: Set<File>?
         var folderCreating: String?
+        var linkForFilePreview: URL?
     }
     
     private let file: File
@@ -214,6 +215,20 @@ class FolderViewModel: ObservableObject {
     func deleteOne(file: File) {
         state.file = file
         delete()
+    }
+    
+    func getLinkForPreview(file: File) {
+        let fileManager = FileManagerFactory.makeFileManager(file: file)
+        fileManager.copyToLocalTemporary(files: [file], conflictResolver: self) { result in
+            switch result {
+            case .success(let urls):
+                if let tempURL = urls.first {
+                    self.state.linkForFilePreview = tempURL
+                }
+            case .failure(let failure):
+                self.state.error = failure
+            }
+        }
     }
     
     func isFilesDisabledInFolder(isFolderDestinationChose: FileSelectDelegate?, file: File) -> Bool {
