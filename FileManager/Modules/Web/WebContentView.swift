@@ -8,19 +8,25 @@
 import SwiftUI
 
 struct WebContentView: View {
-
-    @State private var isPresentWebView = true
-    let path: URL
+    
+    @ObservedObject var viewModel: WebContentViewModel
+    
+    init(file: File) {
+        self.viewModel = WebContentViewModel(file: file)
+    }
     
     var body: some View {
-
-        NavigationStack {
-            
-            WebView(url: path)
-            
-                .ignoresSafeArea()
-                .navigationTitle("file.displayedName()")
-                .navigationBarTitleDisplayMode(.inline)
+        Group {
+            if let path = viewModel.state.linkForFilePreview {
+                WebView(url: path)
+                    .navigationTitle(viewModel.state.file.displayedName())
+                    .navigationBarTitleDisplayMode(.inline)
+            } else {
+                ProgressView()
+            }
+        }
+        .onAppear {
+            viewModel.getLinkForPreview()
         }
     }
 }

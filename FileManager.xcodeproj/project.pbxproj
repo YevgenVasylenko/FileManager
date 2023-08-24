@@ -56,6 +56,7 @@
 		5DD776162A544B5600F9B55D /* FileManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DD776152A544B5600F9B55D /* FileManager.swift */; };
 		5DEDB9062A5ACAC2003CC86B /* FileAction.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DEDB9052A5ACAC2003CC86B /* FileAction.swift */; };
 		5DEDB90E2A5AEDD2003CC86B /* EnvironmenttUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DEDB90D2A5AEDD2003CC86B /* EnvironmenttUtils.swift */; };
+		5DF5DBA42A9610B500F91A46 /* WebContentViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DF5DBA32A9610B500F91A46 /* WebContentViewModel.swift */; };
 		5DF870D32A77ADAA00F9E5D5 /* DropboxFIleManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DF870D22A77ADAA00F9E5D5 /* DropboxFIleManager.swift */; };
 /* End PBXBuildFile section */
 
@@ -108,6 +109,7 @@
 		5DD776152A544B5600F9B55D /* FileManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileManager.swift; sourceTree = "<group>"; };
 		5DEDB9052A5ACAC2003CC86B /* FileAction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileAction.swift; sourceTree = "<group>"; };
 		5DEDB90D2A5AEDD2003CC86B /* EnvironmenttUtils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EnvironmenttUtils.swift; sourceTree = "<group>"; };
+		5DF5DBA32A9610B500F91A46 /* WebContentViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebContentViewModel.swift; sourceTree = "<group>"; };
 		5DF870CF2A76E06900F9E5D5 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		5DF870D22A77ADAA00F9E5D5 /* DropboxFIleManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DropboxFIleManager.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -146,6 +148,7 @@
 			children = (
 				5D69E0052A9349C20036AE44 /* BridgingWebView.swift */,
 				5D69E0082A934A050036AE44 /* WebContentView.swift */,
+				5DF5DBA32A9610B500F91A46 /* WebContentViewModel.swift */,
 			);
 			path = Web;
 			sourceTree = "<group>";
@@ -462,6 +465,7 @@
 				5D69E0092A934A050036AE44 /* WebContentView.swift in Sources */,
 				5D1B5B132A8E7B56004C7AA8 /* LocalTemporaryFolderConnector.swift in Sources */,
 				5D627D8B2A79875100170451 /* FolderMonitor.swift in Sources */,
+				5DF5DBA42A9610B500F91A46 /* WebContentViewModel.swift in Sources */,
 				5DACCB4E2A445689000A0CA9 /* RootView.swift in Sources */,
 				5DACCB4C2A445689000A0CA9 /* FileManagerApp.swift in Sources */,
 				5D78B1B12A4ECDAA00A76D0F /* Result+Utilities.swift in Sources */,

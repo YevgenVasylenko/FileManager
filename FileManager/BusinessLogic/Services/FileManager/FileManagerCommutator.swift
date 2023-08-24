@@ -62,7 +62,7 @@ extension FileManagerCommutator: FileManager {
                 completion: completion)
             return
         }
-        fileManager.copyToLocalTemporary(files: files, conflictResolver: conflictResolver) { result in
+        fileManager.copyToLocalTemporary(files: files) { result in
             switch result {
             case .success(let sentFileURLs):
                 var downloadedFiles: [File] = []

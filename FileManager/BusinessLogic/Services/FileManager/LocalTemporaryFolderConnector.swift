@@ -11,7 +11,6 @@ protocol LocalTemporaryFolderConnector {
     
     func copyToLocalTemporary(
         files: [File],
-        conflictResolver: NameConflictResolver,
         completion: @escaping (Result<[URL], Error>) -> Void
     )
     

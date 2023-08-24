@@ -48,7 +48,6 @@ struct FolderView: View {
                                 } label: {
                                     FileView(file: file)
                                 }
-                                Spacer()
                                 if fileSelectDelegate == nil {
                                     fileActionsMenuView(file: file)
                                 }
@@ -99,14 +98,9 @@ private extension FolderView {
         Group {
             if file.isFolder() {
                 FolderView(file: file, fileSelectDelegate: fileSelectDelegate)
-//            } else if file.typeDefine() == .unknown {
-//                unreadableFileAlert(isShowing: .constant(true))
             } else {
-                viewModel.getLinkForPreview(file: file)
-                if let link = viewModel.state.linkForFilePreview {
-                    WebContentView(path: link)
-                        .unreadableFileAlert(isShowing: .constant(file.typeDefine() == .unknown))
-                }
+                WebContentView(file: file)
+                    .unreadableFileAlert(isShowing: .constant(file.typeDefine() == .unknown))
             }
         }
     }

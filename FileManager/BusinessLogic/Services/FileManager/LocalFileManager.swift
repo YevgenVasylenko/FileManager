@@ -213,14 +213,17 @@ extension LocalFileManager: FileManager {
 
 extension LocalFileManager: LocalTemporaryFolderConnector {
     
-    func copyToLocalTemporary(files: [File], conflictResolver: NameConflictResolver, completion: @escaping (Result<[URL], Error>) -> Void) {
+    func copyToLocalTemporary(files: [File], completion: @escaping (Result<[URL], Error>) -> Void) {
+//        confirm changes with conflictResolve
+        var conflictResolve = NameConflictResolverMock()
+        conflictResolve.mockResult = .replace
         let group = DispatchGroup()
         var destinationFileURLs: [URL] = []
         for file in files {
             group.enter()
             let temporaryStorage = File(path: SystemFileManger.default.temporaryDirectory, storageType: .local(LocalStorageData()))
             let destinationPath = temporaryStorage.makeSubfile(name: file.name).path
-            copy(file: file, destination: temporaryStorage, conflictResolver: conflictResolver) { result in
+            copy(file: file, destination: temporaryStorage, conflictResolver: conflictResolve) { result in
                 switch result {
                 case .success:
                     defer { group.leave() }

@@ -48,6 +48,7 @@ extension DropboxFileManager: FileManager {
                         path: URL(fileURLWithPath: fileInResult.pathDisplay!),
                         storageType: .dropbox(DropboxStorageData())
                     )
+                    self.correctFolderPath(file: &fileInFolder)
                     fileInFolder.actions = FileAction.regularFolder
                     files.append(fileInFolder)
                 }
@@ -227,7 +228,6 @@ extension DropboxFileManager: LocalTemporaryFolderConnector {
     
     func copyToLocalTemporary(
         files: [File],
-        conflictResolver: NameConflictResolver,
         completion: @escaping (Result<[URL], Error>) -> Void
     ) {
         guard let client = DropboxClientsManager.authorizedClient else {
@@ -243,7 +243,7 @@ extension DropboxFileManager: LocalTemporaryFolderConnector {
             let destination: (URL, HTTPURLResponse) -> URL = { temporaryURL, response in
                 return SystemFileManger.default.temporaryDirectory.appending(component: file.name)
             }
-            client.files.download(path: copyFilePath, destination: destination).response { response, error in
+            client.files.download(path: copyFilePath, overwrite: true, destination: destination).response { response, error in
                 defer { group.leave() }
                 if let error = error {
                     lastError = Error(dropboxError: error)
@@ -302,6 +302,12 @@ extension DropboxFileManager: LocalTemporaryFolderConnector {
 // MARK: - Private
 
 private extension DropboxFileManager {
+    
+    func correctFolderPath(file: inout File) {
+        if file.path.pathExtension == "" {
+            file.path = file.path.appendingPathExtension(for: .folder)
+        }
+    }
     
     func copyOne(
         file: File,
@@ -416,6 +422,7 @@ private extension DropboxFileManager {
                             path: URL(fileURLWithPath: deletedMetadata.pathDisplay!),
                             storageType: .dropbox(DropboxStorageData())
                         )
+                        self.correctFolderPath(file: &fileInFolder)
                         fileInFolder.actions = [FileAction.restoreFromTrash]
                         fileInFolder.isDeleted = true
                         files.append(fileInFolder)
@@ -431,6 +438,7 @@ private extension DropboxFileManager {
     func addTrashFolderToRoot(file: File, files: inout [File]) {
         if file == self.rootFolder {
             trashFolder.folderAffiliation = .system(.trash)
+            self.correctFolderPath(file: &trashFolder)
             files.append(self.trashFolder)
         }
     }

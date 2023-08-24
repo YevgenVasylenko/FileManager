@@ -85,7 +85,7 @@ struct File {
     }
     
     var name: String {
-        path.lastPathComponent
+        path.deletingPathExtension().lastPathComponent
     }
 
     var fileType: ObjectType {
@@ -93,7 +93,11 @@ struct File {
     }
     
     func makeSubfile(name: String, isDirectory: Bool = false) -> File {
-        return File(path: self.path.appendingPathComponent(name, isDirectory: isDirectory), storageType: storageType)
+        let fileExtension = self.path.pathExtension
+        return File(
+            path: self.path.appendingPathComponent(name, isDirectory: isDirectory).appendingPathExtension(fileExtension),
+            storageType: storageType
+        )
     }
     
     func isFolder() -> Bool {
@@ -101,7 +105,11 @@ struct File {
     }
     
     func rename(name: String) -> File {
-        return File(path: self.path.deletingLastPathComponent().appendingPathComponent(name), storageType: storageType)
+        let fileExtension = self.path.pathExtension
+        return File(
+            path: self.path.deletingLastPathComponent().appendingPathComponent(name).appendingPathExtension(fileExtension),
+            storageType: storageType
+        )
     }
     
     mutating func addTimeToName() {
