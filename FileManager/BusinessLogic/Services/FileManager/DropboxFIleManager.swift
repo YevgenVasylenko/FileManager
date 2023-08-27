@@ -74,12 +74,13 @@ extension DropboxFileManager: FileManager {
         newFolderName: String,
         completion: @escaping (Result<File, Error>) -> Void
     ) {
-        let destinationFile: File
+        var destinationFile: File
         if file == rootFolder {
             destinationFile = File(path: URL(fileURLWithPath: "/\(newFolderName)"), storageType: .dropbox(DropboxStorageData()))
         } else {
-            destinationFile = file.makeSubfile(name: newFolderName)
+            destinationFile = file.makeSubfile(name: newFolderName, isDirectory: true)
         }
+        self.correctFolderPath(file: &destinationFile)
         contents(of: file) { result in
             switch result {
             case .success(let files):
@@ -89,6 +90,7 @@ extension DropboxFileManager: FileManager {
                     let suffixToName = numberOfFolder == 0 ? "" : " \(numberOfFolder)"
                     let newName = destinationFile.name + suffixToName
                     fileForChanges = fileForChanges.rename(name: newName)
+                    self.correctFolderPath(file: &fileForChanges)
                     numberOfFolder += 1
                 } while files.contains(fileForChanges)
                 completion(.success(fileForChanges))
@@ -240,8 +242,21 @@ extension DropboxFileManager: LocalTemporaryFolderConnector {
         for file in files {
             group.enter()
             let copyFilePath = dropboxPath(file: file)
+            let destinationFile = File(
+                path: SystemFileManger.default.temporaryDirectory
+                    .appendingPathComponent(UUID().uuidString, isDirectory: true),
+                storageType: .local(LocalStorageData())
+            )
+            FileManagerCommutator().createFolder(at: destinationFile) { result in
+                switch result {
+                case .success:
+                    break
+                case .failure(let failure):
+                    completion(.failure(failure))
+                }
+            }
             let destination: (URL, HTTPURLResponse) -> URL = { temporaryURL, response in
-                return SystemFileManger.default.temporaryDirectory.appending(component: file.name)
+                return destinationFile.makeSubfile(name: file.name).path
             }
             client.files.download(path: copyFilePath, overwrite: true, destination: destination).response { response, error in
                 defer { group.leave() }
@@ -297,6 +312,19 @@ extension DropboxFileManager: LocalTemporaryFolderConnector {
                 completion(.success(.finished))
             })
     }
+    
+    func getLocalFileURL(file: File, completion: @escaping (Result<URL, Error>) -> Void) {
+        copyToLocalTemporary(files: [file]) { result in
+            switch result {
+            case .success(let urls):
+                if let tempURL = urls.first {
+                    completion(.success(tempURL))
+                }
+            case .failure(let error):
+                completion(.failure(error))
+            }
+        }
+    }
 }
 
 // MARK: - Private
@@ -304,6 +332,7 @@ extension DropboxFileManager: LocalTemporaryFolderConnector {
 private extension DropboxFileManager {
     
     func correctFolderPath(file: inout File) {
+//    TO DO make extension for file
         if file.path.pathExtension == "" {
             file.path = file.path.appendingPathExtension(for: .folder)
         }

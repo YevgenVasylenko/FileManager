@@ -41,3 +41,5 @@
 "folderCreating" = "Tap name for new folder";
 "createFolder" = "Create";
 
+"unreadableFile" = "File type is not supported";
+

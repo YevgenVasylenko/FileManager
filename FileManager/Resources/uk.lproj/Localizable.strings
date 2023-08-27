@@ -40,3 +40,5 @@
 "newFolder" = "Нова папка";
 "folderCreating" = "Введіть ім'я для нової папки";
 "createFolder" = "Створити";
+
+"unreadableFile" = "Тип файлу не підтримується";

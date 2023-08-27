@@ -104,7 +104,6 @@ extension FileManagerCommutator: FileManager {
                 isForOneFile: isForOneFile,
                 completion: completion
             )
-            return
         }
     }
 
@@ -149,5 +148,10 @@ extension FileManagerCommutator: FileManager {
     func makeFolderMonitor(file: File) -> FolderMonitor? {
         let fileManager = FileManagerFactory.makeFileManager(file: file)
         return fileManager.makeFolderMonitor(file: file)
+    }
+    
+    func getLocalFileURL(file: File, completion: @escaping (Result<URL, Error>) -> Void) {
+        let fileManager = FileManagerFactory.makeFileManager(file: file)
+        fileManager.getLocalFileURL(file: file, completion: completion)
     }
 }

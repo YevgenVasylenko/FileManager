@@ -1,5 +1,5 @@
 //
-//  WebContentView.swift
+//  FileContentView.swift
 //  FileManager
 //
 //  Created by Yevgen Vasylenko on 21.08.2023.
@@ -7,27 +7,37 @@
 
 import SwiftUI
 
-struct WebContentView: View {
+struct FileContentView: View {
     
-    @ObservedObject var viewModel: WebContentViewModel
+    @ObservedObject
+    private var viewModel: FileContentViewModel
+    
+    @Environment(\.presentationMode)
+    private var presentation
     
     init(file: File) {
-        self.viewModel = WebContentViewModel(file: file)
+        self.viewModel = FileContentViewModel(file: file)
     }
     
     var body: some View {
-        Group {
-            if let path = viewModel.state.linkForFilePreview {
+        ZStack {
+            if let path = viewModel.state.localFileURL {
                 WebView(url: path)
                     .navigationTitle(viewModel.state.file.displayedName())
                     .navigationBarTitleDisplayMode(.inline)
-            } else {
+            }
+            if viewModel.state.isLoading {
                 ProgressView()
             }
         }
         .onAppear {
-            viewModel.getLinkForPreview()
+            viewModel.getLocalFileURL()
         }
+        .errorAlert(error: $viewModel.state.error)
+        .unreadableFileAlert(
+            isShowing: .constant(viewModel.state.file.typeDefine() == .unknown),
+            presentation: presentation
+        )
     }
 }
 //

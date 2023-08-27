@@ -9,9 +9,11 @@ import SwiftUI
 
 struct FolderView: View {
     
-    @ObservedObject private var viewModel: FolderViewModel
+    @ObservedObject
+    private var viewModel: FolderViewModel
     
-    @State private var newName: String = ""
+    @State
+    private var newName: String = ""
     
     private let fileSelectDelegate: FileSelectDelegate?
     private let columns = [
@@ -35,7 +37,7 @@ struct FolderView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                if viewModel.state.loading == true {
+                if viewModel.state.isLoading == true {
                     ProgressView()
                 }
                 ScrollView {
@@ -99,8 +101,7 @@ private extension FolderView {
             if file.isFolder() {
                 FolderView(file: file, fileSelectDelegate: fileSelectDelegate)
             } else {
-                WebContentView(file: file)
-                    .unreadableFileAlert(isShowing: .constant(file.typeDefine() == .unknown))
+                FileContentView(file: file)                    
             }
         }
     }
@@ -311,7 +312,7 @@ private extension View {
     
     func renamePopover(viewModel: FolderViewModel, newName: Binding<String>) -> some View {
         return alert(R.string.localizable.renamePopupTitle.callAsFunction() + (viewModel.state.file?.name ?? ""),
-                     isPresented: .constant(viewModel.state.fileRenameInProgress),
+                     isPresented: .constant(viewModel.state.isFileRenameInProgress),
                      actions: {
             TextField(R.string.localizable.new_name.callAsFunction(), text: newName)
                 .padding()
@@ -324,7 +325,7 @@ private extension View {
                 }
                 Spacer()
                 Button(R.string.localizable.cancel.callAsFunction()) {
-                    viewModel.state.fileRenameInProgress = false
+                    viewModel.state.isFileRenameInProgress = false
                     newName.wrappedValue = ""
                 }
             }

@@ -1,5 +1,5 @@
 //
-//  BridgingWebView.swift
+//  WebView.swift
 //  FileManager
 //
 //  Created by Yevgen Vasylenko on 21.08.2023.

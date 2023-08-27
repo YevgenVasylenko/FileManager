@@ -21,4 +21,6 @@ protocol LocalTemporaryFolderConnector {
         isForOneFile: Bool,
         completion: @escaping (Result<OperationResult, Error>) -> Void
     )
+    
+    func getLocalFileURL(file: File, completion: @escaping (Result<URL, Error>) -> Void)
 }

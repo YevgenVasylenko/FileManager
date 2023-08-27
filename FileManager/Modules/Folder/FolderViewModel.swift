@@ -41,12 +41,12 @@ class FolderViewModel: ObservableObject {
     struct State {
         var folder: File
         var files: [File] = []
-        var loading = true
+        var isLoading = true
         var error: Error?
         var nameConflict: NameConflict?
         var fileActionType: FileActionType?
         var file: File?
-        var fileRenameInProgress = false
+        var isFileRenameInProgress = false
         var chosenFiles: Set<File>?
         var folderCreating: String?
     }
@@ -102,7 +102,7 @@ class FolderViewModel: ObservableObject {
     
     func load() {
         folderMonitor?.startMonitoring()
-        state.loading = true
+        state.isLoading = true
         fileManagerCommutator.contents(of: file) { result in
             switch result {
             case .success(let files):
@@ -110,7 +110,7 @@ class FolderViewModel: ObservableObject {
             case .failure(let failure):
                 self.state.error = failure
             }
-            self.state.loading = false
+            self.state.isLoading = false
         }
     }
     
@@ -131,7 +131,7 @@ class FolderViewModel: ObservableObject {
     func createFolder(newName: String) {
         state.folderCreating = nil
         let createdFile = file.makeSubfile(name: newName, isDirectory: true)
-        state.loading = true
+        state.isLoading = true
         fileManagerCommutator.createFolder(at: createdFile) { result in
             switch result {
             case .success:
@@ -139,7 +139,7 @@ class FolderViewModel: ObservableObject {
             case .failure(let failure):
                 self.state.error = failure
             }
-            self.state.loading = false
+            self.state.isLoading = false
         }
     }
     
@@ -163,11 +163,11 @@ class FolderViewModel: ObservableObject {
     
     func startRename(file: File) {
         state.file = file
-        self.state.fileRenameInProgress = true
+        self.state.isFileRenameInProgress = true
     }
     
     func rename(newName: String) {
-        state.fileRenameInProgress = false
+        state.isFileRenameInProgress = false
         fileManagerCommutator.rename(file: state.file!, newName: newName) { result in
             switch result {
             case .success:
@@ -228,7 +228,7 @@ class FolderViewModel: ObservableObject {
     }
     
     func isFilesInCurrentFolder(files: [File]) -> Bool? {
-        if state.loading {
+        if state.isLoading {
             return nil
         } else {
             return state.files.contains(files)

@@ -208,20 +208,23 @@ extension LocalFileManager: FileManager {
         return LocalFolderMonitor(url: file.path)
     }
     
- 
 }
 
 extension LocalFileManager: LocalTemporaryFolderConnector {
     
     func copyToLocalTemporary(files: [File], completion: @escaping (Result<[URL], Error>) -> Void) {
-//        confirm changes with conflictResolve
-        var conflictResolve = NameConflictResolverMock()
-        conflictResolve.mockResult = .replace
+        var conflictResolve = NameConflictResolverError()
         let group = DispatchGroup()
         var destinationFileURLs: [URL] = []
         for file in files {
             group.enter()
-            let temporaryStorage = File(path: SystemFileManger.default.temporaryDirectory, storageType: .local(LocalStorageData()))
+            let temporaryStorage = File(
+                path: SystemFileManger.default.temporaryDirectory.appendingPathComponent(
+                    UUID().uuidString, isDirectory: true),
+                storageType: .local(LocalStorageData())
+            )
+            createFolder(at: temporaryStorage) { _ in
+            }
             let destinationPath = temporaryStorage.makeSubfile(name: file.name).path
             copy(file: file, destination: temporaryStorage, conflictResolver: conflictResolve) { result in
                 switch result {
@@ -253,6 +256,10 @@ extension LocalFileManager: LocalTemporaryFolderConnector {
             isForOneFile: isForOneFile
         ) { result in
         }
+    }
+    
+    func getLocalFileURL(file: File, completion: @escaping (Result<URL, Error>) -> Void) {
+        completion(.success(file.path))
     }
 }
 
@@ -351,16 +358,16 @@ private extension LocalFileManager {
     }
 
     func copyFileWithNewName(file: File, destination: File) -> Result<Void, Error> {
-        var destinationPath = destination
+        var finalFile = destination
         var numberOfCopy = 1
         repeat {
-            let newName = destination.name + " (\(numberOfCopy))"
-            destinationPath = destinationPath.rename(name: newName)
+            let newName = destination.nameWithoutExtension + " (\(numberOfCopy))"
+            finalFile = finalFile.rename(name: newName)
             numberOfCopy += 1
-        } while SystemFileManger.default.fileExists(atPath: destinationPath.path.path)
+        } while SystemFileManger.default.fileExists(atPath: finalFile.path.path)
         
         do {
-            try SystemFileManger.default.copyItem(at: file.path, to: destinationPath.path)
+            try SystemFileManger.default.copyItem(at: file.path, to: finalFile.path)
             return .success(())
         } catch {
             return .failure(Error(error: error))
@@ -398,8 +405,17 @@ private extension LocalFileManager {
                 case .failure(let error):
                     completion(.failure(Error(error: error)))
                 }
+            case .error:
+                completion(.failure(Error(error: Error.unknown)))
             }
         }
     }
 }
 
+struct NameConflictResolverError: NameConflictResolver {
+    var mockResult: ConflictNameResult = .error
+
+    func resolve(conflictedFile: File, placeOfConflict: File, completion: @escaping (ConflictNameResult) -> Void) {
+        completion(mockResult)
+    }
+}

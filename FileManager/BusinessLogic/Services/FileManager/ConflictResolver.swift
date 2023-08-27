@@ -11,6 +11,7 @@ enum ConflictNameResult {
     case cancel
     case replace
     case newName
+    case error
 }
 
 protocol NameConflictResolver {

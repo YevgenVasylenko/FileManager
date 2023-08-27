@@ -20,13 +20,12 @@ extension View {
         }
     }
     
-    func unreadableFileAlert(isShowing: Binding<Bool>) -> some View {
-        return alert("Not readable file", isPresented: isShowing) {
-            
-        } message: {
-            Text("Not Readable")
+    func unreadableFileAlert(isShowing: Binding<Bool>, presentation: Binding<PresentationMode>) -> some View {
+        return alert(R.string.localizable.unreadableFile.callAsFunction(), isPresented: isShowing) {
+            Button(R.string.localizable.ok.callAsFunction()) {
+                presentation.wrappedValue.dismiss()
+            }
         }
-
     }
 }
 

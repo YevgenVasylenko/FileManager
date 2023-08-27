@@ -85,6 +85,10 @@ struct File {
     }
     
     var name: String {
+        path.lastPathComponent
+    }
+    
+    var nameWithoutExtension: String {
         path.deletingPathExtension().lastPathComponent
     }
 
@@ -93,9 +97,8 @@ struct File {
     }
     
     func makeSubfile(name: String, isDirectory: Bool = false) -> File {
-        let fileExtension = self.path.pathExtension
         return File(
-            path: self.path.appendingPathComponent(name, isDirectory: isDirectory).appendingPathExtension(fileExtension),
+            path: self.path.appendingPathComponent(name, isDirectory: isDirectory),
             storageType: storageType
         )
     }
@@ -107,7 +110,10 @@ struct File {
     func rename(name: String) -> File {
         let fileExtension = self.path.pathExtension
         return File(
-            path: self.path.deletingLastPathComponent().appendingPathComponent(name).appendingPathExtension(fileExtension),
+            path: self.path
+                .deletingLastPathComponent()
+                .appendingPathComponent(name)
+                .appendingPathExtension(fileExtension),
             storageType: storageType
         )
     }
@@ -134,3 +140,5 @@ struct LocalStorageData {
 
 struct DropboxStorageData {
 }
+
+
