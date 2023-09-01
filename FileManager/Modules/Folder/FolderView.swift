@@ -48,7 +48,7 @@ struct FolderView: View {
                                 NavigationLink {
                                     viewToShow(file: file)
                                 } label: {
-                                    FileView(file: file)
+                                    FileView(file: file, infoPresented: fileInfoPopoverBinding(for: file))
                                 }
                                 if fileSelectDelegate == nil {
                                     fileActionsMenuView(file: file)
@@ -60,7 +60,6 @@ struct FolderView: View {
                             .overlay(alignment: Alignment(horizontal: .leading, vertical: .top)) {
                                 filesChooseToggle(file: file)
                             }
-                            
                         }
                     }
                 }
@@ -95,7 +94,7 @@ struct FolderView: View {
 }
 
 private extension FolderView {
-    
+
     func viewToShow(file: File) -> some View {
         Group {
             if file.isFolder() {
@@ -222,6 +221,8 @@ private extension FolderView {
                 viewModel.deleteOne(file: file)
             case .clean:
                 viewModel.clear()
+            case .info:
+                viewModel.state.fileInfoPopover = file
             }
         }
     }
@@ -270,6 +271,16 @@ private extension FolderView {
                 }
             })
     }
+    
+    func fileInfoPopoverBinding(for file: File) -> Binding<Bool> {
+        return Binding(
+            get: {
+                viewModel.state.fileInfoPopover == file
+            },
+            set: { isPresented in
+                viewModel.state.fileInfoPopover = isPresented ? file : nil
+            })
+    }
 }
 
 private extension View {
@@ -278,9 +289,9 @@ private extension View {
         let nameConflict = viewModule.state.nameConflict
         return alert(
             R.string.localizable.conflictAlertTitlePart1.callAsFunction() +
-            (viewModule.state.nameConflict?.placeOfConflict?.displayedName() ?? "") +
+            (nameConflict?.placeOfConflict?.displayedName() ?? "") +
             R.string.localizable.conflictAlertTitlePart2.callAsFunction() +
-            (viewModule.state.nameConflict?.conflictedFile?.name ?? ""),
+            (nameConflict?.conflictedFile?.name ?? ""),
             isPresented: .constant(nameConflict != nil)
         ) {
             HStack {
@@ -359,6 +370,8 @@ private extension View {
             .padding()
         })
     }
+    
+    
 }
 
 struct FolderView_Previews: PreviewProvider {

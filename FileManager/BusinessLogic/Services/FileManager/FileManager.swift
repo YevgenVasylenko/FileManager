@@ -50,6 +50,8 @@ protocol FileManager {
     func deleteFile(files: [File], completion: @escaping (Result<Void, Error>) -> Void)
     
     func makeFolderMonitor(file: File) -> FolderMonitor?
+    
+    func getFileAttributes(file: File, completion: @escaping (Result<FileAttributes, Error>) -> Void)
 }
 
 

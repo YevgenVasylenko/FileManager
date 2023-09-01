@@ -224,6 +224,53 @@ extension DropboxFileManager: FileManager {
     func makeFolderMonitor(file: File) -> FolderMonitor? {
         return DropboxFolderMonitor(url: file.path)
     }
+    
+    func getFileAttributes(file: File, completion: @escaping (Result<FileAttributes, Error>) -> Void) {
+        guard let client = DropboxClientsManager.authorizedClient else {
+            completion(.failure(.unknown))
+            return
+        }
+        var newFile = file
+        correctFolderPath(file: &newFile)
+        client.files.getMetadata(path: newFile.path.path).response { response, error in
+            if let error = error {
+                completion(.failure(Error(dropboxError: error)))
+                return
+            }
+            if let result = response {
+                switch result {
+                case let fileMetadata as Files.FileMetadata:
+                    self.getSizeOfFile(file: file) { result in
+                        switch result {
+                        case .success(let sizeOfFile):
+                            completion(.success(FileAttributes(
+                                size: sizeOfFile,
+                                createdDate: fileMetadata.serverModified,
+                                modifiedDate: fileMetadata.clientModified
+                            )))
+                        case .failure(let error):
+                            completion(.failure(Error(error: error)))
+                        }
+                    }
+                case _ as Files.FolderMetadata:
+                    self.getSizeOfFolder(file: file) { result in
+                        switch result {
+                        case .success(let sizeOfFolder):
+                            completion(.success(FileAttributes(
+                                size: sizeOfFolder,
+                                createdDate: nil,
+                                modifiedDate: nil
+                            )))
+                        case .failure(let error):
+                            completion(.failure(Error(error: error)))
+                        }
+                    }
+                default:
+                    break
+                }
+            }
+        }
+    }
 }
 
 extension DropboxFileManager: LocalTemporaryFolderConnector {
@@ -469,6 +516,58 @@ private extension DropboxFileManager {
             trashFolder.folderAffiliation = .system(.trash)
             self.correctFolderPath(file: &trashFolder)
             files.append(self.trashFolder)
+        }
+    }
+    
+    func getSizeOfFile(file: File, completion: @escaping (Result<Double, Error>) -> Void) {
+        guard let client = DropboxClientsManager.authorizedClient else {
+            completion(.failure(.unknown))
+            return
+        }
+        let path = dropboxPath(file: file)
+        
+        client.files.getMetadata(path: path).response { response, error in
+            if let error = error {
+                completion(.failure(Error(dropboxError: error)))
+                return
+            }
+            if let result = response {
+                switch result {
+                case let fileMetadata as Files.FileMetadata:
+                    completion(.success(Double(fileMetadata.size)))
+                default:
+                    break
+                }
+            }
+        }
+    }
+    
+    func getSizeOfFolder(file: File, completion: @escaping (Result<Double, Error>) -> Void) {
+        guard let client = DropboxClientsManager.authorizedClient else {
+            completion(.failure(.unknown))
+            return
+        }
+        let path = dropboxPath(file: file)
+        var newFile = file
+        correctFolderPath(file: &newFile)
+        
+        client.files.listFolder(path: path, recursive: true).response { response, error in
+            if let error = error {
+                completion(.failure(Error(dropboxError: error)))
+                return
+            }
+            if let result = response {
+                var size = 0.0
+                for fileInResult in result.entries {
+                    switch fileInResult {
+                    case let metaDataSize as Files.FileMetadata:
+                        size += Double(metaDataSize.size)
+                    default:
+                        continue
+                    }
+                }
+                completion(.success(size))
+            }
         }
     }
 }

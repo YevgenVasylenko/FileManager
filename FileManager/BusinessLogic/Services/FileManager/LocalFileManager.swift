@@ -208,12 +208,38 @@ extension LocalFileManager: FileManager {
         return LocalFolderMonitor(url: file.path)
     }
     
+    func getFileAttributes(file: File, completion: @escaping (Result<FileAttributes, Error>) -> Void) {
+        do {
+            let attributes = try SystemFileManger.default.attributesOfItem(atPath: file.path.path)
+            let creationDate = attributes[.creationDate] as? Date ?? Date()
+            let modifiedDate = attributes[.modificationDate] as? Date ?? Date()
+            var size = Double()
+            if file.isFolder() {
+                if let enumerator = SystemFileManger.default.enumerator(at: file.path, includingPropertiesForKeys: [.fileSizeKey]) {
+                    for case let filePath as URL in enumerator {
+                            do {
+                                let fileAttributes = try filePath.resourceValues(forKeys: [.fileSizeKey])
+                                size += Double(fileAttributes.fileSize ?? Int())
+                            } catch {
+                                completion(.failure(Error(error: error)))
+                                return
+                            }
+                        }
+                    }
+            } else {
+                size = attributes[.size] as? Double ?? Double()
+            }
+            completion(.success(FileAttributes(size: size, createdDate: creationDate, modifiedDate: modifiedDate)))
+        } catch {
+            completion(.failure(Error(error: error)))
+        }
+    }
 }
 
 extension LocalFileManager: LocalTemporaryFolderConnector {
     
     func copyToLocalTemporary(files: [File], completion: @escaping (Result<[URL], Error>) -> Void) {
-        var conflictResolve = NameConflictResolverError()
+        let conflictResolve = NameConflictResolverError()
         let group = DispatchGroup()
         var destinationFileURLs: [URL] = []
         for file in files {

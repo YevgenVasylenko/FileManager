@@ -154,4 +154,9 @@ extension FileManagerCommutator: FileManager {
         let fileManager = FileManagerFactory.makeFileManager(file: file)
         fileManager.getLocalFileURL(file: file, completion: completion)
     }
+    
+    func getFileAttributes(file: File, completion: @escaping (Result<FileAttributes, Error>) -> Void) {
+        let fileManager = FileManagerFactory.makeFileManager(file: file)
+        fileManager.getFileAttributes(file: file, completion: completion)
+    }
 }

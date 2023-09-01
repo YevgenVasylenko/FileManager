@@ -38,6 +38,8 @@ struct FileOptionsButtonView: View {
                                 deleteButton()
                             case .clean:
                                 cleanButton()
+                            case .info:
+                                infoButton()
                             }
 
                         }
@@ -109,6 +111,14 @@ private extension FileOptionsButtonView {
             Label(R.string.localizable.clean.callAsFunction(), systemImage: "paintbrush.pointed")
         }
     }
+    
+    func infoButton() -> some View {
+        Button {
+            delegate(.info)
+        } label: {
+            Label(R.string.localizable.info.callAsFunction(), systemImage: "info.circle")
+        }
+    }
 }
 
 struct FileOptionsButtonView_Previews: PreviewProvider {
@@ -128,6 +138,8 @@ struct FileOptionsButtonView_Previews: PreviewProvider {
             case .delete:
                 break
             case .clean:
+                break
+            case .info:
                 break
             }
         }

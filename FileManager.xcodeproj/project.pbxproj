@@ -26,6 +26,8 @@
 		5D221D5E2A5EDB720072AA35 /* File.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D0B9CA62A4466BD0099021C /* File.swift */; };
 		5D2499742A4D7CFD003D66F3 /* FIleManagerRootPath.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D2499732A4D7CFD003D66F3 /* FIleManagerRootPath.swift */; };
 		5D2499762A4D7DA8003D66F3 /* FIleManagerRootPath.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D2499732A4D7CFD003D66F3 /* FIleManagerRootPath.swift */; };
+		5D30A12E2A9CCD5D0052AA95 /* FileInfoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D30A12D2A9CCD5D0052AA95 /* FileInfoView.swift */; };
+		5D30A1312A9CCD750052AA95 /* FileInfoViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D30A1302A9CCD750052AA95 /* FileInfoViewModel.swift */; };
 		5D32C0152A54687900578958 /* FileManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DD776152A544B5600F9B55D /* FileManager.swift */; };
 		5D616B672A4AE58300E1360A /* FileManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D616B662A4AE58300E1360A /* FileManagerTests.swift */; };
 		5D616B6F2A4AE5B000E1360A /* LocalFileManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D616B6E2A4AE5B000E1360A /* LocalFileManagerTests.swift */; };
@@ -82,6 +84,8 @@
 		5D221D582A5D416A0072AA35 /* View+Utilities.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "View+Utilities.swift"; sourceTree = "<group>"; };
 		5D221D5B2A5DA1170072AA35 /* LocalizedError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalizedError.swift; sourceTree = "<group>"; };
 		5D2499732A4D7CFD003D66F3 /* FIleManagerRootPath.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FIleManagerRootPath.swift; sourceTree = "<group>"; };
+		5D30A12D2A9CCD5D0052AA95 /* FileInfoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileInfoView.swift; sourceTree = "<group>"; };
+		5D30A1302A9CCD750052AA95 /* FileInfoViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileInfoViewModel.swift; sourceTree = "<group>"; };
 		5D616B642A4AE58300E1360A /* FileManagerTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = FileManagerTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		5D616B662A4AE58300E1360A /* FileManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileManagerTests.swift; sourceTree = "<group>"; };
 		5D616B6E2A4AE5B000E1360A /* LocalFileManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalFileManagerTests.swift; sourceTree = "<group>"; };
@@ -134,6 +138,15 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		5D30A12C2A9CCD2F0052AA95 /* FileInfo */ = {
+			isa = PBXGroup;
+			children = (
+				5D30A12D2A9CCD5D0052AA95 /* FileInfoView.swift */,
+				5D30A1302A9CCD750052AA95 /* FileInfoViewModel.swift */,
+			);
+			path = FileInfo;
+			sourceTree = "<group>";
+		};
 		5D616B652A4AE58300E1360A /* FileManagerTests */ = {
 			isa = PBXGroup;
 			children = (
@@ -196,6 +209,7 @@
 				5D954CDB2A5AC7AA00A221DB /* Root */,
 				5D954CDC2A5AC7B400A221DB /* Folder */,
 				5D954CDD2A5AC7BC00A221DB /* ContextMenu */,
+				5D30A12C2A9CCD2F0052AA95 /* FileInfo */,
 				5D04653C2A71071900BE768E /* FileActionType.swift */,
 			);
 			path = Modules;
@@ -462,12 +476,14 @@
 				5D78B1B52A4ECEDC00A76D0F /* ConflictResolver.swift in Sources */,
 				5D1B5B0D2A8A2234004C7AA8 /* DropboxFolderMonitor.swift in Sources */,
 				5D627D912A7E73CA00170451 /* FileManagerFactory.swift in Sources */,
+				5D30A1312A9CCD750052AA95 /* FileInfoViewModel.swift in Sources */,
 				5D69E0092A934A050036AE44 /* FileContentView.swift in Sources */,
 				5D1B5B132A8E7B56004C7AA8 /* LocalTemporaryFolderConnector.swift in Sources */,
 				5D627D8B2A79875100170451 /* FolderMonitor.swift in Sources */,
 				5DF5DBA42A9610B500F91A46 /* FileContentViewModel.swift in Sources */,
 				5DACCB4E2A445689000A0CA9 /* RootView.swift in Sources */,
 				5DACCB4C2A445689000A0CA9 /* FileManagerApp.swift in Sources */,
+				5D30A12E2A9CCD5D0052AA95 /* FileInfoView.swift in Sources */,
 				5D78B1B12A4ECDAA00A76D0F /* Result+Utilities.swift in Sources */,
 				5D0B9CA32A4464530099021C /* FolderView.swift in Sources */,
 				5D1B5B1E2A910598004C7AA8 /* FileDisplayedName.swift in Sources */,

@@ -135,6 +135,12 @@ extension File: Hashable {
     }
 }
 
+extension File: Identifiable {
+    var id: URL {
+        self.path
+    }
+}
+
 struct LocalStorageData {
 }
 

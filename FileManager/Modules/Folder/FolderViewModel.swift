@@ -49,6 +49,7 @@ class FolderViewModel: ObservableObject {
         var isFileRenameInProgress = false
         var chosenFiles: Set<File>?
         var folderCreating: String?
+        var fileInfoPopover: File?
     }
     
     private let file: File
@@ -215,7 +216,7 @@ class FolderViewModel: ObservableObject {
         state.file = file
         delete()
     }
-    
+
     func isFilesDisabledInFolder(isFolderDestinationChose: FileSelectDelegate?, file: File) -> Bool {
         guard let isFolderDestinationChose = isFolderDestinationChose else {
             return state.chosenFiles != nil

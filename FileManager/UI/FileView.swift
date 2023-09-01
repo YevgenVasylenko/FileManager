@@ -9,10 +9,13 @@ import SwiftUI
 
 struct FileView: View {
     
-    var file: File
+    private let file: File
     
-    init(file: File) {
+    private let infoPresented: Binding<Bool>
+    
+    init(file: File, infoPresented: Binding<Bool>) {
         self.file = file
+        self.infoPresented = infoPresented
     }
     
     var body: some View {
@@ -21,7 +24,11 @@ struct FileView: View {
             nameOfFile(fileName: file.displayedName())
         }
         .frame(width: 80)
+        .popover(isPresented: infoPresented) {
+            FileInfoView(file: file)
+        }
     }
+    
 }
 
 // MARK: - Private
@@ -40,10 +47,12 @@ private extension FileView {
     }
 }
 
-struct FileView_Previews: PreviewProvider {
-    static var previews: some View {
-        FileView(file: PreviewFiles.downloadsFolder)
-    }
-}
+
+//
+//struct FileView_Previews: PreviewProvider {
+//    static var previews: some View {
+//        FileView(file: PreviewFiles.downloadsFolder)
+//    }
+//}
 
 

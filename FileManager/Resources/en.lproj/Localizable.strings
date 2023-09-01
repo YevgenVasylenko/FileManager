@@ -6,6 +6,7 @@
 "move_to_trash" = "Move to trash";
 "restore" = "Restore";
 "clean" = "Clean";
+"info" = "Info";
 
 "root" = "Root";
 "trash" = "Trash";
@@ -43,3 +44,12 @@
 
 "unreadableFile" = "File type is not supported";
 
+"information" = "Information";
+"type" = "Type";
+"size" = "Size";
+"b" = "B";
+"kb" = "KB";
+"mb" = "MB";
+"gb" = "GB";
+"created" = "Created";
+"modified" = "Modified";
