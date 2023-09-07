@@ -45,11 +45,13 @@
 "unreadableFile" = "File type is not supported";
 
 "information" = "Information";
+"name" = "Name";
 "type" = "Type";
+"date" = "Date";
 "size" = "Size";
-"b" = "B";
-"kb" = "KB";
-"mb" = "MB";
-"gb" = "GB";
+"b" = " B";
+"kb" = " KB";
+"mb" = " MB";
+"gb" = " GB";
 "created" = "Created";
 "modified" = "Modified";

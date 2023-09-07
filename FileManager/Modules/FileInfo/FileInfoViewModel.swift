@@ -7,20 +7,13 @@
 
 import Foundation
 
-
-struct FileAttributes {
-    let size: Double
-    let createdDate: Date?
-    let modifiedDate: Date?
-}
-
 class FileInfoViewModel: ObservableObject {
     
     struct State {
-        let file: File
+        var file: File
         var error: Error?
         var isLoading = true
-        var fileAttributes: FileAttributes?
+//        var fileAttributes: FileAttributes?
     }
     
     private var fileManagerCommutator = FileManagerCommutator()
@@ -37,7 +30,7 @@ class FileInfoViewModel: ObservableObject {
         fileManagerCommutator.getFileAttributes(file: file) { result in
             switch result {
             case .success(let attributes):
-                self.state.fileAttributes = attributes
+                self.state.file.attributes = attributes
             case .failure(let failure):
                 self.state.error = failure
             }

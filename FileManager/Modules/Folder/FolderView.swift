@@ -55,7 +55,8 @@ struct FolderView: View {
                                 }
                             }
                             .disabled(viewModel.isFilesDisabledInFolder(
-                                isFolderDestinationChose: fileSelectDelegate, file: file)
+                                isFolderDestinationChose: fileSelectDelegate, file: file) ||
+                                      viewModel.state.fileInfoPopover != nil
                             )
                             .overlay(alignment: Alignment(horizontal: .leading, vertical: .top)) {
                                 filesChooseToggle(file: file)
@@ -180,9 +181,8 @@ private extension FolderView {
         chooseAction: @escaping () -> Void
     ) -> some View {
         HStack {
-            Button {
-            } label: {
-                Image(systemName: "square.grid.3x3.square")
+            FolderShowOptionsView(sortedOption: viewModel.state.sorted) { sortOption in
+                viewModel.sort(sortOption: sortOption)
             }
             
             if fileSelectDelegate?.type == nil {

@@ -36,8 +36,34 @@ struct FileSelectDelegate {
     let selected: (File?) -> Void
 }
 
-class FolderViewModel: ObservableObject {
+struct SortOption: Hashable {
+    enum Attribute: CaseIterable, Hashable {
+        case name
+        case type
+        case date
+        case size
+    }
+
+    enum Direction: Hashable {
+        case ascending
+        case descending
+        
+        func toggled() -> Self {
+            switch self {
+            case .ascending: return .descending
+            case .descending: return .ascending
+            }
+        }
+    }
+
+    let attribute: Attribute
+    var direction: Direction?
     
+    
+}
+
+class FolderViewModel: ObservableObject {
+
     struct State {
         var folder: File
         var files: [File] = []
@@ -50,6 +76,7 @@ class FolderViewModel: ObservableObject {
         var chosenFiles: Set<File>?
         var folderCreating: String?
         var fileInfoPopover: File?
+        var sorted: SortOption?
     }
     
     private let file: File
@@ -113,6 +140,7 @@ class FolderViewModel: ObservableObject {
             }
             self.state.isLoading = false
         }
+        makeAtributesForFiles()
     }
     
     func startCreatingFolder() {
@@ -235,6 +263,38 @@ class FolderViewModel: ObservableObject {
             return state.files.contains(files)
         }
     }
+    
+    func sort(sortOption: SortOption) {
+        self.state.sorted = sortOption
+        switch sortOption.attribute {
+        case .name:
+            switch sortOption.direction! {
+            case .ascending:
+                state.files.sort {
+                    $0.name < $1.name
+                }
+            case .descending:
+                state.files.sort {
+                    $0.name > $1.name
+                }
+            }
+        case .type:
+            break
+        case .date:
+            break
+        case .size:
+            switch sortOption.direction! {
+            case .ascending:
+                state.files.sort {
+                    $0.attributes?.size ?? 0.0 > $1.attributes?.size ?? 0.0
+                }
+            case .descending:
+                state.files.sort {
+                    $0.attributes?.size ?? 0.0 < $1.attributes?.size ?? 0.0
+                }
+            }
+        }
+    }
 }
 
 private extension FolderViewModel {
@@ -310,6 +370,19 @@ private extension FolderViewModel {
                 break
             case .failure(let failure):
                 self.state.error = failure
+            }
+        }
+    }
+    
+    func makeAtributesForFiles() {
+        for i in state.files.indices {
+            fileManagerCommutator.getFileAttributes(file: state.files[i]) { result in
+                switch result {
+                case .success(let attributes):
+                    self.state.files[i].attributes = attributes
+                case .failure(let failure):
+                    self.state.error = failure
+                }
             }
         }
     }

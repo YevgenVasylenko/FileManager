@@ -72,12 +72,13 @@ struct File {
             }
         }
     }
-    
+
     var folderAffiliation: FolderAffiliation = .user
     var actions: [FileAction] = []
     let storageType: StorageType
     var path: URL
     var isDeleted = false
+    var attributes: FileAttributes?
 
     init(path: URL, storageType: StorageType) {
         self.path = path
@@ -147,4 +148,8 @@ struct LocalStorageData {
 struct DropboxStorageData {
 }
 
-
+struct FileAttributes {
+    let size: Double
+    let createdDate: Date?
+    let modifiedDate: Date?
+}

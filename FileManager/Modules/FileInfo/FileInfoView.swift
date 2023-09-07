@@ -44,7 +44,7 @@ private extension FileInfoView {
         HStack {
             Text(R.string.localizable.size.callAsFunction())
             Spacer()
-            Text(viewModel.state.fileAttributes?.size.description ?? "")
+            Text(bytesCalculator(size:viewModel.state.file.attributes?.size))
         }
     }
     
@@ -52,7 +52,7 @@ private extension FileInfoView {
         HStack {
             Text(R.string.localizable.created.callAsFunction())
             Spacer()
-            Text(viewModel.state.fileAttributes?.createdDate?.formatted() ?? "-")
+            Text(viewModel.state.file.attributes?.createdDate?.formatted() ?? "-")
         }
     }
     
@@ -60,7 +60,7 @@ private extension FileInfoView {
         HStack {
             Text(R.string.localizable.modified.callAsFunction())
             Spacer()
-            Text(viewModel.state.fileAttributes?.modifiedDate?.formatted() ?? "-")
+            Text(viewModel.state.file.attributes?.modifiedDate?.formatted() ?? "-")
         }
     }
     
@@ -71,15 +71,24 @@ private extension FileInfoView {
             return number.description + R.string.localizable.b.callAsFunction()
         } else if number / 1000000 < 1 {
             newNumber = number / 1000
-            return Int(newNumber).description + R.string.localizable.kb.callAsFunction()
+            return keepThreeDigits(number: newNumber).description + R.string.localizable.kb.callAsFunction()
         } else if number / 1000000000 < 1 {
             newNumber = number / 1000000
-            return Int(newNumber).description + R.string.localizable.mb.callAsFunction()
-        } else if number / 1000000000000 < 1 {
-            newNumber = number / 10000000000
-            return newNumber.description + R.string.localizable.gb.callAsFunction()
+            return keepThreeDigits(number: newNumber).description + R.string.localizable.mb.callAsFunction()
         } else {
-            return ""
+            newNumber = number / 10000000000
+            return keepThreeDigits(number: newNumber).description + R.string.localizable.gb.callAsFunction()
+        }
+    }
+    
+    func keepThreeDigits(number: Double) -> Double {
+        let countOfWholeNumbers = Int(number).description.count
+        if countOfWholeNumbers == 3 {
+            return Double(Int(number))
+        } else if countOfWholeNumbers == 2 {
+            return Double(round(10 * number) / 10)
+        } else {
+            return Double(round(100 * number) / 100)
         }
     }
 }
