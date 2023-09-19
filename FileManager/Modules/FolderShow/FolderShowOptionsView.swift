@@ -18,7 +18,6 @@ struct FolderShowOptionsView: View {
         self.sortOptions = SortOption.Attribute.allCases.map { attribute in
             SortOption(attribute: attribute)
         }
-        
         updateSortOptions(sortOptions: &sortOptions)
     }
     
@@ -40,10 +39,7 @@ private extension FolderShowOptionsView {
         Button {
             selectedOption(makeSelectedOption(sortOption: sortOption))
         } label: {
-            Label(
-                buttonName(sortOptionAttribute: sortOption.attribute),
-                systemImage: arrowImage(sortOptionDirection: sortOption.direction)
-            )
+            labelForButton(sortOption: sortOption)
         }
     }
     
@@ -76,13 +72,23 @@ private extension FolderShowOptionsView {
         }
     }
     
-    func arrowImage(sortOptionDirection: SortOption.Direction?) -> String {
-        guard let direction = sortOptionDirection else { return "" }
-        switch direction {
+    func arrowImage(sortOptionDirection: SortOption.Direction) -> String {
+        switch sortOptionDirection {
         case .ascending:
             return "arrow.up"
         case .descending:
             return "arrow.down"
+        }
+    }
+    
+    func labelForButton(sortOption: SortOption) -> some View {
+        Group {
+            if let direction = sortOption.direction {
+                 Label(buttonName(sortOptionAttribute: sortOption.attribute),
+                             systemImage: arrowImage(sortOptionDirection: direction))
+            } else {
+                 Text(buttonName(sortOptionAttribute: sortOption.attribute))
+            }
         }
     }
 }

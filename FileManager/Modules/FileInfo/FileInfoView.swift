@@ -18,8 +18,10 @@ struct FileInfoView: View {
     
     var body: some View {
         VStack {
-            FileView(file: viewModel.state.file, infoPresented: .constant(false))
+            FileView(file: viewModel.state.file, isSelfForInfo: true, infoPresented: .constant(false))
+            Spacer()
             Text(R.string.localizable.info.callAsFunction())
+            Spacer()
             VStack {
                 typeOfFile()
                 sizeOfFile()
@@ -36,7 +38,9 @@ private extension FileInfoView {
         HStack {
             Text(R.string.localizable.type.callAsFunction())
             Spacer()
-            Text(viewModel.state.file.path.pathExtension)
+            Text(viewModel.state.file.path.pathExtension.isEmpty ?
+                 R.string.localizable.folder.callAsFunction() :
+                    viewModel.state.file.path.pathExtension)
         }
     }
     

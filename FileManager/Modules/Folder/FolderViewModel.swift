@@ -58,8 +58,6 @@ struct SortOption: Hashable {
 
     let attribute: Attribute
     var direction: Direction?
-    
-    
 }
 
 class FolderViewModel: ObservableObject {
@@ -279,9 +277,27 @@ class FolderViewModel: ObservableObject {
                 }
             }
         case .type:
-            break
+            switch sortOption.direction! {
+            case .ascending:
+                state.files.sort {
+                    $0.path.pathExtension < $1.path.pathExtension
+                }
+            case .descending:
+                state.files.sort {
+                    $0.path.pathExtension > $1.path.pathExtension
+                }
+            }
         case .date:
-            break
+            switch sortOption.direction! {
+            case .ascending:
+                state.files.sort {
+                    $0.attributes?.createdDate ?? Date() > $1.attributes?.createdDate ?? Date()
+                }
+            case .descending:
+                state.files.sort {
+                    $0.attributes?.createdDate ?? Date() < $1.attributes?.createdDate ?? Date()
+                }
+            }
         case .size:
             switch sortOption.direction! {
             case .ascending:

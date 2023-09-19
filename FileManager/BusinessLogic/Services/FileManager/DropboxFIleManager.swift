@@ -230,6 +230,9 @@ extension DropboxFileManager: FileManager {
             completion(.failure(.unknown))
             return
         }
+        if file.folderAffiliation == .system(.trash) {
+            return
+        }
         var newFile = file
         correctFolderPath(file: &newFile)
         client.files.getMetadata(path: newFile.path.path).response { response, error in

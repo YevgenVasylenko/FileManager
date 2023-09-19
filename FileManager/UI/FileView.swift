@@ -10,11 +10,12 @@ import SwiftUI
 struct FileView: View {
     
     private let file: File
-    
+    var isSelfForInfo: Bool
     private let infoPresented: Binding<Bool>
     
-    init(file: File, infoPresented: Binding<Bool>) {
+    init(file: File, isSelfForInfo: Bool = false, infoPresented: Binding<Bool>) {
         self.file = file
+        self.isSelfForInfo = isSelfForInfo
         self.infoPresented = infoPresented
     }
     
@@ -23,12 +24,11 @@ struct FileView: View {
             imageOfFile(imageName: file.imageName)
             nameOfFile(fileName: file.displayedName())
         }
-        .frame(width: 80)
+        .frame(width: !isSelfForInfo ? 80 : 200)
         .popover(isPresented: infoPresented) {
             FileInfoView(file: file)
         }
     }
-    
 }
 
 // MARK: - Private
@@ -43,7 +43,7 @@ private extension FileView {
     func nameOfFile(fileName: String) -> some View {
         return Text(fileName)
             .font(.headline)
-            .lineLimit(2, reservesSpace: false)
+            .lineLimit(!isSelfForInfo ? 2 : nil)
     }
 }
 

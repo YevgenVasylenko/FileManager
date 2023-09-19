@@ -16,13 +16,9 @@ struct FolderView: View {
     private var newName: String = ""
     
     private let fileSelectDelegate: FileSelectDelegate?
-    private let columns = [
-        GridItem(.flexible()),
-        GridItem(.flexible()),
-        GridItem(.flexible()),
-        GridItem(.flexible()),
-        GridItem(.flexible())
-    ]
+    private var columns: [GridItem] {
+        columnsForView()
+    }
     
     init(file: File, fileSelectDelegate: FileSelectDelegate?) {
         viewModel = FolderViewModel(file: file)
@@ -52,6 +48,8 @@ struct FolderView: View {
                                 }
                                 if fileSelectDelegate == nil {
                                     fileActionsMenuView(file: file)
+                                } else {
+                                    Spacer()
                                 }
                             }
                             .disabled(viewModel.isFilesDisabledInFolder(
@@ -280,6 +278,13 @@ private extension FolderView {
             set: { isPresented in
                 viewModel.state.fileInfoPopover = isPresented ? file : nil
             })
+    }
+    
+    func columnsForView() -> [GridItem] {
+        .init(
+            repeating: GridItem(.flexible()),
+            count: fileSelectDelegate == nil ? 5 : 4
+        )
     }
 }
 

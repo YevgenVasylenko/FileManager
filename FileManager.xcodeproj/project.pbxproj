@@ -44,6 +44,8 @@
 		5D78B1B32A4ECDD000A76D0F /* Result+Utilities.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D78B1B02A4ECDAA00A76D0F /* Result+Utilities.swift */; };
 		5D78B1B52A4ECEDC00A76D0F /* ConflictResolver.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D78B1B42A4ECEDC00A76D0F /* ConflictResolver.swift */; };
 		5D78B1B62A4ECEDF00A76D0F /* ConflictResolver.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D78B1B42A4ECEDC00A76D0F /* ConflictResolver.swift */; };
+		5D793A5A2AB2162C00A73D5C /* RootViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D793A592AB2162C00A73D5C /* RootViewModel.swift */; };
+		5D793A5D2AB87B8300A73D5C /* FolderGridView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D793A5C2AB87B8300A73D5C /* FolderGridView.swift */; };
 		5D954CAC2A56D45A00A221DB /* FolderViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D954CAB2A56D45A00A221DB /* FolderViewModel.swift */; };
 		5D954CB82A58062300A221DB /* FileOptionsButtonView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D954CB72A58062300A221DB /* FileOptionsButtonView.swift */; };
 		5D954CC82A58559800A221DB /* LocalFolderMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D954CC72A58559800A221DB /* LocalFolderMonitor.swift */; };
@@ -61,6 +63,7 @@
 		5DEDB90E2A5AEDD2003CC86B /* EnvironmenttUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DEDB90D2A5AEDD2003CC86B /* EnvironmenttUtils.swift */; };
 		5DF5DBA42A9610B500F91A46 /* FileContentViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DF5DBA32A9610B500F91A46 /* FileContentViewModel.swift */; };
 		5DF870D32A77ADAA00F9E5D5 /* DropboxFIleManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DF870D22A77ADAA00F9E5D5 /* DropboxFIleManager.swift */; };
+		5DF9C96B2AB9A365007AF29C /* FolderGridViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DF9C96A2AB9A365007AF29C /* FolderGridViewModel.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -100,6 +103,8 @@
 		5D69E00C2A9392B20036AE44 /* FIle+Utilities.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "FIle+Utilities.swift"; sourceTree = "<group>"; };
 		5D78B1B02A4ECDAA00A76D0F /* Result+Utilities.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Result+Utilities.swift"; sourceTree = "<group>"; };
 		5D78B1B42A4ECEDC00A76D0F /* ConflictResolver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConflictResolver.swift; sourceTree = "<group>"; };
+		5D793A592AB2162C00A73D5C /* RootViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootViewModel.swift; sourceTree = "<group>"; };
+		5D793A5C2AB87B8300A73D5C /* FolderGridView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FolderGridView.swift; sourceTree = "<group>"; };
 		5D954CAB2A56D45A00A221DB /* FolderViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FolderViewModel.swift; sourceTree = "<group>"; };
 		5D954CB72A58062300A221DB /* FileOptionsButtonView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileOptionsButtonView.swift; sourceTree = "<group>"; };
 		5D954CC72A58559800A221DB /* LocalFolderMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalFolderMonitor.swift; sourceTree = "<group>"; };
@@ -118,6 +123,7 @@
 		5DF5DBA32A9610B500F91A46 /* FileContentViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileContentViewModel.swift; sourceTree = "<group>"; };
 		5DF870CF2A76E06900F9E5D5 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		5DF870D22A77ADAA00F9E5D5 /* DropboxFIleManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DropboxFIleManager.swift; sourceTree = "<group>"; };
+		5DF9C96A2AB9A365007AF29C /* FolderGridViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FolderGridViewModel.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -215,6 +221,7 @@
 		5D954CD92A5AC78B00A221DB /* Modules */ = {
 			isa = PBXGroup;
 			children = (
+				5DF9C9692AB9A33C007AF29C /* FolderGrid */,
 				5D69E0042A93497B0036AE44 /* Web */,
 				5D954CDB2A5AC7AA00A221DB /* Root */,
 				5D954CDC2A5AC7B400A221DB /* Folder */,
@@ -230,6 +237,7 @@
 			isa = PBXGroup;
 			children = (
 				5DACCB4D2A445689000A0CA9 /* RootView.swift */,
+				5D793A592AB2162C00A73D5C /* RootViewModel.swift */,
 			);
 			path = Root;
 			sourceTree = "<group>";
@@ -331,6 +339,15 @@
 				5DEDB9032A5AC9D5003CC86B /* Services */,
 			);
 			path = BusinessLogic;
+			sourceTree = "<group>";
+		};
+		5DF9C9692AB9A33C007AF29C /* FolderGrid */ = {
+			isa = PBXGroup;
+			children = (
+				5D793A5C2AB87B8300A73D5C /* FolderGridView.swift */,
+				5DF9C96A2AB9A365007AF29C /* FolderGridViewModel.swift */,
+			);
+			path = FolderGrid;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -482,6 +499,7 @@
 				5D0B9CA92A446D080099021C /* LocalFileManager.swift in Sources */,
 				5D04653D2A71071900BE768E /* FileActionType.swift in Sources */,
 				5D221D5C2A5DA1170072AA35 /* LocalizedError.swift in Sources */,
+				5DF9C96B2AB9A365007AF29C /* FolderGridViewModel.swift in Sources */,
 				5DD776162A544B5600F9B55D /* FileManager.swift in Sources */,
 				5D0B9CA52A4466460099021C /* FileView.swift in Sources */,
 				5D69E00D2A9392B20036AE44 /* FIle+Utilities.swift in Sources */,
@@ -499,6 +517,8 @@
 				5D78B1B12A4ECDAA00A76D0F /* Result+Utilities.swift in Sources */,
 				5D0B9CA32A4464530099021C /* FolderView.swift in Sources */,
 				5D1B5B1E2A910598004C7AA8 /* FileDisplayedName.swift in Sources */,
+				5D793A5D2AB87B8300A73D5C /* FolderGridView.swift in Sources */,
+				5D793A5A2AB2162C00A73D5C /* RootViewModel.swift in Sources */,
 				5DEDB90E2A5AEDD2003CC86B /* EnvironmenttUtils.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

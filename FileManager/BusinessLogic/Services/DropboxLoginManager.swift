@@ -10,7 +10,9 @@ import SwiftyDropbox
 
 enum DropboxLoginManager {
     
-    static let isLogged = DropboxClientsManager.authorizedClient != nil
+    static var isLogged: Bool {
+        DropboxClientsManager.authorizedClient != nil
+    }
     
     static func login() {
         guard let controller = UIApplication.shared.windows.first(where: \.isKeyWindow)?.rootViewController else {
@@ -34,7 +36,8 @@ enum DropboxLoginManager {
             openURL: { url in
                 UIApplication.shared.open(url, options: [:], completionHandler: nil)
             },
-            scopeRequest: scopeRequest)
+            scopeRequest: scopeRequest
+        )
     }
     
     static func  logout() {
@@ -42,18 +45,18 @@ enum DropboxLoginManager {
     }
     
     static func openUrl(url: URL) {
-            let oauthCompletion: DropboxOAuthCompletion = {
-                if let authResult = $0 {
-                    switch authResult {
-                    case .success:
-                        print("Success! User is logged into DropboxClientsManager.")
-                    case .cancel:
-                        print("Authorisation flow was manually canceled by user!")
-                    case .error(_, let description):
-                        print("Error: \(String(describing: description))")
-                    }
+        let oauthCompletion: DropboxOAuthCompletion = {
+            if let authResult = $0 {
+                switch authResult {
+                case .success:
+                    print("Success! User is logged into DropboxClientsManager.")
+                case .cancel:
+                    print("Authorisation flow was manually canceled by user!")
+                case .error(_, let description):
+                    print("Error: \(String(describing: description))")
                 }
             }
-            DropboxClientsManager.handleRedirectURL(url, completion: oauthCompletion)
         }
+        DropboxClientsManager.handleRedirectURL(url, completion: oauthCompletion)
+    }
 }

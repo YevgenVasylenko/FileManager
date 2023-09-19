@@ -7,66 +7,75 @@
 
 import SwiftUI
 
-struct DataSource {
-    let file: File
-    let fileSelectedDelegate: FileSelectDelegate
-}
-
 struct RootView: View {
-    let file: File
     let fileSelectDelegate: FileSelectDelegate?
-    @State private var files: [File] = [LocalFileManager().rootFolder, DropboxFileManager().rootFolder]
-    @State private var selectedFile: File?
     
-    init(file: File = LocalFileManager().rootFolder, fileSelectDelegate: FileSelectDelegate? = nil) {
-        self.file = file
+    @ObservedObject
+    private var viewModel: RootViewModel
+    
+    init(fileSelectDelegate: FileSelectDelegate? = nil) {
         self.fileSelectDelegate = fileSelectDelegate
+        self.viewModel = RootViewModel()
     }
     
     var body: some View {
         NavigationSplitView {
-            List(files, id: \.self, selection: $selectedFile) { file in
-                dataSourceSelectionButton(file: file)
+            List(viewModel.files, id: \.self, selection: $viewModel.state.selectedFile) { fileInRow in
+                dataSourceSelectionButton(file: fileInRow)
             }
         } detail: {
-            FolderView(file: selectedFile ?? LocalFileManager().rootFolder, fileSelectDelegate: fileSelectDelegate)
-                .id(selectedFile)
+            if viewModel.isLoggedToCloud() || viewModel.state.selectedFile?.storageType.isLocal ?? true {
+                FolderView(file: viewModel.state.selectedFile ?? LocalFileManager().rootFolder, fileSelectDelegate: fileSelectDelegate)
+                    .id(viewModel.state.selectedFile)
+            } else {
+                connectionButton()
+                    .toolbar(.hidden)
+            }
         }
-        .padding()
+        Spacer()
         .onOpenURL(perform: { url in
             DropboxLoginManager.openUrl(url: url)
         })
+        .onAppear() {
+            viewModel.reloadLoggedState()
+        }
     }
 }
 
 private extension RootView {
     func dataSourceSelectionButton(file: File) -> some View {
-        Button(action: {
-            selectedFile = file
-        },
-               label: {
+        Label(title: {
+            Spacer()
+                .frame(width: 10)
             Text(file.displayedName())
-                .contextMenu {
-                    if file.storageType.isDropbox {
-                        Button {
-                            DropboxLoginManager.login()
-                        } label: {
-                            Text(R.string.localizable.connect.callAsFunction())
-                        }
-                        .disabled(DropboxLoginManager.isLogged)
-                        
-                        Button(R.string.localizable.disconnect.callAsFunction(), role: .destructive) {
-                            DropboxLoginManager.logout()
-                        }
-                        .disabled(!DropboxLoginManager.isLogged)
+                .font(.headline)
+        }, icon: {
+            Image(imageNameForSource(file: file))
+        })
+            .padding()
+            .contextMenu {
+                if !file.storageType.isLocal {
+                    Button(R.string.localizable.disconnect.callAsFunction(), role: .destructive) {
+                        viewModel.logoutFromCloud()
                     }
+                    .disabled(!viewModel.isLoggedToCloud())
                 }
-        }).tag(file)
-            .buttonStyle(.plain)
+            }
             .navigationBarItems(
                 trailing: cancelButtonForFolderSelection(chooseAction: {
                     fileSelectDelegate?.selected(nil)
                 }))
+    }
+    
+    func connectionButton() -> some View {
+        Button {
+            viewModel.loggingToCloud()
+        } label: {
+            Label(R.string.localizable.connect.callAsFunction(), systemImage: "plus")
+                .padding()
+        }
+        .font(.title)
+        .buttonStyle(.borderedProminent)
     }
     
     func cancelButtonForFolderSelection(chooseAction: @escaping () -> Void) -> some View {
@@ -78,10 +87,19 @@ private extension RootView {
             }
         }
     }
+    
+    func imageNameForSource(file: File) -> String {
+        switch file.storageType {
+        case .dropbox:
+           return R.image.dropbox.name
+        case .local:
+           return R.image.folder.name
+        }
+    }
 }
 
 struct RootView_Previews: PreviewProvider {
     static var previews: some View {
-        RootView(file: PreviewFiles.rootFolder)
+        RootView()
     }
 }

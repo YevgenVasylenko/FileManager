@@ -13,7 +13,6 @@ class FileInfoViewModel: ObservableObject {
         var file: File
         var error: Error?
         var isLoading = true
-//        var fileAttributes: FileAttributes?
     }
     
     private var fileManagerCommutator = FileManagerCommutator()
