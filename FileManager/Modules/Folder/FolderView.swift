@@ -36,33 +36,13 @@ struct FolderView: View {
                 if viewModel.state.isLoading == true {
                     ProgressView()
                 }
-                ScrollView {
-                    LazyVGrid(columns: columns, spacing: 20) {
-                        ForEach($viewModel.state.files, id: \.self) { $file in
-                            
-                            VStack {
-                                NavigationLink {
-                                    viewToShow(file: file)
-                                } label: {
-                                    FileView(file: file, infoPresented: fileInfoPopoverBinding(for: file))
-                                }
-                                if fileSelectDelegate == nil {
-                                    fileActionsMenuView(file: file)
-                                } else {
-                                    Spacer()
-                                }
-                            }
-                            .disabled(viewModel.isFilesDisabledInFolder(
-                                isFolderDestinationChose: fileSelectDelegate, file: file) ||
-                                      viewModel.state.fileInfoPopover != nil
-                            )
-                            .overlay(alignment: Alignment(horizontal: .leading, vertical: .top)) {
-                                filesChooseToggle(file: file)
-                            }
-                        }
-                    }
+                switch viewModel.state.showOption {
+                case .grid:
+                    FolderGridView(files: viewModel.state.files, fileSelectDelegate: fileSelectDelegate)
+                case .list:
+                    FolderListView(files: viewModel.state.files, fileSelectDelegate: fileSelectDelegate)
                 }
-                if !(viewModel.state.folder.folderAffiliation == .system(.trash)) {
+                if viewModel.state.folder.folderAffiliation != .system(.trash) {
                     createFolderButton()
                 }
                 actionMenuBarForChosenFiles()
@@ -73,7 +53,7 @@ struct FolderView: View {
                 viewModel.load()
             }
         }
-        .renamePopover(viewModel: viewModel, newName: $newName)
+//        .renamePopover(viewModel: viewModel, newName: $newName)
         .fileCreatingPopover(viewModel: viewModel, newName: $newName)
         .destinationPopoverFileFolder(viewModule: viewModel)
         .conflictAlertFolder(viewModule: viewModel)
@@ -164,7 +144,7 @@ private extension FolderView {
     
     func filesChooseToggle(file: File) -> some View {
         Group {
-            if chooseInProgressBinding().wrappedValue && !viewModel.isFileDefault(file: file) {
+            if chooseInProgressBinding().wrappedValue && file.folderAffiliation.isSystem == false {
                 Toggle(isOn: selectedFileBinding(for: file)) {
                     Image(systemName: selectedFileBinding(for: file).wrappedValue ? "checkmark.square.fill" : "square")
                         .foregroundColor(selectedFileBinding(for: file).wrappedValue ? .blue : .gray)
@@ -179,9 +159,13 @@ private extension FolderView {
         chooseAction: @escaping () -> Void
     ) -> some View {
         HStack {
-            FolderShowOptionsView(sortedOption: viewModel.state.sorted) { sortOption in
+            FolderShowOptionsView(
+                sortedOption: viewModel.state.sorted,
+                selectedOption: { sortOption in
                 viewModel.sort(sortOption: sortOption)
-            }
+            }, selectedFolderShow: { showOption in
+                viewModel.state.showOption = showOption
+            })
             
             if fileSelectDelegate?.type == nil {
                 let isChoosing = chooseInProgressBinding()
@@ -202,28 +186,28 @@ private extension FolderView {
         }
     }
     
-    func fileActionsMenuView(file: File) -> some View {
-        FileOptionsButtonView(file: file) { action in
-            switch action {
-            case .rename:
-                viewModel.startRename(file: file)
-            case .move:
-                viewModel.moveOne(file: file)
-            case .copy:
-                viewModel.copyOne(file: file)
-            case .moveToTrash:
-                viewModel.moveToTrashOne(file: file)
-            case .restoreFromTrash:
-                viewModel.restoreFromTrashOne(file: file)
-            case .delete:
-                viewModel.deleteOne(file: file)
-            case .clean:
-                viewModel.clear()
-            case .info:
-                viewModel.state.fileInfoPopover = file
-            }
-        }
-    }
+//    func fileActionsMenuView(file: File) -> some View {
+//        FileOptionsButtonView(file: file) { action in
+//            switch action {
+//            case .rename:
+//                viewModel.startRename(file: file)
+//            case .move:
+//                viewModel.moveOne(file: file)
+//            case .copy:
+//                viewModel.copyOne(file: file)
+//            case .moveToTrash:
+//                viewModel.moveToTrashOne(file: file)
+//            case .restoreFromTrash:
+//                viewModel.restoreFromTrashOne(file: file)
+//            case .delete:
+//                viewModel.deleteOne(file: file)
+//            case .clean:
+//                viewModel.clear()
+//            case .info:
+//                viewModel.state.fileInfoPopover = file
+//            }
+//        }
+//    }
     
     func nameOfActionSelection(fileActionType: FileActionType) -> String {
         switch fileActionType {
@@ -326,28 +310,28 @@ private extension View {
         }
     }
     
-    func renamePopover(viewModel: FolderViewModel, newName: Binding<String>) -> some View {
-        return alert(R.string.localizable.renamePopupTitle.callAsFunction() + (viewModel.state.file?.name ?? ""),
-                     isPresented: .constant(viewModel.state.isFileRenameInProgress),
-                     actions: {
-            TextField(R.string.localizable.new_name.callAsFunction(), text: newName)
-                .padding()
-                .interactiveDismissDisabled()
-                .autocorrectionDisabled()
-            HStack {
-                Button(R.string.localizable.rename.callAsFunction()) {
-                    viewModel.rename(newName: newName.wrappedValue)
-                    newName.wrappedValue = ""
-                }
-                Spacer()
-                Button(R.string.localizable.cancel.callAsFunction()) {
-                    viewModel.state.isFileRenameInProgress = false
-                    newName.wrappedValue = ""
-                }
-            }
-            .padding()
-        })
-    }
+//    func renamePopover(viewModel: FolderViewModel, newName: Binding<String>) -> some View {
+//        return alert(R.string.localizable.renamePopupTitle.callAsFunction() + (viewModel.state.file?.name ?? ""),
+//                     isPresented: .constant(viewModel.state.isFileRenameInProgress),
+//                     actions: {
+//            TextField(R.string.localizable.new_name.callAsFunction(), text: newName)
+//                .padding()
+//                .interactiveDismissDisabled()
+//                .autocorrectionDisabled()
+//            HStack {
+//                Button(R.string.localizable.rename.callAsFunction()) {
+//                    viewModel.rename(newName: newName.wrappedValue)
+//                    newName.wrappedValue = ""
+//                }
+//                Spacer()
+//                Button(R.string.localizable.cancel.callAsFunction()) {
+//                    viewModel.state.isFileRenameInProgress = false
+//                    newName.wrappedValue = ""
+//                }
+//            }
+//            .padding()
+//        })
+//    }
     
     func fileCreatingPopover(viewModel: FolderViewModel, newName: Binding<String>) -> some View {
         return alert(R.string.localizable.folderCreating.callAsFunction(),
@@ -375,16 +359,14 @@ private extension View {
             .padding()
         })
     }
-    
-    
 }
 
-struct FolderView_Previews: PreviewProvider {
-    static var previews: some View {
-        FolderView(
-            viewModel: FolderViewModel(
-                file: PreviewFiles.rootFolder,
-                state: .init(folder: PreviewFiles.rootFolder,
-                             files: PreviewFiles.filesInTrash)), fileSelectDelegate: nil)
-    }
-}
+//struct FolderView_Previews: PreviewProvider {
+//    static var previews: some View {
+//        FolderView(
+//            viewModel: FolderViewModel(
+//                file: PreviewFiles.rootFolder,
+//                state: .init(folder: PreviewFiles.rootFolder,
+//                             files: PreviewFiles.filesInTrash)), fileSelectDelegate: nil)
+//    }
+//}

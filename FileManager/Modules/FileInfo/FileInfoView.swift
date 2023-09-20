@@ -18,7 +18,7 @@ struct FileInfoView: View {
     
     var body: some View {
         VStack {
-            FileView(file: viewModel.state.file, isSelfForInfo: true, infoPresented: .constant(false))
+            FileView(file: viewModel.state.file, style: .info, infoPresented: .constant(false))
             Spacer()
             Text(R.string.localizable.info.callAsFunction())
             Spacer()

@@ -10,11 +10,17 @@ import SwiftUI
 struct FolderShowOptionsView: View {
     private let sortedOption: SortOption?
     private let selectedOption: (SortOption) -> Void
+    private let selectedFolderShow: (FolderShowOption) -> Void
     private var sortOptions: [SortOption]
     
-    init(sortedOption: SortOption?, selectedOption: @escaping (SortOption) -> Void) {
+    init(
+        sortedOption: SortOption?,
+        selectedOption: @escaping (SortOption) -> Void,
+        selectedFolderShow: @escaping (FolderShowOption) -> Void
+    ) {
         self.sortedOption = sortedOption
         self.selectedOption = selectedOption
+        self.selectedFolderShow = selectedFolderShow
         self.sortOptions = SortOption.Attribute.allCases.map { attribute in
             SortOption(attribute: attribute)
         }
@@ -23,6 +29,19 @@ struct FolderShowOptionsView: View {
     
     var body: some View {
         Menu {
+            Section {
+                Button {
+                    selectedFolderShow(.grid)
+                } label: {
+                    Label(R.string.localizable.grid.callAsFunction(), systemImage: "square.grid.2x2")
+                }
+                Button {
+                    selectedFolderShow(.list)
+                } label: {
+                    Label(R.string.localizable.list.callAsFunction(), systemImage: "list.bullet")
+                }
+            }
+            
             ForEach(sortOptions, id: \.self) { option in
                 button(sortOption: option)
             }

@@ -8,23 +8,29 @@
 import SwiftUI
 
 struct FileView: View {
+    enum Style {
+        case grid
+        case list
+        case info
+    }
     
     private let file: File
-    var isSelfForInfo: Bool
+    private let style: Style
     private let infoPresented: Binding<Bool>
     
-    init(file: File, isSelfForInfo: Bool = false, infoPresented: Binding<Bool>) {
+    init(file: File, style: Style, infoPresented: Binding<Bool>) {
         self.file = file
-        self.isSelfForInfo = isSelfForInfo
+        self.style = style
         self.infoPresented = infoPresented
     }
     
     var body: some View {
-        VStack {
+        container {
             imageOfFile(imageName: file.imageName)
             nameOfFile(fileName: file.displayedName())
         }
-        .frame(width: !isSelfForInfo ? 80 : 200)
+//        .padding()
+//        .frame(width: width())
         .popover(isPresented: infoPresented) {
             FileInfoView(file: file)
         }
@@ -34,16 +40,52 @@ struct FileView: View {
 // MARK: - Private
 
 private extension FileView {
+    
     func imageOfFile(imageName: String) -> some View {
         return Image(imageName)
-            .resizable()
+//            .resizable()
             .frame(width: 75, height: 75)
     }
     
     func nameOfFile(fileName: String) -> some View {
         return Text(fileName)
             .font(.headline)
-            .lineLimit(!isSelfForInfo ? 2 : nil)
+            .lineLimit(lineLimit())
+    }
+    
+    func container(@ViewBuilder content: () -> some View) -> some View {
+        Group {
+            switch style {
+            case .grid:
+                VStack(content: content)
+            case .list:
+                HStack(content: content)
+            case .info:
+                VStack(content: content)
+            }
+        }
+    }
+    
+    func width() -> CGFloat {
+        switch style {
+        case .grid:
+            return 80
+        case .list:
+            return 30
+        case .info:
+            return 200
+        }
+    }
+    
+    func lineLimit() -> Int? {
+        switch style {
+        case .grid:
+            return 2
+        case .list:
+            return nil
+        case .info:
+            return nil
+        }
     }
 }
 

@@ -10,13 +10,20 @@ import Foundation
 struct File {
 
     enum FolderAffiliation: Equatable {
-        enum systemFolderName {
+        enum SystemFolderName {
             case trash
             case download
         }
         
         case user
-        case system(systemFolderName)
+        case system(SystemFolderName)
+        
+        var isSystem: Bool {
+            switch self {
+            case .system: return true
+            default: return false
+            }
+        }
     }
     
     enum StorageType: Equatable {

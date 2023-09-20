@@ -63,7 +63,8 @@
 		5DEDB90E2A5AEDD2003CC86B /* EnvironmenttUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DEDB90D2A5AEDD2003CC86B /* EnvironmenttUtils.swift */; };
 		5DF5DBA42A9610B500F91A46 /* FileContentViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DF5DBA32A9610B500F91A46 /* FileContentViewModel.swift */; };
 		5DF870D32A77ADAA00F9E5D5 /* DropboxFIleManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DF870D22A77ADAA00F9E5D5 /* DropboxFIleManager.swift */; };
-		5DF9C96B2AB9A365007AF29C /* FolderGridViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DF9C96A2AB9A365007AF29C /* FolderGridViewModel.swift */; };
+		5DF9C96B2AB9A365007AF29C /* FolderGridListViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DF9C96A2AB9A365007AF29C /* FolderGridListViewModel.swift */; };
+		5DF9C96E2AB9EE53007AF29C /* FolderListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DF9C96D2AB9EE53007AF29C /* FolderListView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -123,7 +124,8 @@
 		5DF5DBA32A9610B500F91A46 /* FileContentViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileContentViewModel.swift; sourceTree = "<group>"; };
 		5DF870CF2A76E06900F9E5D5 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		5DF870D22A77ADAA00F9E5D5 /* DropboxFIleManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DropboxFIleManager.swift; sourceTree = "<group>"; };
-		5DF9C96A2AB9A365007AF29C /* FolderGridViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FolderGridViewModel.swift; sourceTree = "<group>"; };
+		5DF9C96A2AB9A365007AF29C /* FolderGridListViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FolderGridListViewModel.swift; sourceTree = "<group>"; };
+		5DF9C96D2AB9EE53007AF29C /* FolderListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FolderListView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -149,7 +151,10 @@
 		5D0ACE4B2AA72BFD00B834E8 /* FolderShow */ = {
 			isa = PBXGroup;
 			children = (
+				5DF9C96C2AB9EE20007AF29C /* FolderList */,
+				5DF9C9692AB9A33C007AF29C /* FolderGrid */,
 				5D0ACE482AA72BE900B834E8 /* FolderShowOptionsView.swift */,
+				5DF9C96A2AB9A365007AF29C /* FolderGridListViewModel.swift */,
 			);
 			path = FolderShow;
 			sourceTree = "<group>";
@@ -221,7 +226,6 @@
 		5D954CD92A5AC78B00A221DB /* Modules */ = {
 			isa = PBXGroup;
 			children = (
-				5DF9C9692AB9A33C007AF29C /* FolderGrid */,
 				5D69E0042A93497B0036AE44 /* Web */,
 				5D954CDB2A5AC7AA00A221DB /* Root */,
 				5D954CDC2A5AC7B400A221DB /* Folder */,
@@ -345,9 +349,16 @@
 			isa = PBXGroup;
 			children = (
 				5D793A5C2AB87B8300A73D5C /* FolderGridView.swift */,
-				5DF9C96A2AB9A365007AF29C /* FolderGridViewModel.swift */,
 			);
 			path = FolderGrid;
+			sourceTree = "<group>";
+		};
+		5DF9C96C2AB9EE20007AF29C /* FolderList */ = {
+			isa = PBXGroup;
+			children = (
+				5DF9C96D2AB9EE53007AF29C /* FolderListView.swift */,
+			);
+			path = FolderList;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -482,6 +493,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				5DF9C96E2AB9EE53007AF29C /* FolderListView.swift in Sources */,
 				5D69E0062A9349C20036AE44 /* WebView.swift in Sources */,
 				5D627D942A7F871C00170451 /* FileManagerCommutator.swift in Sources */,
 				5D954CB82A58062300A221DB /* FileOptionsButtonView.swift in Sources */,
@@ -499,7 +511,7 @@
 				5D0B9CA92A446D080099021C /* LocalFileManager.swift in Sources */,
 				5D04653D2A71071900BE768E /* FileActionType.swift in Sources */,
 				5D221D5C2A5DA1170072AA35 /* LocalizedError.swift in Sources */,
-				5DF9C96B2AB9A365007AF29C /* FolderGridViewModel.swift in Sources */,
+				5DF9C96B2AB9A365007AF29C /* FolderGridListViewModel.swift in Sources */,
 				5DD776162A544B5600F9B55D /* FileManager.swift in Sources */,
 				5D0B9CA52A4466460099021C /* FileView.swift in Sources */,
 				5D69E00D2A9392B20036AE44 /* FIle+Utilities.swift in Sources */,

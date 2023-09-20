@@ -60,6 +60,11 @@ struct SortOption: Hashable {
     var direction: Direction?
 }
 
+enum FolderShowOption {
+    case grid
+    case list
+}
+
 class FolderViewModel: ObservableObject {
 
     struct State {
@@ -75,6 +80,7 @@ class FolderViewModel: ObservableObject {
         var folderCreating: String?
         var fileInfoPopover: File?
         var sorted: SortOption?
+        var showOption: FolderShowOption
     }
     
     private let file: File
@@ -94,7 +100,7 @@ class FolderViewModel: ObservableObject {
     }
     
     convenience init(file: File) {
-        self.init(file: file, state: State(folder: file))
+        self.init(file: file, state: State(folder: file, showOption: .grid))
     }
     
     var filesForAction: [File] {
@@ -174,84 +180,80 @@ class FolderViewModel: ObservableObject {
         self.state.fileActionType = .copy
     }
     
-    func copyOne(file: File) {
-        state.file = file
-        self.state.fileActionType = .copy
-    }
+//    func copyOne(file: File) {
+//        state.file = file
+//        self.state.fileActionType = .copy
+//    }
     
     func moveChosen() {
         self.state.fileActionType = .move
     }
     
-    func moveOne(file: File) {
-        state.file = file
-        self.state.fileActionType = .move
-    }
+//    func moveOne(file: File) {
+//        state.file = file
+//        self.state.fileActionType = .move
+//    }
     
-    func startRename(file: File) {
-        state.file = file
-        self.state.isFileRenameInProgress = true
-    }
+//    func startRename(file: File) {
+//        state.file = file
+//        self.state.isFileRenameInProgress = true
+//    }
+//
+//    func rename(newName: String) {
+//        state.isFileRenameInProgress = false
+//        fileManagerCommutator.rename(file: state.file!, newName: newName) { result in
+//            switch result {
+//            case .success:
+//                break
+//            case .failure(let failure):
+//                self.state.error = failure
+//            }
+//        }
+//    }
     
-    func rename(newName: String) {
-        state.isFileRenameInProgress = false
-        fileManagerCommutator.rename(file: state.file!, newName: newName) { result in
-            switch result {
-            case .success:
-                break
-            case .failure(let failure):
-                self.state.error = failure
-            }
-        }
-    }
-    
-    func clear() {
-        fileManagerCommutator.cleanTrashFolder(fileForFileManager: file) { result in
-            switch result {
-            case .success:
-                break
-            case .failure(let failure):
-                self.state.error = failure
-            }
-        }
-    }
+//    func clear() {
+//        fileManagerCommutator.cleanTrashFolder(fileForFileManager: file) { result in
+//            switch result {
+//            case .success:
+//                break
+//            case .failure(let failure):
+//                self.state.error = failure
+//            }
+//        }
+//    }
     
     func moveToTrashChosen() {
         moveToTrash()
     }
     
-    func moveToTrashOne(file: File) {
-        state.file = file
-        moveToTrash()
-    }
-    
+//    func moveToTrashOne(file: File) {
+//        state.file = file
+//        moveToTrash()
+//    }
+//
     func restoreFromTrashChosen() {
         restoreFromTrash()
     }
-    
-    func restoreFromTrashOne(file: File) {
-        state.file = file
-        restoreFromTrash()
-    }
-    
+//
+//    func restoreFromTrashOne(file: File) {
+//        state.file = file
+//        restoreFromTrash()
+//    }
+//
     func deleteChosen() {
         delete()
     }
     
-    func deleteOne(file: File) {
-        state.file = file
-        delete()
-    }
+//    func deleteOne(file: File) {
+//        state.file = file
+//        delete()
+//    }
 
     func isFilesDisabledInFolder(isFolderDestinationChose: FileSelectDelegate?, file: File) -> Bool {
         guard let isFolderDestinationChose = isFolderDestinationChose else {
             return state.chosenFiles != nil
         }
         return file.folderAffiliation == .system(.trash) || isFolderDestinationChose.selectedFiles.contains(file)
-    }
-    
-    func isFileDefault(file: File) -> Bool {
-        return file.folderAffiliation == .system(.download) || file.folderAffiliation == .system(.trash)
     }
     
     func isFilesInCurrentFolder(files: [File]) -> Bool? {
