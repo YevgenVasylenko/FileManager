@@ -120,10 +120,9 @@ extension DropboxFileManager: FileManager {
         files: [File],
         destination: File,
         conflictResolver: NameConflictResolver,
-        isForOneFile: Bool,
         completion: @escaping (Result<OperationResult, Error>) -> Void
     ) {
-        if isForOneFile {
+        if files.count == 1 {
             guard let oneFile = files.last else { return }
             copyOne(file: oneFile, destination: destination, conflictResolver: conflictResolver, completion: completion)
         } else {
@@ -135,10 +134,9 @@ extension DropboxFileManager: FileManager {
         files: [File],
         destination: File,
         conflictResolver: NameConflictResolver,
-        isForOneFile: Bool,
         completion: @escaping (Result<OperationResult, Error>) -> Void
     ) {
-        if isForOneFile {
+        if files.count == 1 {
             guard let oneFile = files.last else { return }
             moveOne(file: oneFile, destination: destination, conflictResolver: conflictResolver, completion: completion)
         } else {
@@ -332,7 +330,6 @@ extension DropboxFileManager: LocalTemporaryFolderConnector {
         files: [File],
         destination: File,
         conflictResolver: NameConflictResolver,
-        isForOneFile: Bool,
         completion: @escaping (Result<OperationResult, Error>) -> Void
     ) {
         guard let client = DropboxClientsManager.authorizedClient else {

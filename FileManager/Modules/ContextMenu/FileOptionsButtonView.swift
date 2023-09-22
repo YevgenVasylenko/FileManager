@@ -46,7 +46,8 @@ struct FileOptionsButtonView: View {
                     }
                     .buttonStyle(.plain)
                 } label: {
-                    Text("...")
+                    Image(systemName: "ellipsis")
+                        .font(.headline)
                 }
             }
             Spacer()

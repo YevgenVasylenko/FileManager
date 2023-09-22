@@ -29,7 +29,7 @@ final class LocalFileManager {
 }
 
 extension LocalFileManager: FileManager {
-    
+
     func contents(of file: File, completion: (Result<[File], Error>) -> Void) {
         do {
             var files: [File] = []
@@ -78,7 +78,6 @@ extension LocalFileManager: FileManager {
         files: [File],
         destination: File,
         conflictResolver: NameConflictResolver,
-        isForOneFile: Bool,
         completion: @escaping (Result<OperationResult, Error>) -> Void
     ) {
         guard let file = files.first else {
@@ -98,7 +97,6 @@ extension LocalFileManager: FileManager {
                     files: Array(files),
                     destination: destination,
                     conflictResolver: conflictResolver,
-                    isForOneFile: isForOneFile,
                     completion: completion
                 )
             case .failure(let error):
@@ -111,7 +109,6 @@ extension LocalFileManager: FileManager {
         files: [File],
         destination: File,
         conflictResolver: NameConflictResolver,
-        isForOneFile: Bool,
         completion: @escaping (Result<OperationResult, Error>) -> Void)
     {
         guard let file = files.first else {
@@ -131,7 +128,6 @@ extension LocalFileManager: FileManager {
                     files: Array(files),
                     destination: destination,
                     conflictResolver: conflictResolver,
-                    isForOneFile: isForOneFile,
                     completion: completion
                 )
             case .failure(let error):
@@ -273,13 +269,11 @@ extension LocalFileManager: LocalTemporaryFolderConnector {
         files: [File],
         destination: File,
         conflictResolver: NameConflictResolver,
-        isForOneFile: Bool,
         completion: @escaping (Result<OperationResult, Error>) -> Void) {
         move(
             files: files,
             destination: destination,
-            conflictResolver: conflictResolver,
-            isForOneFile: isForOneFile
+            conflictResolver: conflictResolver
         ) { result in
         }
     }

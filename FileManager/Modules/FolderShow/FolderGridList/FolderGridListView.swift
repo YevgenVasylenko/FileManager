@@ -1,59 +1,63 @@
 //
-//  FolderListView.swift
+//  FolderGridListView.swift
 //  FileManager
 //
-//  Created by Yevgen Vasylenko on 19.09.2023.
+//  Created by Yevgen Vasylenko on 18.09.2023.
 //
 
 import SwiftUI
 
-struct FolderListView: View {
+struct FolderGridListView: View {
     
     @State
     private var newName: String = ""
     
     @ObservedObject
     private var viewModel: FolderGridListViewModel
-    
     private let fileSelectDelegate: FileSelectDelegate?
-   
-    init(files: [File], fileSelectDelegate: FileSelectDelegate?) {
-        viewModel = FolderGridListViewModel(files: files)
+    private let selectedFiles: Binding<Set<File>?>
+    
+    @State
+    private var redraw = Date.now
+    
+    private var columns: [GridItem] {
+        columnsForView()
+    }
+    
+    init(
+        files: [File],
+        fileSelectDelegate: FileSelectDelegate?,
+        selectedFiles: Binding<Set<File>?>,
+        showOption: FolderShowOption
+    ) {
+        self.viewModel = FolderGridListViewModel(files: files)
         self.fileSelectDelegate = fileSelectDelegate
+        self.selectedFiles = selectedFiles
+        viewModel.state.showOption = showOption
     }
     
     var body: some View {
-        List(viewModel.state.files) { file in
-            HStack {
-                NavigationLink {
-                    viewToShow(file: file)
-                } label: {
-                    FileView(file: file, style: .list, infoPresented: fileInfoPopoverBinding(for: file))
-                }
-                if fileSelectDelegate == nil {
-                    fileActionsMenuView(file: file)
-                } else {
-                    Spacer()
-                }
-            }
-            .disabled(viewModel.isFilesDisabledInFolder(
-                isFolderDestinationChose: fileSelectDelegate, file: file) ||
-                      viewModel.state.fileInfoPopover != nil
-            )
-            .overlay(alignment: Alignment(horizontal: .leading, vertical: .top)) {
-                filesChooseToggle(file: file)
+        Group {
+            switch viewModel.state.showOption {
+            case .grid: folderGridView()
+            case .list: folderListView()
             }
         }
-        .background(.clear)
-        .scrollContentBackground(.hidden)
         .renamePopover(viewModel: viewModel, newName: $newName)
         .conflictAlertFolder(viewModule: viewModel)
         .destinationPopoverFileFolder(viewModule: viewModel)
     }
 }
 
-private extension FolderListView {
- 
+private extension FolderGridListView {
+    
+    func columnsForView() -> [GridItem] {
+        .init(
+            repeating: GridItem(.flexible()),
+            count: fileSelectDelegate == nil ? 5 : 4
+        )
+    }
+    
     func viewToShow(file: File) -> some View {
         Group {
             if file.isFolder() {
@@ -99,7 +103,7 @@ private extension FolderListView {
     
     func filesChooseToggle(file: File) -> some View {
         Group {
-            if chooseInProgressBinding().wrappedValue && file.folderAffiliation.isSystem == false {
+            if selectedFiles.wrappedValue != nil && file.folderAffiliation.isSystem == false {
                 Toggle(isOn: selectedFileBinding(for: file)) {
                     Image(systemName: selectedFileBinding(for: file).wrappedValue ? "checkmark.square.fill" : "square")
                         .foregroundColor(selectedFileBinding(for: file).wrappedValue ? .blue : .gray)
@@ -109,35 +113,72 @@ private extension FolderListView {
             }
         }
     }
-    
-    func chooseInProgressBinding() -> Binding<Bool> {
+
+    func selectedFileBinding(for file: File) -> Binding<Bool> {
         Binding(
             get: {
-                viewModel.state.chosenFiles != nil
+                selectedFiles.wrappedValue?.contains(file) ?? false
             },
             set: { selected in
                 if selected {
-                    viewModel.state.chosenFiles = Set<File>()
+                    selectedFiles.wrappedValue?.insert(file)
                 } else {
-                    viewModel.state.chosenFiles = nil
+                    selectedFiles.wrappedValue?.remove(file)
                 }
+                redraw = .now
             })
     }
     
-    func selectedFileBinding(for file: File) -> Binding<Bool> {
-        return Binding(
-            get: {
-                viewModel.state.chosenFiles?.contains(file) ?? false
-            },
-            set: { selected in
-                if selected {
-                    viewModel.state.chosenFiles?.insert(file)
-                } else {
-                    viewModel.state.chosenFiles?.remove(file)
+    func folderListView() -> some View {
+        List(viewModel.state.files) { file in
+            HStack {
+                filesChooseToggle(file: file)
+                NavigationLink {
+                    viewToShow(file: file)
+                } label: {
+                    FileView(file: file, style: .list, infoPresented: fileInfoPopoverBinding(for: file))
                 }
-            })
+                if fileSelectDelegate == nil {
+                    fileActionsMenuView(file: file)
+                } else {
+                    Spacer()
+                }
+            }
+            .disabled(viewModel.isFilesDisabledInFolder(
+                fileSelectDelegate: fileSelectDelegate, file: file) ||
+                      viewModel.state.fileInfoPopover != nil
+            )
+        }
+        .background(.clear)
+        .scrollContentBackground(.hidden)
     }
-
+    
+    func folderGridView() -> some View {
+        ScrollView {
+            LazyVGrid(columns: columns, spacing: 20) {
+                ForEach($viewModel.state.files, id: \.self) { $file in
+                    ZStack {
+                        VStack {
+                            NavigationLink {
+                                viewToShow(file: file)
+                            } label: {
+                                FileView(file: file, style: .grid, infoPresented: fileInfoPopoverBinding(for: file))
+                            }
+                            if fileSelectDelegate == nil {
+                                fileActionsMenuView(file: file)
+                            } else {
+                                Spacer()
+                            }
+                        }
+                        .disabled(viewModel.isFilesDisabledInFolder(fileSelectDelegate: fileSelectDelegate, file: file) || viewModel.state.fileInfoPopover != nil)
+                        .overlay(alignment: Alignment(horizontal: .leading, vertical: .top)) {
+                            filesChooseToggle(file: file)
+                        }
+                    }
+                }
+            }
+        }
+    }
 }
 
 private extension View {
@@ -166,12 +207,17 @@ private extension View {
     }
     
     func destinationPopoverFileFolder(viewModule: FolderGridListViewModel) -> some View {
+        var files: [File] = []
+        if let file = viewModule.state.file {
+            files.append(file)
+        }
         let fileActionType = viewModule.state.fileActionType
         return sheet(isPresented: .constant(fileActionType != nil)) {
             RootView(
-                fileSelectDelegate: FileSelectDelegate(type: fileActionType ?? .move,
-                selectedFiles: viewModule.filesForAction,
-                selected: { file in
+                fileSelectDelegate: FileSelectDelegate(
+                    type: fileActionType ?? .move,
+                    selectedFiles: files,
+                    selected: { file in
                 viewModule.moveOrCopyWithUserChosen(folder: file)
             }))
             .interactiveDismissDisabled()
@@ -201,3 +247,9 @@ private extension View {
         })
     }
 }
+
+//struct SwiftUIView_Previews: PreviewProvider {
+//    static var previews: some View {
+//        SwiftUIView()
+//    }
+//}

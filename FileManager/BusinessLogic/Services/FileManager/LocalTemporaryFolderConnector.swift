@@ -18,7 +18,6 @@ protocol LocalTemporaryFolderConnector {
         files: [File],
         destination: File,
         conflictResolver: NameConflictResolver,
-        isForOneFile: Bool,
         completion: @escaping (Result<OperationResult, Error>) -> Void
     )
     

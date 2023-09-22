@@ -31,7 +31,7 @@ enum NameConflict {
 }
 
 struct FileSelectDelegate {
-    var type: FileActionType
+    let type: FileActionType
     let selectedFiles: [File]
     let selected: (File?) -> Void
 }
@@ -80,7 +80,7 @@ class FolderViewModel: ObservableObject {
         var folderCreating: String?
         var fileInfoPopover: File?
         var sorted: SortOption?
-        var showOption: FolderShowOption
+        var showOption: FolderShowOption = .grid
     }
     
     private let file: File
@@ -100,7 +100,7 @@ class FolderViewModel: ObservableObject {
     }
     
     convenience init(file: File) {
-        self.init(file: file, state: State(folder: file, showOption: .grid))
+        self.init(file: file, state: State(folder: file))
     }
     
     var filesForAction: [File] {
@@ -179,83 +179,23 @@ class FolderViewModel: ObservableObject {
     func copyChosen() {
         self.state.fileActionType = .copy
     }
-    
-//    func copyOne(file: File) {
-//        state.file = file
-//        self.state.fileActionType = .copy
-//    }
-    
+
     func moveChosen() {
         self.state.fileActionType = .move
     }
     
-//    func moveOne(file: File) {
-//        state.file = file
-//        self.state.fileActionType = .move
-//    }
-    
-//    func startRename(file: File) {
-//        state.file = file
-//        self.state.isFileRenameInProgress = true
-//    }
-//
-//    func rename(newName: String) {
-//        state.isFileRenameInProgress = false
-//        fileManagerCommutator.rename(file: state.file!, newName: newName) { result in
-//            switch result {
-//            case .success:
-//                break
-//            case .failure(let failure):
-//                self.state.error = failure
-//            }
-//        }
-//    }
-    
-//    func clear() {
-//        fileManagerCommutator.cleanTrashFolder(fileForFileManager: file) { result in
-//            switch result {
-//            case .success:
-//                break
-//            case .failure(let failure):
-//                self.state.error = failure
-//            }
-//        }
-//    }
-    
     func moveToTrashChosen() {
         moveToTrash()
     }
-    
-//    func moveToTrashOne(file: File) {
-//        state.file = file
-//        moveToTrash()
-//    }
-//
+
     func restoreFromTrashChosen() {
         restoreFromTrash()
     }
-//
-//    func restoreFromTrashOne(file: File) {
-//        state.file = file
-//        restoreFromTrash()
-//    }
-//
+    
     func deleteChosen() {
         delete()
     }
-    
-//    func deleteOne(file: File) {
-//        state.file = file
-//        delete()
-//    }
 
-    func isFilesDisabledInFolder(isFolderDestinationChose: FileSelectDelegate?, file: File) -> Bool {
-        guard let isFolderDestinationChose = isFolderDestinationChose else {
-            return state.chosenFiles != nil
-        }
-        return file.folderAffiliation == .system(.trash) || isFolderDestinationChose.selectedFiles.contains(file)
-    }
-    
     func isFilesInCurrentFolder(files: [File]) -> Bool? {
         if state.isLoading {
             return nil
@@ -323,8 +263,7 @@ private extension FolderViewModel {
             self.fileManagerCommutator.move(
                 files: self.filesForAction,
                 destination: folder,
-                conflictResolver: self,
-                isForOneFile: self.state.chosenFiles == nil
+                conflictResolver: self
             ) { result in
                 switch result {
                 case .success:
@@ -343,8 +282,7 @@ private extension FolderViewModel {
             self.fileManagerCommutator.copy(
                 files: self.filesForAction,
                 destination: folder,
-                conflictResolver: self,
-                isForOneFile: self.state.file != nil
+                conflictResolver: self
             ) { result in
                 switch result {
                 case .success:

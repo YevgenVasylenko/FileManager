@@ -31,14 +31,12 @@ protocol FileManager {
         files: [File],
         destination: File,
         conflictResolver: NameConflictResolver,
-        isForOneFile: Bool,
         completion: @escaping (Result<OperationResult, Error>) -> Void)
 
     func move(
         files: [File],
         destination: File,
         conflictResolver: NameConflictResolver,
-        isForOneFile: Bool,
         completion: @escaping (Result<OperationResult, Error>) -> Void)
    
     func moveToTrash(filesToTrash: [File], completion: @escaping (Result<Void, Error>) -> Void)

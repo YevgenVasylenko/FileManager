@@ -11,7 +11,7 @@ final class FileManagerCommutator {
 }
 
 extension FileManagerCommutator: FileManager {
-    
+
    func contents(of file: File, completion: @escaping (Result<[File], Error>) -> Void) {
         FileManagerFactory.makeFileManager(file: file).contents(of: file, completion: completion)
     }
@@ -44,7 +44,6 @@ extension FileManagerCommutator: FileManager {
         files: [File],
         destination: File,
         conflictResolver: NameConflictResolver,
-        isForOneFile: Bool,
         completion: @escaping (Result<OperationResult, Error>) -> Void
     ) {
         guard let firstFile = files.first else {
@@ -58,7 +57,6 @@ extension FileManagerCommutator: FileManager {
                 files: files,
                 destination: destination,
                 conflictResolver: conflictResolver,
-                isForOneFile: isForOneFile,
                 completion: completion)
             return
         }
@@ -74,7 +72,6 @@ extension FileManagerCommutator: FileManager {
                     files: downloadedFiles,
                     destination: destination,
                     conflictResolver: conflictResolver,
-                    isForOneFile: isForOneFile,
                     completion: completion
                 )
             case .failure(let error):
@@ -87,7 +84,6 @@ extension FileManagerCommutator: FileManager {
         files: [File],
         destination: File,
         conflictResolver: NameConflictResolver,
-        isForOneFile: Bool,
         completion: @escaping (Result<OperationResult, Error>) -> Void
     ) {
         guard let firstFile = files.first else {
@@ -101,7 +97,6 @@ extension FileManagerCommutator: FileManager {
                 files: files,
                 destination: destination,
                 conflictResolver: conflictResolver,
-                isForOneFile: isForOneFile,
                 completion: completion
             )
         }

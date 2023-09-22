@@ -12,24 +12,15 @@ class FolderGridListViewModel: ObservableObject {
         var file: File?
         var files: [File]
         var fileActionType: FileActionType?
-        var chosenFiles: Set<File>?
         var fileInfoPopover: File?
         var isFileRenameInProgress = false
         var error: Error?
         var nameConflict: NameConflict?
+        var showOption: FolderShowOption = .grid
     }
     
     private var fileManagerCommutator = FileManagerCommutator()
     private var conflictCompletion: ((ConflictNameResult) -> Void)?
-    
-    var filesForAction: [File] {
-        if let files = state.chosenFiles {
-            return Array(files)
-        } else {
-            guard let file = state.file else { return [] }
-            return [file]
-        }
-    }
 
     @Published
     var state: State
@@ -64,10 +55,10 @@ class FolderGridListViewModel: ObservableObject {
     }
     
     func moveToTrash() {
-        fileManagerCommutator.moveToTrash(filesToTrash: filesForAction) { result in
+        fileManagerCommutator.moveToTrash(filesToTrash: [state.file!]) { result in
             switch result {
             case .success:
-                self.state.chosenFiles = nil
+                self.state.file = nil
                 break
             case .failure(let failure):
                 self.state.error = failure
@@ -76,10 +67,10 @@ class FolderGridListViewModel: ObservableObject {
     }
     
     func restoreFromTrash() {
-        fileManagerCommutator.restoreFromTrash(filesToRestore: filesForAction) { result in
+        fileManagerCommutator.restoreFromTrash(filesToRestore: [state.file!]) { result in
             switch result {
             case .success:
-                self.state.chosenFiles = nil
+                self.state.file = nil
                 break
             case .failure(let failure):
                 self.state.error = failure
@@ -93,10 +84,10 @@ class FolderGridListViewModel: ObservableObject {
     }
     
     func delete() {
-        fileManagerCommutator.deleteFile(files: filesForAction) { result in
+        fileManagerCommutator.deleteFile(files: [state.file!]) { result in
             switch result {
             case .success:
-                break
+                self.state.file = nil
             case .failure(let failure):
                 self.state.error = failure
             }
@@ -126,11 +117,11 @@ class FolderGridListViewModel: ObservableObject {
         }
     }
     
-    func isFilesDisabledInFolder(isFolderDestinationChose: FileSelectDelegate?, file: File) -> Bool {
-        guard let isFolderDestinationChose = isFolderDestinationChose else {
-            return state.chosenFiles != nil
+    func isFilesDisabledInFolder(fileSelectDelegate: FileSelectDelegate?, file: File) -> Bool {
+        guard let fileSelectDelegate = fileSelectDelegate else {
+            return false
         }
-        return file.folderAffiliation == .system(.trash) || isFolderDestinationChose.selectedFiles.contains(file)
+        return file.folderAffiliation == .system(.trash) || fileSelectDelegate.selectedFiles.contains(file)
     }
     
     func moveOrCopyWithUserChosen(folder: File?) {
@@ -152,14 +143,13 @@ class FolderGridListViewModel: ObservableObject {
         self.state.fileActionType = nil
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.5)  {
             self.fileManagerCommutator.move(
-                files: self.filesForAction,
+                files: [self.state.file!],
                 destination: folder,
-                conflictResolver: self,
-                isForOneFile: self.state.chosenFiles == nil
+                conflictResolver: self
             ) { result in
                 switch result {
                 case .success:
-                    self.state.chosenFiles = nil
+                    self.state.file = nil
                     break
                 case .failure(let failure):
                     self.state.error = failure
@@ -172,14 +162,13 @@ class FolderGridListViewModel: ObservableObject {
         self.state.fileActionType = nil
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.5)  {
             self.fileManagerCommutator.copy(
-                files: self.filesForAction,
+                files: [self.state.file!],
                 destination: folder,
-                conflictResolver: self,
-                isForOneFile: self.state.file != nil
+                conflictResolver: self
             ) { result in
                 switch result {
                 case .success:
-                    self.state.chosenFiles = nil
+                    self.state.file = nil
                     break
                 case .failure(let failure):
                     self.state.error = failure
@@ -192,8 +181,6 @@ class FolderGridListViewModel: ObservableObject {
         self.state.nameConflict = nil
         conflictCompletion?(nameResult)
     }
-    
-    
 }
 
 extension FolderGridListViewModel: NameConflictResolver {

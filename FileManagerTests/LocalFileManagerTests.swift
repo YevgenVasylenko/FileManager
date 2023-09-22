@@ -109,7 +109,7 @@ final class LocalFileManagerTests: XCTestCase {
             XCTAssertTrue(contentResult.isSuccess)
         }
         let fileAfterMove = destinationFolder.makeSubfile(name: fileToMove.name)
-        fileManager.move(files: [fileToMove], destination: destinationFolder, conflictResolver: conflictResolver, isForOneFile: true) { result in
+        fileManager.move(files: [fileToMove], destination: destinationFolder, conflictResolver: conflictResolver) { result in
             switch result {
             case .success:
                 XCTAssertTrue(SystemFileManger.default.fileExists(atPath: fileAfterMove.path.path))
@@ -127,7 +127,7 @@ final class LocalFileManagerTests: XCTestCase {
             XCTAssertTrue(contentResult.isSuccess)
         }
         let destinationFolder = fileManager.rootFolder.makeStubFile()
-        fileManager.move(files: [fileToMove], destination: destinationFolder, conflictResolver: conflictResolver, isForOneFile: true) { result in
+        fileManager.move(files: [fileToMove], destination: destinationFolder, conflictResolver: conflictResolver) { result in
             switch result {
             case .success:
                 XCTFail()
@@ -146,7 +146,7 @@ final class LocalFileManagerTests: XCTestCase {
             XCTAssertTrue(contentResult.isSuccess)
         }
         let fileAfterMove = destinationFolder.makeSubfile(name: fileToMove.name)
-        fileManager.move(files: [fileToMove], destination: destinationFolder, conflictResolver: conflictResolver, isForOneFile: true) { result in
+        fileManager.move(files: [fileToMove], destination: destinationFolder, conflictResolver: conflictResolver) { result in
             switch result {
             case .success:
                 XCTFail()
@@ -170,7 +170,7 @@ final class LocalFileManagerTests: XCTestCase {
         fileManager.createFolder(at: fileAfterMove) { contentResult in
             XCTAssertTrue(contentResult.isSuccess)
         }
-        fileManager.move(files: [fileToMove], destination: destinationFolder, conflictResolver: conflictResolver, isForOneFile: true) { result in
+        fileManager.move(files: [fileToMove], destination: destinationFolder, conflictResolver: conflictResolver) { result in
             switch result {
             case .success:
                 XCTAssertFalse(SystemFileManger.default.fileExists(atPath: fileToMove.path.path))
@@ -195,7 +195,7 @@ final class LocalFileManagerTests: XCTestCase {
             XCTAssertTrue(contentResult.isSuccess)
         }
 
-        fileManager.move(files: [fileToMove], destination: destinationFolder, conflictResolver: conflictResolver, isForOneFile: true) { result in
+        fileManager.move(files: [fileToMove], destination: destinationFolder, conflictResolver: conflictResolver) { result in
             switch result {
             case .success:
                 XCTAssertTrue(SystemFileManger.default.fileExists(atPath: fileAfterMove.path.path + " (1)"))
@@ -217,7 +217,7 @@ final class LocalFileManagerTests: XCTestCase {
             XCTAssertTrue(contentResult.isSuccess)
         }
         let copiedFile = destinationFolder.makeSubfile(name: fileToCopy.name)
-        fileManager.copy(files: [fileToCopy], destination: destinationFolder, conflictResolver: conflictResolver, isForOneFile: true) { copyFileResult in
+        fileManager.copy(files: [fileToCopy], destination: destinationFolder, conflictResolver: conflictResolver) { copyFileResult in
             switch copyFileResult {
             case .success:
                 XCTAssertTrue(SystemFileManger.default.fileExists(atPath: fileToCopy.path.path))
@@ -236,7 +236,7 @@ final class LocalFileManagerTests: XCTestCase {
         }
         let destinationFolder = fileManager.rootFolder.makeStubFile()
         let copiedFile = destinationFolder.makeSubfile(name: fileToCopy.name)
-        fileManager.copy(files: [fileToCopy], destination: destinationFolder, conflictResolver: conflictResolver, isForOneFile: true) { copyFileResult in
+        fileManager.copy(files: [fileToCopy], destination: destinationFolder, conflictResolver: conflictResolver) { copyFileResult in
             switch copyFileResult {
             case .success:
                 XCTFail()
@@ -253,7 +253,7 @@ final class LocalFileManagerTests: XCTestCase {
             XCTAssertTrue(contentResult.isSuccess)
         }
         let copiedFile = destinationFolder.makeSubfile(name: fileToCopy.name)
-        fileManager.copy(files: [fileToCopy], destination: destinationFolder, conflictResolver: conflictResolver, isForOneFile: true) { copyFileResult in
+        fileManager.copy(files: [fileToCopy], destination: destinationFolder, conflictResolver: conflictResolver) { copyFileResult in
             switch copyFileResult {
             case .success:
                 XCTFail()
@@ -281,7 +281,7 @@ final class LocalFileManagerTests: XCTestCase {
         fileManager.createFolder(at: fileInConflictedFolder) { contentResult in
             XCTAssertTrue(contentResult.isSuccess)
         }
-        fileManager.copy(files: [fileToCopy], destination: destinationFolder, conflictResolver: conflictResolver, isForOneFile: true) { result in
+        fileManager.copy(files: [fileToCopy], destination: destinationFolder, conflictResolver: conflictResolver) { result in
             switch result {
             case .success:
                 XCTAssertTrue(SystemFileManger.default.fileExists(atPath: fileToCopy.path.path))
@@ -306,7 +306,7 @@ final class LocalFileManagerTests: XCTestCase {
         fileManager.createFolder(at: folderInDestinationWithSameName) { contentResult in
             XCTAssertTrue(contentResult.isSuccess)
         }
-        fileManager.copy(files: [fileToCopy], destination: destinationFolder, conflictResolver: conflictResolver, isForOneFile: true) { result in
+        fileManager.copy(files: [fileToCopy], destination: destinationFolder, conflictResolver: conflictResolver) { result in
             switch result {
             case .success:
                 SystemFileManger.default.fileExists(atPath: folderInDestinationWithSameName.path.path + " (1)")
