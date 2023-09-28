@@ -36,17 +36,24 @@ struct FileSelectDelegate {
     let selected: (File?) -> Void
 }
 
-struct SortOption: Hashable {
-    enum Attribute: CaseIterable, Hashable {
+struct SortOption: Hashable, Codable {
+    enum Attribute: CaseIterable, Hashable, Codable {
         case name
         case type
         case date
         case size
     }
 
-    enum Direction: Hashable {
+    enum Direction: Hashable, Codable {
         case ascending
         case descending
+        
+        var isAscending: Bool {
+            switch self {
+            case .ascending: return true
+            case .descending: return false
+            }
+        }
         
         func toggled() -> Self {
             switch self {
@@ -57,16 +64,16 @@ struct SortOption: Hashable {
     }
 
     let attribute: Attribute
-    var direction: Direction?
+    var direction: Direction = .ascending
 }
 
-enum FolderShowOption {
+enum LayoutOption: Codable {
     case grid
     case list
 }
 
 class FolderViewModel: ObservableObject {
-
+    
     struct State {
         var folder: File
         var files: [File] = []
@@ -74,13 +81,9 @@ class FolderViewModel: ObservableObject {
         var error: Error?
         var nameConflict: NameConflict?
         var fileActionType: FileActionType?
-        var file: File?
-        var isFileRenameInProgress = false
         var chosenFiles: Set<File>?
         var folderCreating: String?
-        var fileInfoPopover: File?
-        var sorted: SortOption?
-        var showOption: FolderShowOption = .grid
+        var fileDisplayOptions: FileDisplayOptions
     }
     
     private let file: File
@@ -95,20 +98,22 @@ class FolderViewModel: ObservableObject {
         self.file = file
         self.state = state
         folderMonitor?.folderDidChange = { [weak self] in
-            self?.load()
+            self?.loadContent()
         }
     }
     
     convenience init(file: File) {
-        self.init(file: file, state: State(folder: file))
+        self.init(file: file, state: State(
+            folder: file,
+            fileDisplayOptions: FileDisplayOptionsManager.options)
+        )
     }
     
     var filesForAction: [File] {
         if let files = state.chosenFiles {
             return Array(files)
         } else {
-            guard let file = state.file else { return [] }
-            return [file]
+            return []
         }
     }
     
@@ -132,10 +137,12 @@ class FolderViewModel: ObservableObject {
         }
     }
     
-    func load() {
+    func loadContent() {
         folderMonitor?.startMonitoring()
         state.isLoading = true
-        fileManagerCommutator.contents(of: file) { result in
+        fileManagerCommutator.contents(of: file) { [weak self] result in
+            guard let self else { return }
+            
             switch result {
             case .success(let files):
                 self.state.files = files
@@ -145,18 +152,19 @@ class FolderViewModel: ObservableObject {
             self.state.isLoading = false
         }
         makeAtributesForFiles()
+        sort()
     }
     
     func startCreatingFolder() {
         fileManagerCommutator.newNameForCreationOfFolder(
             at: file,
             newFolderName: R.string.localizable.newFolder.callAsFunction()
-        ) { result in
+        ) { [weak self] result in
             switch result {
             case .success(let file):
-                self.state.folderCreating = file.name
+                self?.state.folderCreating = file.name
             case .failure:
-                return
+                break
             }
         }
     }
@@ -165,7 +173,9 @@ class FolderViewModel: ObservableObject {
         state.folderCreating = nil
         let createdFile = file.makeSubfile(name: newName, isDirectory: true)
         state.isLoading = true
-        fileManagerCommutator.createFolder(at: createdFile) { result in
+        fileManagerCommutator.createFolder(at: createdFile) { [weak self] result in
+            guard let self else { return }
+            
             switch result {
             case .success:
                 break
@@ -184,16 +194,37 @@ class FolderViewModel: ObservableObject {
         self.state.fileActionType = .move
     }
     
-    func moveToTrashChosen() {
-        moveToTrash()
+    func moveToTrash() {
+        fileManagerCommutator.moveToTrash(filesToTrash: filesForAction) { [weak self] result in
+            switch result {
+            case .success:
+                self?.state.chosenFiles = nil
+            case .failure(let failure):
+                self?.state.error = failure
+            }
+        }
     }
 
-    func restoreFromTrashChosen() {
-        restoreFromTrash()
+    func restoreFromTrash() {
+        fileManagerCommutator.restoreFromTrash(filesToRestore: filesForAction) { [weak self] result in
+            switch result {
+            case .success:
+                self?.state.chosenFiles = nil
+            case .failure(let failure):
+                self?.state.error = failure
+            }
+        }
     }
     
-    func deleteChosen() {
-        delete()
+    func delete() {
+        fileManagerCommutator.deleteFile(files: filesForAction) { [weak self] result in
+            switch result {
+            case .success:
+                break
+            case .failure(let failure):
+                self?.state.error = failure
+            }
+        }
     }
 
     func isFilesInCurrentFolder(files: [File]) -> Bool? {
@@ -204,52 +235,31 @@ class FolderViewModel: ObservableObject {
         }
     }
     
-    func sort(sortOption: SortOption) {
-        self.state.sorted = sortOption
+    func update(fileDisplayOptions: FileDisplayOptions) {
+        FileDisplayOptionsManager.options = fileDisplayOptions
+        state.fileDisplayOptions = fileDisplayOptions
+        sort()
+    }
+    
+    func sort() {
+        let sortOption = state.fileDisplayOptions.sort
+        let isAscending = sortOption.direction.isAscending
         switch sortOption.attribute {
         case .name:
-            switch sortOption.direction! {
-            case .ascending:
-                state.files.sort {
-                    $0.name < $1.name
-                }
-            case .descending:
-                state.files.sort {
-                    $0.name > $1.name
-                }
+            sortForAffiliationOrder(ascending: isAscending) {
+                $0.name
             }
         case .type:
-            switch sortOption.direction! {
-            case .ascending:
-                state.files.sort {
-                    $0.path.pathExtension < $1.path.pathExtension
-                }
-            case .descending:
-                state.files.sort {
-                    $0.path.pathExtension > $1.path.pathExtension
-                }
+            sortForAffiliationOrder(ascending: isAscending) {
+                $0.path.pathExtension
             }
         case .date:
-            switch sortOption.direction! {
-            case .ascending:
-                state.files.sort {
-                    $0.attributes?.createdDate ?? Date() > $1.attributes?.createdDate ?? Date()
-                }
-            case .descending:
-                state.files.sort {
-                    $0.attributes?.createdDate ?? Date() < $1.attributes?.createdDate ?? Date()
-                }
+            sortForAffiliationOrder(ascending: isAscending) {
+                $0.attributes?.createdDate ?? Date()
             }
         case .size:
-            switch sortOption.direction! {
-            case .ascending:
-                state.files.sort {
-                    $0.attributes?.size ?? 0.0 > $1.attributes?.size ?? 0.0
-                }
-            case .descending:
-                state.files.sort {
-                    $0.attributes?.size ?? 0.0 < $1.attributes?.size ?? 0.0
-                }
+            sortForAffiliationOrder(ascending: isAscending) {
+                $0.attributes?.size ?? 0.0
             }
         }
     }
@@ -264,13 +274,12 @@ private extension FolderViewModel {
                 files: self.filesForAction,
                 destination: folder,
                 conflictResolver: self
-            ) { result in
+            ) { [weak self] result in
                 switch result {
                 case .success:
-                    self.state.chosenFiles = nil
-                    break
+                    self?.state.chosenFiles = nil
                 case .failure(let failure):
-                    self.state.error = failure
+                    self?.state.error = failure
                 }
             }
         }
@@ -283,62 +292,44 @@ private extension FolderViewModel {
                 files: self.filesForAction,
                 destination: folder,
                 conflictResolver: self
-            ) { result in
+            ) { [weak self] result in
                 switch result {
                 case .success:
-                    self.state.chosenFiles = nil
-                    break
+                    self?.state.chosenFiles = nil
                 case .failure(let failure):
-                    self.state.error = failure
+                    self?.state.error = failure
                 }
-            }
-        }
-    }
-    
-    func moveToTrash() {
-        fileManagerCommutator.moveToTrash(filesToTrash: filesForAction) { result in
-            switch result {
-            case .success:
-                self.state.chosenFiles = nil
-                break
-            case .failure(let failure):
-                self.state.error = failure
-            }
-        }
-    }
-    
-    func restoreFromTrash() {
-        fileManagerCommutator.restoreFromTrash(filesToRestore: filesForAction) { result in
-            switch result {
-            case .success:
-                self.state.chosenFiles = nil
-                break
-            case .failure(let failure):
-                self.state.error = failure
-            }
-        }
-    }
-    
-    func delete() {
-        fileManagerCommutator.deleteFile(files: filesForAction) { result in
-            switch result {
-            case .success:
-                break
-            case .failure(let failure):
-                self.state.error = failure
             }
         }
     }
     
     func makeAtributesForFiles() {
         for i in state.files.indices {
-            fileManagerCommutator.getFileAttributes(file: state.files[i]) { result in
+            fileManagerCommutator.getFileAttributes(file: state.files[i]) { [weak self] result in
                 switch result {
                 case .success(let attributes):
-                    self.state.files[i].attributes = attributes
+                    self?.state.files[i].attributes = attributes
                 case .failure(let failure):
-                    self.state.error = failure
+                    self?.state.error = failure
                 }
+            }
+        }
+    }
+
+    func sortForAffiliationOrder(
+        ascending: Bool,
+        field: (File) -> some Comparable
+    ) {
+        state.files.sort { file1, file2 in
+            let affiliationOrder = file1.folderAffiliation < file2.folderAffiliation
+            switch affiliationOrder {
+            case .orderedAscending:
+                return true
+            case .orderedDescending:
+                return false
+            case .orderedSame:
+                let result = field(file1) < field(file2)
+                return result == ascending
             }
         }
     }
@@ -349,4 +340,45 @@ extension FolderViewModel: NameConflictResolver {
         self.state.nameConflict = .resolving(conflictedFile, placeOfConflict)
         self.conflictCompletion = completion
     }
+}
+
+enum FileDisplayOptionsManager {
+
+    private static var _options: FileDisplayOptions?
+
+    static var options: FileDisplayOptions {
+        get {
+            if let options = _options {
+                return options
+            }
+            let options = decodeOptions() ?? .initial
+            _options = options
+            return options
+        }
+        set {
+            let encoder = JSONEncoder()
+            if let encoded = try? encoder.encode(newValue) {
+                UserDefaults.standard.set(encoded, forKey: "displayOptionData")
+            }
+            _options = newValue
+        }
+    }
+    
+    private static func decodeOptions() -> FileDisplayOptions? {
+        var options: FileDisplayOptions?
+        if let displayOptionData = UserDefaults.standard.object(forKey: "displayOptionData") as? Data {
+            let decoder = JSONDecoder()
+            if let displayOptionDecoded = try? decoder.decode(FileDisplayOptions.self, from: displayOptionData) {
+                options = displayOptionDecoded
+            }
+        }
+        return options
+    }
+}
+
+struct FileDisplayOptions: Codable {
+    var layout: LayoutOption
+    var sort: SortOption
+    
+    static var initial = Self(layout: .grid, sort: SortOption(attribute: .name))
 }

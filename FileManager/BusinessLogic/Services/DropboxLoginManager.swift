@@ -9,7 +9,7 @@ import UIKit
 import SwiftyDropbox
 
 enum DropboxLoginManager {
-    
+
     static var isLogged: Bool {
         DropboxClientsManager.authorizedClient != nil
     }

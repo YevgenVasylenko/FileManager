@@ -27,25 +27,30 @@ struct FolderGridListView: View {
     init(
         files: [File],
         fileSelectDelegate: FileSelectDelegate?,
-        selectedFiles: Binding<Set<File>?>,
-        showOption: FolderShowOption
+        selectedFiles: Binding<Set<File>?>
     ) {
         self.viewModel = FolderGridListViewModel(files: files)
         self.fileSelectDelegate = fileSelectDelegate
         self.selectedFiles = selectedFiles
-        viewModel.state.showOption = showOption
     }
     
     var body: some View {
         Group {
-            switch viewModel.state.showOption {
+            switch FileDisplayOptionsManager.options.layout {
             case .grid: folderGridView()
             case .list: folderListView()
             }
         }
         .renamePopover(viewModel: viewModel, newName: $newName)
-        .conflictAlertFolder(viewModule: viewModel)
-        .destinationPopoverFileFolder(viewModule: viewModel)
+        .destinationPopover(
+            actionType: viewModel.state.fileActionType,
+            files: viewModel.filesForAction,
+            moveOrCopyToFolder: viewModel.moveOrCopyWithUserChosen
+        )
+        .conflictPopover(
+            conflictName: viewModel.state.nameConflict,
+            resolveConflictWithUserChoice: viewModel.userConflictResolveChoice
+        )
     }
 }
 
@@ -61,7 +66,10 @@ private extension FolderGridListView {
     func viewToShow(file: File) -> some View {
         Group {
             if file.isFolder() {
-                FolderView(file: file, fileSelectDelegate: fileSelectDelegate)
+                FolderView(
+                    file: file,
+                    fileSelectDelegate: fileSelectDelegate
+                )
             } else {
                 FileContentView(file: file)
             }
@@ -94,7 +102,7 @@ private extension FolderGridListView {
             case .delete:
                 viewModel.deleteOne(file: file)
             case .clean:
-                viewModel.clear()
+                viewModel.clear(file: file)
             case .info:
                 viewModel.state.fileInfoPopover = file
             }
@@ -133,22 +141,17 @@ private extension FolderGridListView {
         List(viewModel.state.files) { file in
             HStack {
                 filesChooseToggle(file: file)
-                NavigationLink {
-                    viewToShow(file: file)
-                } label: {
-                    FileView(file: file, style: .list, infoPresented: fileInfoPopoverBinding(for: file))
-                }
+                fileView(file: file, style: .list)
                 if fileSelectDelegate == nil {
                     fileActionsMenuView(file: file)
                 } else {
                     Spacer()
                 }
             }
-            .disabled(viewModel.isFilesDisabledInFolder(
-                fileSelectDelegate: fileSelectDelegate, file: file) ||
-                      viewModel.state.fileInfoPopover != nil
-            )
+            .buttonStyle(.plain)
+            .disabled(isFileViewDisabled(file: file))
         }
+        .listStyle(.plain)
         .background(.clear)
         .scrollContentBackground(.hidden)
     }
@@ -159,18 +162,14 @@ private extension FolderGridListView {
                 ForEach($viewModel.state.files, id: \.self) { $file in
                     ZStack {
                         VStack {
-                            NavigationLink {
-                                viewToShow(file: file)
-                            } label: {
-                                FileView(file: file, style: .grid, infoPresented: fileInfoPopoverBinding(for: file))
-                            }
+                            fileView(file: file, style: .grid)
                             if fileSelectDelegate == nil {
                                 fileActionsMenuView(file: file)
                             } else {
                                 Spacer()
                             }
                         }
-                        .disabled(viewModel.isFilesDisabledInFolder(fileSelectDelegate: fileSelectDelegate, file: file) || viewModel.state.fileInfoPopover != nil)
+                        .disabled(isFileViewDisabled(file: file))
                         .overlay(alignment: Alignment(horizontal: .leading, vertical: .top)) {
                             filesChooseToggle(file: file)
                         }
@@ -179,51 +178,21 @@ private extension FolderGridListView {
             }
         }
     }
+    
+    func fileView(file: File, style: FileView.Style) -> some View {
+        NavigationLink {
+            viewToShow(file: file)
+        } label: {
+            FileView(file: file, style: style, infoPresented: fileInfoPopoverBinding(for: file))
+        }
+    }
+    
+    func isFileViewDisabled(file: File) -> Bool {
+        viewModel.isFilesDisabledInFolder(fileSelectDelegate: fileSelectDelegate, file: file) || viewModel.state.fileInfoPopover != nil
+    }
 }
 
 private extension View {
-    
-    func conflictAlertFolder(viewModule: FolderGridListViewModel) -> some View {
-        let nameConflict = viewModule.state.nameConflict
-        return alert(
-            R.string.localizable.conflictAlertTitlePart1.callAsFunction() +
-            (nameConflict?.placeOfConflict?.displayedName() ?? "") +
-            R.string.localizable.conflictAlertTitlePart2.callAsFunction() +
-            (nameConflict?.conflictedFile?.name ?? ""),
-            isPresented: .constant(nameConflict != nil)
-        ) {
-            HStack {
-                Button(R.string.localizable.cancel.callAsFunction()) {
-                    viewModule.userConflictResolveChoice(nameResult: .cancel)
-                }
-                Button(R.string.localizable.replace.callAsFunction()) {
-                    viewModule.userConflictResolveChoice(nameResult: .replace)
-                }
-                Button(R.string.localizable.new_name.callAsFunction()) {
-                    viewModule.userConflictResolveChoice(nameResult: .newName)
-                }
-            }
-        }
-    }
-    
-    func destinationPopoverFileFolder(viewModule: FolderGridListViewModel) -> some View {
-        var files: [File] = []
-        if let file = viewModule.state.file {
-            files.append(file)
-        }
-        let fileActionType = viewModule.state.fileActionType
-        return sheet(isPresented: .constant(fileActionType != nil)) {
-            RootView(
-                fileSelectDelegate: FileSelectDelegate(
-                    type: fileActionType ?? .move,
-                    selectedFiles: files,
-                    selected: { file in
-                viewModule.moveOrCopyWithUserChosen(folder: file)
-            }))
-            .interactiveDismissDisabled()
-        }
-    }
-
     func renamePopover(viewModel: FolderGridListViewModel, newName: Binding<String>) -> some View {
         return alert(R.string.localizable.renamePopupTitle.callAsFunction() + (viewModel.state.file?.name ?? ""),
                      isPresented: .constant(viewModel.state.isFileRenameInProgress),

@@ -8,8 +8,20 @@
 import Foundation
 
 struct File {
-
+    
     enum FolderAffiliation: Equatable {
+        static func < (lhs: File.FolderAffiliation, rhs: File.FolderAffiliation) -> ComparisonResult {
+            switch (lhs, rhs) {
+            case (.user, .system):
+                return .orderedDescending
+            case (.system, .user):
+                return .orderedAscending
+            case (.system, .system),
+                (.user, .user):
+                return .orderedSame
+            }
+        }
+        
         enum SystemFolderName {
             case trash
             case download
@@ -79,14 +91,14 @@ struct File {
             }
         }
     }
-
+    
     var folderAffiliation: FolderAffiliation = .user
     var actions: [FileAction] = []
     let storageType: StorageType
     var path: URL
     var isDeleted = false
     var attributes: FileAttributes?
-
+    
     init(path: URL, storageType: StorageType) {
         self.path = path
         self.storageType = storageType
@@ -99,7 +111,7 @@ struct File {
     var nameWithoutExtension: String {
         path.deletingPathExtension().lastPathComponent
     }
-
+    
     var fileType: ObjectType {
         typeDefine()
     }
@@ -130,7 +142,7 @@ struct File {
         let newName = name + Date.now.formatted(date: .omitted, time: .standard)
         path = self.rename(name: newName).path
     }
- }
+}
 
 extension File: Hashable {
     

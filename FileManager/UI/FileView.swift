@@ -30,7 +30,7 @@ struct FileView: View {
             nameOfFile(fileName: file.displayedName())
         }
 //        .padding()
-//        .frame(width: width())
+        .frame(width: width())
         .popover(isPresented: infoPresented) {
             FileInfoView(file: file)
         }
@@ -43,8 +43,8 @@ private extension FileView {
     
     func imageOfFile(imageName: String) -> some View {
         return Image(imageName)
-//            .resizable()
-            .frame(width: 75, height: 75)
+            .resizable()
+            .frame(width: 65, height: 65)
     }
     
     func nameOfFile(fileName: String) -> some View {
@@ -66,12 +66,12 @@ private extension FileView {
         }
     }
     
-    func width() -> CGFloat {
+    func width() -> CGFloat? {
         switch style {
         case .grid:
             return 80
         case .list:
-            return 30
+            return nil
         case .info:
             return 200
         }

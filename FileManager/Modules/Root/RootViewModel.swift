@@ -10,7 +10,7 @@ import Foundation
 class RootViewModel: ObservableObject {
     struct State {
         var selectedFile: File? = LocalFileManager().rootFolder
-        var isDropboxLogged: Bool = false
+        var isDropboxLogged = false
     }
     
     let files: [File] = [LocalFileManager().rootFolder, DropboxFileManager().rootFolder]

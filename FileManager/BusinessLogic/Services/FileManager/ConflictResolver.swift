@@ -7,10 +7,10 @@
 
 import Foundation
 
-enum ConflictNameResult {
-    case cancel
+enum ConflictNameResult: CaseIterable {
     case replace
     case newName
+    case cancel
     case error
 }
 

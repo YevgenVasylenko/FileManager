@@ -20,18 +20,22 @@ struct RootView: View {
     
     var body: some View {
         NavigationSplitView {
-            List(viewModel.files, id: \.self, selection: $viewModel.state.selectedFile) { fileInRow in
-                dataSourceSelectionButton(file: fileInRow)
+            List(viewModel.files, id: \.self, selection: $viewModel.state.selectedFile) { file in
+                dataSourceSelectionButton(file: file)
             }
         } detail: {
             if viewModel.isLoggedToCloud() || viewModel.state.selectedFile?.storageType.isLocal ?? true {
-                FolderView(file: viewModel.state.selectedFile ?? LocalFileManager().rootFolder, fileSelectDelegate: fileSelectDelegate)
+                FolderView(
+                    file: viewModel.state.selectedFile ?? LocalFileManager().rootFolder,
+                    fileSelectDelegate: fileSelectDelegate
+                )
                     .id(viewModel.state.selectedFile)
             } else {
                 connectionButton()
                     .toolbar(.hidden)
             }
         }
+        .listStyle(.plain)
         Spacer()
         .onOpenURL(perform: { url in
             DropboxLoginManager.openUrl(url: url)
@@ -51,7 +55,7 @@ private extension RootView {
                 .font(.headline)
         }, icon: {
             Image(imageNameForSource(file: file))
-        })
+        }).buttonStyle(.plain)
             .padding()
             .contextMenu {
                 if !file.storageType.isLocal {

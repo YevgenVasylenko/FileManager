@@ -430,6 +430,7 @@ private extension LocalFileManager {
             }
         }
     }
+
 }
 
 struct NameConflictResolverError: NameConflictResolver {

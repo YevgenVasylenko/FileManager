@@ -8,19 +8,12 @@
 import SwiftUI
 
 struct FolderShowOptionsView: View {
-    private let sortedOption: SortOption?
-    private let selectedOption: (SortOption) -> Void
-    private let selectedFolderShow: (FolderShowOption) -> Void
+    private let options = FileDisplayOptionsManager.options
+    private let optionSelected: (FileDisplayOptions) -> Void
     private var sortOptions: [SortOption]
     
-    init(
-        sortedOption: SortOption?,
-        selectedOption: @escaping (SortOption) -> Void,
-        selectedFolderShow: @escaping (FolderShowOption) -> Void
-    ) {
-        self.sortedOption = sortedOption
-        self.selectedOption = selectedOption
-        self.selectedFolderShow = selectedFolderShow
+    init(optionSelected: @escaping (FileDisplayOptions) -> Void) {
+        self.optionSelected = optionSelected
         self.sortOptions = SortOption.Attribute.allCases.map { attribute in
             SortOption(attribute: attribute)
         }
@@ -31,12 +24,12 @@ struct FolderShowOptionsView: View {
         Menu {
             Section {
                 Button {
-                    selectedFolderShow(.grid)
+                    optionSelected(FileDisplayOptions(layout: .grid, sort: options.sort))
                 } label: {
                     Label(R.string.localizable.grid.callAsFunction(), systemImage: "square.grid.2x2")
                 }
                 Button {
-                    selectedFolderShow(.list)
+                    optionSelected(FileDisplayOptions(layout: .list, sort: options.sort))
                 } label: {
                     Label(R.string.localizable.list.callAsFunction(), systemImage: "list.bullet")
                 }
@@ -56,17 +49,18 @@ struct FolderShowOptionsView: View {
 private extension FolderShowOptionsView {
     func button(sortOption: SortOption) -> some View {
         Button {
-            selectedOption(makeSelectedOption(sortOption: sortOption))
+            optionSelected(FileDisplayOptions(
+                layout: options.layout,
+                sort: makeSelectedOption(sortOption: sortOption)))
         } label: {
             labelForButton(sortOption: sortOption)
         }
     }
     
     func updateSortOptions(sortOptions: inout [SortOption]) {
-        guard let sortedOption = sortedOption else { return }
         for optionNumber in sortOptions.indices {
-            if sortOptions[optionNumber].attribute == sortedOption.attribute {
-                sortOptions[optionNumber] = sortedOption
+            if sortOptions[optionNumber].attribute == options.sort.attribute {
+                sortOptions[optionNumber] = options.sort
             }
         }
     }
@@ -74,7 +68,7 @@ private extension FolderShowOptionsView {
     func makeSelectedOption(sortOption: SortOption) -> SortOption {
         SortOption(
             attribute: sortOption.attribute,
-            direction: sortOption.direction?.toggled() ?? .ascending
+            direction: sortOption.direction.toggled()
         )
     }
     
@@ -102,9 +96,9 @@ private extension FolderShowOptionsView {
     
     func labelForButton(sortOption: SortOption) -> some View {
         Group {
-            if let direction = sortOption.direction {
+            if self.options.sort == sortOption {
                  Label(buttonName(sortOptionAttribute: sortOption.attribute),
-                             systemImage: arrowImage(sortOptionDirection: direction))
+                       systemImage: arrowImage(sortOptionDirection: sortOption.direction))
             } else {
                  Text(buttonName(sortOptionAttribute: sortOption.attribute))
             }
