@@ -10,39 +10,52 @@ import SwiftUI
 struct RootView: View {
     let fileSelectDelegate: FileSelectDelegate?
     
-    @ObservedObject
+    @StateObject
     private var viewModel: RootViewModel
     
     init(fileSelectDelegate: FileSelectDelegate? = nil) {
         self.fileSelectDelegate = fileSelectDelegate
-        self.viewModel = RootViewModel()
+        self._viewModel = StateObject(wrappedValue: RootViewModel())
+//        self.viewModel = RootViewModel()
     }
     
     var body: some View {
         NavigationSplitView {
-            List(viewModel.files, id: \.self, selection: $viewModel.state.selectedFile) { file in
+            List(viewModel.state.files, id: \.self, selection: $viewModel.state.selectedFile) { file in
                 dataSourceSelectionButton(file: file)
+            }
+            .onChange(of: viewModel.state.selectedFile) { newValue in
+                viewModel.state.detailNavigationStack = NavigationPath()
             }
         } detail: {
             if viewModel.isLoggedToCloud() || viewModel.state.selectedFile?.storageType.isLocal ?? true {
-                FolderView(
-                    file: viewModel.state.selectedFile ?? LocalFileManager().rootFolder,
-                    fileSelectDelegate: fileSelectDelegate
-                )
-                    .id(viewModel.state.selectedFile)
+                NavigationStack(path: $viewModel.state.detailNavigationStack) {
+                    folderView(file: viewModel.state.selectedFile ?? viewModel.state.files[0])
+                        .navigationDestination(for: File.self) { file in
+                            folderView(file: file)
+                        }
+                        .id(viewModel.state.selectedFile)
+                }
             } else {
                 connectionButton()
                     .toolbar(.hidden)
             }
         }
-        .listStyle(.plain)
-        Spacer()
-        .onOpenURL(perform: { url in
+        .onOpenURL { url in
             DropboxLoginManager.openUrl(url: url)
-        })
-        .onAppear() {
-            viewModel.reloadLoggedState()
         }
+    }
+}
+
+// MARK: - Private
+
+private extension RootView {
+    
+    private func folderView(file: File) -> some View {
+        FolderView(
+            file: file,
+            fileSelectDelegate: fileSelectDelegate
+        )
     }
 }
 
@@ -68,7 +81,8 @@ private extension RootView {
             .navigationBarItems(
                 trailing: cancelButtonForFolderSelection(chooseAction: {
                     fileSelectDelegate?.selected(nil)
-                }))
+                })
+            )
     }
     
     func connectionButton() -> some View {
@@ -95,9 +109,9 @@ private extension RootView {
     func imageNameForSource(file: File) -> String {
         switch file.storageType {
         case .dropbox:
-           return R.image.dropbox.name
+            return R.image.dropbox.name
         case .local:
-           return R.image.folder.name
+            return R.image.folder.name
         }
     }
 }

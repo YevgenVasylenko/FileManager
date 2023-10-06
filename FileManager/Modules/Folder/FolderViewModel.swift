@@ -141,18 +141,21 @@ class FolderViewModel: ObservableObject {
         folderMonitor?.startMonitoring()
         state.isLoading = true
         fileManagerCommutator.contents(of: file) { [weak self] result in
-            guard let self else { return }
-            
-            switch result {
-            case .success(let files):
-                self.state.files = files
-            case .failure(let failure):
-                self.state.error = failure
-            }
-            self.state.isLoading = false
+//            DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
+                
+                guard let self else { return }
+                switch result {
+                case .success(let files):
+                    self.state.files = files
+                case .failure(let failure):
+                    self.state.error = failure
+                }
+                self.sort()
+                self.state.isLoading = false
+//            }
         }
         makeAtributesForFiles()
-        sort()
+        
     }
     
     func startCreatingFolder() {

@@ -30,6 +30,7 @@
 		5D30A12E2A9CCD5D0052AA95 /* FileInfoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D30A12D2A9CCD5D0052AA95 /* FileInfoView.swift */; };
 		5D30A1312A9CCD750052AA95 /* FileInfoViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D30A1302A9CCD750052AA95 /* FileInfoViewModel.swift */; };
 		5D32C0152A54687900578958 /* FileManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DD776152A544B5600F9B55D /* FileManager.swift */; };
+		5D45509C2AC6C1DF00C29B1C /* ListViewItemWithoutDisclosureIndicator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D45509B2AC6C1DF00C29B1C /* ListViewItemWithoutDisclosureIndicator.swift */; };
 		5D616B672A4AE58300E1360A /* FileManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D616B662A4AE58300E1360A /* FileManagerTests.swift */; };
 		5D616B6F2A4AE5B000E1360A /* LocalFileManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D616B6E2A4AE5B000E1360A /* LocalFileManagerTests.swift */; };
 		5D616B702A4AE64800E1360A /* LocalFileManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D0B9CA82A446D080099021C /* LocalFileManager.swift */; };
@@ -91,6 +92,7 @@
 		5D2499732A4D7CFD003D66F3 /* FIleManagerRootPath.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FIleManagerRootPath.swift; sourceTree = "<group>"; };
 		5D30A12D2A9CCD5D0052AA95 /* FileInfoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileInfoView.swift; sourceTree = "<group>"; };
 		5D30A1302A9CCD750052AA95 /* FileInfoViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileInfoViewModel.swift; sourceTree = "<group>"; };
+		5D45509B2AC6C1DF00C29B1C /* ListViewItemWithoutDisclosureIndicator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListViewItemWithoutDisclosureIndicator.swift; sourceTree = "<group>"; };
 		5D616B642A4AE58300E1360A /* FileManagerTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = FileManagerTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		5D616B662A4AE58300E1360A /* FileManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileManagerTests.swift; sourceTree = "<group>"; };
 		5D616B6E2A4AE5B000E1360A /* LocalFileManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalFileManagerTests.swift; sourceTree = "<group>"; };
@@ -189,6 +191,7 @@
 				5D0B9CA42A4466460099021C /* FileView.swift */,
 				5D954CD42A597FF800A221DB /* File+UI.swift */,
 				5D221D582A5D416A0072AA35 /* View+Utilities.swift */,
+				5D45509B2AC6C1DF00C29B1C /* ListViewItemWithoutDisclosureIndicator.swift */,
 				5D1B5B1D2A910598004C7AA8 /* FileDisplayedName.swift */,
 			);
 			path = UI;
@@ -496,6 +499,7 @@
 				5DF870D32A77ADAA00F9E5D5 /* DropboxFIleManager.swift in Sources */,
 				5D954CAC2A56D45A00A221DB /* FolderViewModel.swift in Sources */,
 				5D954CD52A597FF800A221DB /* File+UI.swift in Sources */,
+				5D45509C2AC6C1DF00C29B1C /* ListViewItemWithoutDisclosureIndicator.swift in Sources */,
 				5D0B9CA92A446D080099021C /* LocalFileManager.swift in Sources */,
 				5D04653D2A71071900BE768E /* FileActionType.swift in Sources */,
 				5D221D5C2A5DA1170072AA35 /* LocalizedError.swift in Sources */,

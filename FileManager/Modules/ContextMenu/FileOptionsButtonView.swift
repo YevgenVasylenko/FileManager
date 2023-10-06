@@ -48,9 +48,9 @@ struct FileOptionsButtonView: View {
                 } label: {
                     Image(systemName: "ellipsis")
                         .font(.headline)
+                        .padding()
                 }
             }
-            Spacer()
         }
     }
 }

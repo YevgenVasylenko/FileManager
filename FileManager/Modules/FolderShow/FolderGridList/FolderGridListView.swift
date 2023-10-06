@@ -63,19 +63,6 @@ private extension FolderGridListView {
         )
     }
     
-    func viewToShow(file: File) -> some View {
-        Group {
-            if file.isFolder() {
-                FolderView(
-                    file: file,
-                    fileSelectDelegate: fileSelectDelegate
-                )
-            } else {
-                FileContentView(file: file)
-            }
-        }
-    }
-    
     func fileInfoPopoverBinding(for file: File) -> Binding<Bool> {
         return Binding(
             get: {
@@ -142,16 +129,12 @@ private extension FolderGridListView {
             HStack {
                 filesChooseToggle(file: file)
                 fileView(file: file, style: .list)
-                if fileSelectDelegate == nil {
-                    fileActionsMenuView(file: file)
-                } else {
-                    Spacer()
-                }
+                Spacer()
+                fileActionsMenuView(file: file)
             }
-            .buttonStyle(.plain)
+            .listRowBackground(Color.clear)
             .disabled(isFileViewDisabled(file: file))
         }
-        .listStyle(.plain)
         .background(.clear)
         .scrollContentBackground(.hidden)
     }
@@ -163,11 +146,8 @@ private extension FolderGridListView {
                     ZStack {
                         VStack {
                             fileView(file: file, style: .grid)
-                            if fileSelectDelegate == nil {
-                                fileActionsMenuView(file: file)
-                            } else {
-                                Spacer()
-                            }
+                            fileActionsMenuView(file: file)
+                            Spacer()
                         }
                         .disabled(isFileViewDisabled(file: file))
                         .overlay(alignment: Alignment(horizontal: .leading, vertical: .top)) {
@@ -180,10 +160,24 @@ private extension FolderGridListView {
     }
     
     func fileView(file: File, style: FileView.Style) -> some View {
-        NavigationLink {
-            viewToShow(file: file)
-        } label: {
-            FileView(file: file, style: style, infoPresented: fileInfoPopoverBinding(for: file))
+        Group {
+            switch style {
+            case .grid:
+//                NavigationLink {
+//                    viewToShow(file: file)
+//                } label: {
+//                    FileView(file: file, style: style, infoPresented: fileInfoPopoverBinding(for: file))
+//                }
+                NavigationLink(value: file) {
+                    FileView(file: file, style: style, infoPresented: fileInfoPopoverBinding(for: file))
+                }
+            case .list:
+                ListViewItemWithoutDisclosureIndicator(value: file) {
+                    FileView(file: file, style: style, infoPresented: fileInfoPopoverBinding(for: file))
+                }
+            case .info:
+                EmptyView()
+            }
         }
     }
     
@@ -216,6 +210,8 @@ private extension View {
         })
     }
 }
+
+
 
 //struct SwiftUIView_Previews: PreviewProvider {
 //    static var previews: some View {

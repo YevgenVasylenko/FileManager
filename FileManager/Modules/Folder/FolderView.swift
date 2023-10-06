@@ -9,7 +9,7 @@ import SwiftUI
 
 struct FolderView: View {
     
-    @ObservedObject
+    @StateObject
     private var viewModel: FolderViewModel
     
     @State
@@ -21,31 +21,32 @@ struct FolderView: View {
         file: File,
         fileSelectDelegate: FileSelectDelegate?
     ) {
-        viewModel = FolderViewModel(file: file)
+        self._viewModel = StateObject(wrappedValue: FolderViewModel(file: file))
+//        self.viewModel = FolderViewModel(file: file)
         self.fileSelectDelegate = fileSelectDelegate
     }
     
-    init(viewModel: FolderViewModel, fileSelectDelegate: FileSelectDelegate?) {
-        self.viewModel = viewModel
-        self.fileSelectDelegate = fileSelectDelegate
-    }
+//    init(viewModel: FolderViewModel, fileSelectDelegate: FileSelectDelegate?) {
+//        self.viewModel = viewModel
+//        self.fileSelectDelegate = fileSelectDelegate
+//    }
     
     var body: some View {
-        NavigationStack {
-            ZStack {
-                if viewModel.state.isLoading == true {
-                    ProgressView()
-                }
+        ZStack {
+            if viewModel.state.isLoading == true {
+                ProgressView()
+            }
+            else {
                 FolderGridListView(
                     files: viewModel.state.files,
                     fileSelectDelegate: fileSelectDelegate,
                     selectedFiles: $viewModel.state.chosenFiles
                 )
-                if viewModel.state.folder.folderAffiliation != .system(.trash) {
-                    createFolderButton()
-                }
-                actionMenuBarForChosenFiles()
             }
+            if viewModel.state.folder.folderAffiliation != .system(.trash) {
+                createFolderButton()
+            }
+            actionMenuBarForChosenFiles()
         }
         .onAppear {
             if EnvironmentUtils.isPreview == false {
@@ -67,7 +68,6 @@ struct FolderView: View {
         .buttonStyle(.plain)
         .padding()
         .navigationTitle(viewModel.state.folder.displayedName())
-        .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             navigationBar(
                 chooseAction: {
@@ -191,6 +191,21 @@ private extension FolderView {
                     viewModel.state.chosenFiles = nil
                 }
             })
+    }
+    
+    func simpleFilesView(files: [File]) -> some View {
+        VStack {
+            Text(viewModel.state.folder.name)
+            ForEach(viewModel.state.files) { file in
+//                Text(file.name)
+//                NavigationLink(value: file) {
+//                    Text(file.name)
+//                }
+                
+            Text(file.name)
+                
+            }
+        }
     }
 }
 

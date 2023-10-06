@@ -5,30 +5,24 @@
 //  Created by Yevgen Vasylenko on 13.09.2023.
 //
 
-import Foundation
+import SwiftUI
 
 class RootViewModel: ObservableObject {
     struct State {
-        var selectedFile: File? = LocalFileManager().rootFolder
+        let files = [LocalFileManager().rootFolder, DropboxFileManager().rootFolder]
+        var selectedFile: File?
+        var detailNavigationStack = NavigationPath()
         var isDropboxLogged = false
     }
-    
-    let files: [File] = [LocalFileManager().rootFolder, DropboxFileManager().rootFolder]
 
     @Published
     var state: State
     
     init() {
         self.state = State()
-    }
-    
-    func reloadLoggedState() {
-        switch state.selectedFile?.storageType {
-        case .dropbox:
-            state.isDropboxLogged = DropboxLoginManager.isLogged
-        case .local, .none:
-            break
-        }
+        reloadLoggedState()
+//        let selectedFile = state.files[0]
+//        state.detailNavigationStack.append(selectedFile)
     }
     
     func loggingToCloud() {
@@ -58,5 +52,9 @@ class RootViewModel: ObservableObject {
         case .dropbox:
             return state.isDropboxLogged
         }
+    }
+    
+    private func reloadLoggedState() {
+        state.isDropboxLogged = DropboxLoginManager.isLogged
     }
 }
