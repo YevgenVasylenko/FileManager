@@ -11,19 +11,18 @@ import SwiftUI
 extension View {
     
     func destinationPopover(
-        actionType: FileActionType?,
+        actionType: Binding<FileActionType?>,
         files: [File],
         moveOrCopyToFolder: @escaping (File?) -> Void
     ) -> some View {
-        let fileActionType = actionType
-        return sheet(isPresented: .constant(fileActionType != nil)) {
+        sheet(item: actionType) { actionType in
             RootView(
                 fileSelectDelegate: FileSelectDelegate(
-                    type: fileActionType ?? .move,
+                    type: actionType,
                     selectedFiles: files,
-                    selected: { file in
-                        moveOrCopyToFolder(file)
-                    }))
+                    selected: moveOrCopyToFolder
+                )
+            )
             .interactiveDismissDisabled()
         }
     }

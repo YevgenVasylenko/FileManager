@@ -22,14 +22,13 @@ struct FolderView: View {
         fileSelectDelegate: FileSelectDelegate?
     ) {
         self._viewModel = StateObject(wrappedValue: FolderViewModel(file: file))
-//        self.viewModel = FolderViewModel(file: file)
         self.fileSelectDelegate = fileSelectDelegate
     }
     
-//    init(viewModel: FolderViewModel, fileSelectDelegate: FileSelectDelegate?) {
-//        self.viewModel = viewModel
-//        self.fileSelectDelegate = fileSelectDelegate
-//    }
+    init(viewModel: FolderViewModel, fileSelectDelegate: FileSelectDelegate?) {
+        self._viewModel = StateObject(wrappedValue: viewModel)
+        self.fileSelectDelegate = fileSelectDelegate
+    }
     
     var body: some View {
         ZStack {
@@ -54,7 +53,7 @@ struct FolderView: View {
             }
         }
         .destinationPopover(
-            actionType: viewModel.state.fileActionType,
+            actionType: $viewModel.state.fileActionType,
             files: viewModel.filesForAction,
             moveOrCopyToFolder: viewModel.moveOrCopyWithUserChosen
         )
@@ -212,9 +211,9 @@ private extension FolderView {
 private extension View {
   
     func fileCreatingPopover(viewModel: FolderViewModel, newName: Binding<String>) -> some View {
-        return alert(R.string.localizable.folderCreating.callAsFunction(),
-                     isPresented: .constant((viewModel.state.folderCreating != nil)),
-                     actions: {
+        alert(R.string.localizable.folderCreating.callAsFunction(),
+              isPresented: .constant((viewModel.state.folderCreating != nil)),
+              actions: {
             TextField(viewModel.state.folderCreating ?? "", text: newName)
                 .padding()
                 .interactiveDismissDisabled()

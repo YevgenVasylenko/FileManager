@@ -7,26 +7,30 @@
 
 import SwiftUI
 
-class RootViewModel: ObservableObject {
+final class RootViewModel: ObservableObject {
     struct State {
-        let files = [LocalFileManager().rootFolder, DropboxFileManager().rootFolder]
-        var selectedFile: File?
+        let storages = [LocalFileManager().rootFolder, DropboxFileManager().rootFolder]
+        var selectedStorage: File?
         var detailNavigationStack = NavigationPath()
         var isDropboxLogged = false
     }
-
+    
     @Published
-    var state: State
+    var state = State() {
+        didSet {
+            if state.selectedStorage != oldValue.selectedStorage {
+                state.detailNavigationStack = .init()
+            }
+        }
+    }
     
     init() {
-        self.state = State()
         reloadLoggedState()
-//        let selectedFile = state.files[0]
-//        state.detailNavigationStack.append(selectedFile)
+        state.selectedStorage = state.storages.first
     }
     
     func loggingToCloud() {
-        switch state.selectedFile?.storageType {
+        switch state.selectedStorage?.storageType {
         case .dropbox:
             DropboxLoginManager.login()
         case .local, .none:
@@ -36,7 +40,7 @@ class RootViewModel: ObservableObject {
     }
     
     func logoutFromCloud() {
-        switch state.selectedFile?.storageType {
+        switch state.selectedStorage?.storageType {
         case .dropbox:
             DropboxLoginManager.logout()
         case .local, .none:
@@ -46,7 +50,7 @@ class RootViewModel: ObservableObject {
     }
     
     func isLoggedToCloud() -> Bool {
-        switch state.selectedFile?.storageType {
+        switch state.selectedStorage?.storageType {
         case .local, .none:
             return false
         case .dropbox:
@@ -54,7 +58,12 @@ class RootViewModel: ObservableObject {
         }
     }
     
+    func isShouldConnectSelectedStorage() -> Bool {
+        isLoggedToCloud() || state.selectedStorage?.storageType.isLocal ?? true
+    }
+    
     private func reloadLoggedState() {
         state.isDropboxLogged = DropboxLoginManager.isLogged
     }
 }
+

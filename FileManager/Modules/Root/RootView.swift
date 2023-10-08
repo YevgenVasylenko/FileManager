@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct RootView: View {
-    let fileSelectDelegate: FileSelectDelegate?
+    private let fileSelectDelegate: FileSelectDelegate?
     
     @StateObject
     private var viewModel: RootViewModel
@@ -16,25 +16,17 @@ struct RootView: View {
     init(fileSelectDelegate: FileSelectDelegate? = nil) {
         self.fileSelectDelegate = fileSelectDelegate
         self._viewModel = StateObject(wrappedValue: RootViewModel())
-//        self.viewModel = RootViewModel()
     }
     
     var body: some View {
         NavigationSplitView {
-            List(viewModel.state.files, id: \.self, selection: $viewModel.state.selectedFile) { file in
-                dataSourceSelectionButton(file: file)
-            }
-            .onChange(of: viewModel.state.selectedFile) { newValue in
-                viewModel.state.detailNavigationStack = NavigationPath()
+            List(viewModel.state.storages, id: \.self, selection: $viewModel.state.selectedStorage) { file in
+                storageListItem(file: file)
             }
         } detail: {
-            if viewModel.isLoggedToCloud() || viewModel.state.selectedFile?.storageType.isLocal ?? true {
+            if viewModel.isShouldConnectSelectedStorage() {
                 NavigationStack(path: $viewModel.state.detailNavigationStack) {
-                    folderView(file: viewModel.state.selectedFile ?? viewModel.state.files[0])
-                        .navigationDestination(for: File.self) { file in
-                            folderView(file: file)
-                        }
-                        .id(viewModel.state.selectedFile)
+                    rootDetailView()
                 }
             } else {
                 connectionButton()
@@ -51,16 +43,27 @@ struct RootView: View {
 
 private extension RootView {
     
-    private func folderView(file: File) -> some View {
+    func folderView(file: File) -> some View {
         FolderView(
             file: file,
             fileSelectDelegate: fileSelectDelegate
         )
+        .id(file)
+    }
+    
+    @ViewBuilder
+    func rootDetailView() -> some View {
+        if let selectedStorage = viewModel.state.selectedStorage {
+            folderView(file: selectedStorage)
+                .navigationDestination(for: File.self) { file in
+                    folderView(file: file)
+                }
+        }
     }
 }
 
 private extension RootView {
-    func dataSourceSelectionButton(file: File) -> some View {
+    func storageListItem(file: File) -> some View {
         Label(title: {
             Spacer()
                 .frame(width: 10)

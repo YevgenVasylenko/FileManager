@@ -38,17 +38,17 @@ class FolderGridListViewModel: ObservableObject {
     
     func startRename(file: File) {
         state.file = file
-        self.state.isFileRenameInProgress = true
+        state.isFileRenameInProgress = true
     }
     
     func moveOne(file: File) {
         state.file = file
-        self.state.fileActionType = .move
+        state.fileActionType = .move
     }
     
     func copyOne(file: File) {
         state.file = file
-        self.state.fileActionType = .copy
+        state.fileActionType = .copy
     }
     
     func moveToTrashOne(file: File) {
@@ -69,12 +69,12 @@ class FolderGridListViewModel: ObservableObject {
     
     
     func clear(file: File) {
-        fileManagerCommutator.cleanTrashFolder(fileForFileManager: file) { result in
+        fileManagerCommutator.cleanTrashFolder(fileForFileManager: file) { [weak self] result in
             switch result {
             case .success:
                 break
             case .failure(let failure):
-                self.state.error = failure
+                self?.state.error = failure
             }
         }
     }
@@ -82,12 +82,12 @@ class FolderGridListViewModel: ObservableObject {
     func rename(newName: String) {
         state.isFileRenameInProgress = false
         guard let file = state.file else { return }
-        fileManagerCommutator.rename(file: file, newName: newName) { result in
+        fileManagerCommutator.rename(file: file, newName: newName) { [weak self] result in
             switch result {
             case .success:
                 break
             case .failure(let failure):
-                self.state.error = failure
+                self?.state.error = failure
             }
         }
     }
@@ -123,36 +123,34 @@ class FolderGridListViewModel: ObservableObject {
 private extension FolderGridListViewModel {
     
     func delete() {
-        fileManagerCommutator.deleteFile(files: filesForAction) { result in
+        fileManagerCommutator.deleteFile(files: filesForAction) { [weak self] result in
             switch result {
             case .success:
-                self.state.file = nil
+                self?.state.file = nil
             case .failure(let failure):
-                self.state.error = failure
+                self?.state.error = failure
             }
         }
     }
     
     func moveToTrash() {
-        fileManagerCommutator.moveToTrash(filesToTrash: filesForAction) { result in
+        fileManagerCommutator.moveToTrash(filesToTrash: filesForAction) { [weak self] result in
             switch result {
             case .success:
-                self.state.file = nil
-                break
+                self?.state.file = nil
             case .failure(let failure):
-                self.state.error = failure
+                self?.state.error = failure
             }
         }
     }
     
     func restoreFromTrash() {
-        fileManagerCommutator.restoreFromTrash(filesToRestore: filesForAction) { result in
+        fileManagerCommutator.restoreFromTrash(filesToRestore: filesForAction) { [weak self] result in
             switch result {
             case .success:
-                self.state.file = nil
-                break
+                self?.state.file = nil
             case .failure(let failure):
-                self.state.error = failure
+                self?.state.error = failure
             }
         }
     }
@@ -165,13 +163,12 @@ private extension FolderGridListViewModel {
                 files: self.filesForAction,
                 destination: folder,
                 conflictResolver: self
-            ) { result in
+            ) { [weak self] result in
                 switch result {
                 case .success:
-                    self.state.file = nil
-                    break
+                    self?.state.file = nil
                 case .failure(let failure):
-                    self.state.error = failure
+                    self?.state.error = failure
                 }
             }
         }
@@ -184,13 +181,12 @@ private extension FolderGridListViewModel {
                 files: self.filesForAction,
                 destination: folder,
                 conflictResolver: self
-            ) { result in
+            ) { [weak self] result in
                 switch result {
                 case .success:
-                    self.state.file = nil
-                    break
+                    self?.state.file = nil
                 case .failure(let failure):
-                    self.state.error = failure
+                    self?.state.error = failure
                 }
             }
         }
@@ -199,7 +195,7 @@ private extension FolderGridListViewModel {
 
 extension FolderGridListViewModel: NameConflictResolver {
     func resolve(conflictedFile: File, placeOfConflict: File, completion: @escaping (ConflictNameResult) -> Void) {
-        self.state.nameConflict = .resolving(conflictedFile, placeOfConflict)
-        self.conflictCompletion = completion
+        state.nameConflict = .resolving(conflictedFile, placeOfConflict)
+        conflictCompletion = completion
     }
 }

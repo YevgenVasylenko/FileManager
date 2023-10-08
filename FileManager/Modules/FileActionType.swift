@@ -11,3 +11,9 @@ enum FileActionType {
     case copy
     case move
 }
+
+extension FileActionType: Identifiable {
+    var id: Self {
+        self
+    }
+}
