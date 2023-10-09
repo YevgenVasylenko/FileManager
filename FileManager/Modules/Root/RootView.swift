@@ -56,7 +56,11 @@ private extension RootView {
         if let selectedStorage = viewModel.state.selectedStorage {
             folderView(file: selectedStorage)
                 .navigationDestination(for: File.self) { file in
-                    folderView(file: file)
+                    if file.isFolder() {
+                        folderView(file: file)
+                    } else {
+                        FileContentView(file: file)
+                    }
                 }
         }
     }

@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import SwiftUI
 
 class FolderGridListViewModel: ObservableObject {
     struct State {
@@ -14,6 +15,7 @@ class FolderGridListViewModel: ObservableObject {
         var fileActionType: FileActionType?
         var fileInfoPopover: File?
         var isFileRenameInProgress = false
+        var newNameForRename = ""
         var error: Error?
         var nameConflict: NameConflict?
     }
@@ -38,6 +40,7 @@ class FolderGridListViewModel: ObservableObject {
     
     func startRename(file: File) {
         state.file = file
+        state.newNameForRename = file.name
         state.isFileRenameInProgress = true
     }
     

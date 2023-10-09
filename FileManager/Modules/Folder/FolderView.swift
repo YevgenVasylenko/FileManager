@@ -32,15 +32,11 @@ struct FolderView: View {
     
     var body: some View {
         ZStack {
-            if viewModel.state.isLoading == true {
+            if viewModel.state.isLoading {
                 ProgressView()
             }
             else {
-                FolderGridListView(
-                    files: viewModel.state.files,
-                    fileSelectDelegate: fileSelectDelegate,
-                    selectedFiles: $viewModel.state.chosenFiles
-                )
+                folderView()
             }
             if viewModel.state.folder.folderAffiliation != .system(.trash) {
                 createFolderButton()
@@ -78,6 +74,16 @@ struct FolderView: View {
 
 private extension FolderView {
 
+    func folderView() -> some View {
+        let files = viewModel.state.files
+        return FolderGridListView(
+            files: files,
+            fileSelectDelegate: fileSelectDelegate,
+            selectedFiles: $viewModel.state.chosenFiles
+        )
+        .id(files)
+    }
+    
     func createFolderButton() -> some View {
         VStack {
             Spacer()
@@ -190,21 +196,6 @@ private extension FolderView {
                     viewModel.state.chosenFiles = nil
                 }
             })
-    }
-    
-    func simpleFilesView(files: [File]) -> some View {
-        VStack {
-            Text(viewModel.state.folder.name)
-            ForEach(viewModel.state.files) { file in
-//                Text(file.name)
-//                NavigationLink(value: file) {
-//                    Text(file.name)
-//                }
-                
-            Text(file.name)
-                
-            }
-        }
     }
 }
 

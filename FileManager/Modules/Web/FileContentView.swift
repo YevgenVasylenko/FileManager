@@ -9,14 +9,14 @@ import SwiftUI
 
 struct FileContentView: View {
     
-    @ObservedObject
+    @StateObject
     private var viewModel: FileContentViewModel
     
     @Environment(\.presentationMode)
     private var presentation
     
     init(file: File) {
-        self.viewModel = FileContentViewModel(file: file)
+        self._viewModel = StateObject(wrappedValue: FileContentViewModel(file: file))
     }
     
     var body: some View {

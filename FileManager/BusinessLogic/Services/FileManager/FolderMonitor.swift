@@ -7,7 +7,7 @@
 
 import Foundation
 
-protocol FolderMonitor {
+protocol FolderMonitor: AnyObject {
     var folderDidChange: (() -> Void)? { get set }
     func startMonitoring()
     func stopMonitoring()

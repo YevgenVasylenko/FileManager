@@ -72,7 +72,7 @@ enum LayoutOption: Codable {
     case list
 }
 
-class FolderViewModel: ObservableObject {
+final class FolderViewModel: ObservableObject {
     
     struct State {
         var folder: File

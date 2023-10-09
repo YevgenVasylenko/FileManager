@@ -7,7 +7,7 @@
 
 import Foundation
 
-class LocalFolderMonitor: FolderMonitor {
+final class LocalFolderMonitor: FolderMonitor {
     
     private var monitoredFolderFileDescriptor: CInt = -1
     private var folderMonitorSource: DispatchSourceFileSystemObject?

@@ -8,10 +8,7 @@
 import SwiftUI
 
 struct FolderGridListView: View {
-    
-    @State
-    private var newName: String = ""
-    
+
     @StateObject
     private var viewModel: FolderGridListViewModel
     private let fileSelectDelegate: FileSelectDelegate?
@@ -19,10 +16,6 @@ struct FolderGridListView: View {
     
     @State
     private var redraw = Date.now
-    
-    private var columns: [GridItem] {
-        columnsForView()
-    }
     
     init(
         files: [File],
@@ -33,7 +26,7 @@ struct FolderGridListView: View {
         self.fileSelectDelegate = fileSelectDelegate
         self.selectedFiles = selectedFiles
     }
-    
+
     var body: some View {
         Group {
             switch FileDisplayOptionsManager.options.layout {
@@ -41,7 +34,7 @@ struct FolderGridListView: View {
             case .list: folderListView()
             }
         }
-        .renamePopover(viewModel: viewModel, newName: $newName)
+        .renamePopover(viewModel: viewModel, newName: $viewModel.state.newNameForRename)
         .destinationPopover(
             actionType: $viewModel.state.fileActionType,
             files: viewModel.filesForAction,
@@ -142,8 +135,8 @@ private extension FolderGridListView {
     
     func folderGridView() -> some View {
         ScrollView {
-            LazyVGrid(columns: columns, spacing: 20) {
-                ForEach($viewModel.state.files, id: \.self) { $file in
+            LazyVGrid(columns: columnsForView(), spacing: 20) {
+                ForEach(viewModel.state.files, id: \.self) { file in
                     ZStack {
                         VStack {
                             fileView(file: file, style: .grid)
@@ -196,7 +189,8 @@ private extension View {
             + (viewModel.state.file?.name ?? ""),
                      isPresented: .constant(viewModel.state.isFileRenameInProgress),
                      actions: {
-            TextField(R.string.localizable.new_name.callAsFunction(), text: newName)
+            TextField(R.string.localizable.new_name.callAsFunction(),
+                      text: newName)
                 .padding()
                 .interactiveDismissDisabled()
                 .autocorrectionDisabled()
@@ -206,7 +200,7 @@ private extension View {
                     newName.wrappedValue = ""
                 }
                 Spacer()
-                Button(R.string.localizable.cancel.callAsFunction()) {
+                Button(R.string.localizable.cancel()) {
                     viewModel.state.isFileRenameInProgress = false
                     newName.wrappedValue = ""
                 }
@@ -215,8 +209,6 @@ private extension View {
         })
     }
 }
-
-
 
 //struct SwiftUIView_Previews: PreviewProvider {
 //    static var previews: some View {
