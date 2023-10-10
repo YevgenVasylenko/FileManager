@@ -31,9 +31,9 @@ extension View {
         conflictName: NameConflict?,
         resolveConflictWithUserChoice: @escaping (ConflictNameResult) -> Void
     ) -> some View {
-        let conflictAlertTitlePart1 = R.string.localizable.conflictAlertTitlePart1.callAsFunction()
+        let conflictAlertTitlePart1 = R.string.localizable.conflictAlertTitlePart1()
         let placeOfConflict = (conflictName?.placeOfConflict?.displayedName() ?? "")
-        let conflictAlertTitlePart2 = R.string.localizable.conflictAlertTitlePart2.callAsFunction()
+        let conflictAlertTitlePart2 = R.string.localizable.conflictAlertTitlePart2()
         let conflictedFile = (conflictName?.conflictedFile?.name ?? "")
         let filteredCases = ConflictNameResult.allCases.filter({ $0 != .error })
         
@@ -52,11 +52,11 @@ extension View {
     func nameForConflictResult(nameResult: ConflictNameResult) -> String {
         switch nameResult {
         case .cancel:
-            return R.string.localizable.cancel.callAsFunction()
+            return R.string.localizable.cancel()
         case .replace:
-            return R.string.localizable.replace.callAsFunction()
+            return R.string.localizable.replace()
         case .newName:
-            return R.string.localizable.new_name.callAsFunction()
+            return R.string.localizable.new_name()
         case .error:
             return ""
         }
@@ -68,7 +68,7 @@ extension View {
             isPresented: .constant(localizedAlertError != nil),
             error: localizedAlertError
         ) { _ in
-            Button(R.string.localizable.ok.callAsFunction()) {
+            Button(R.string.localizable.ok()) {
              error.wrappedValue = nil
             }
         } message: { error in
@@ -77,8 +77,8 @@ extension View {
     }
     
     func unreadableFileAlert(isShowing: Binding<Bool>, presentation: Binding<PresentationMode>) -> some View {
-        return alert(R.string.localizable.unreadableFile.callAsFunction(), isPresented: isShowing) {
-            Button(R.string.localizable.ok.callAsFunction()) {
+        return alert(R.string.localizable.unreadableFile(), isPresented: isShowing) {
+            Button(R.string.localizable.ok()) {
                 presentation.wrappedValue.dismiss()
             }
         }
@@ -89,11 +89,11 @@ extension Error {
     var recoverySuggestion: String? {
         switch self {
         case .nameExist:
-            return R.string.localizable.file_with_same_name_is_already_exist.callAsFunction()
+            return R.string.localizable.file_with_same_name_is_already_exist()
         case .unknown:
-            return R.string.localizable.try_smth_else.callAsFunction()
+            return R.string.localizable.try_smth_else()
         case .dropbox:
-            return R.string.localizable.try_smth_else.callAsFunction()
+            return R.string.localizable.try_smth_else()
         }
     }
 }

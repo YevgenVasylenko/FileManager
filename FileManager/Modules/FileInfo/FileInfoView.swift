@@ -20,7 +20,7 @@ struct FileInfoView: View {
         VStack {
             FileView(file: viewModel.state.file, style: .info, infoPresented: .constant(false))
             Spacer()
-            Text(R.string.localizable.info.callAsFunction())
+            Text(R.string.localizable.info())
             Spacer()
             VStack {
                 typeOfFile()
@@ -36,17 +36,17 @@ struct FileInfoView: View {
 private extension FileInfoView {
     func typeOfFile() -> some View {
         HStack {
-            Text(R.string.localizable.type.callAsFunction())
+            Text(R.string.localizable.type())
             Spacer()
             Text(viewModel.state.file.path.pathExtension.isEmpty ?
-                 R.string.localizable.folder.callAsFunction() :
+                 R.string.localizable.folder() :
                     viewModel.state.file.path.pathExtension)
         }
     }
     
     func sizeOfFile() -> some View {
         HStack {
-            Text(R.string.localizable.size.callAsFunction())
+            Text(R.string.localizable.size())
             Spacer()
             Text(bytesCalculator(size:viewModel.state.file.attributes?.size))
         }
@@ -54,7 +54,7 @@ private extension FileInfoView {
     
     func dateOfCreation() -> some View {
         HStack {
-            Text(R.string.localizable.created.callAsFunction())
+            Text(R.string.localizable.created())
             Spacer()
             Text(viewModel.state.file.attributes?.createdDate?.formatted() ?? "-")
         }
@@ -62,7 +62,7 @@ private extension FileInfoView {
     
     func dateOfLastModifier() -> some View {
         HStack {
-            Text(R.string.localizable.modified.callAsFunction())
+            Text(R.string.localizable.modified())
             Spacer()
             Text(viewModel.state.file.attributes?.modifiedDate?.formatted() ?? "-")
         }
@@ -72,16 +72,16 @@ private extension FileInfoView {
         guard let number = size else { return "" }
         var newNumber = 0.0
         if number / 1000 < 1 {
-            return number.description + R.string.localizable.b.callAsFunction()
+            return number.description + R.string.localizable.b()
         } else if number / 1000000 < 1 {
             newNumber = number / 1000
-            return keepThreeDigits(number: newNumber).description + R.string.localizable.kb.callAsFunction()
+            return keepThreeDigits(number: newNumber).description + R.string.localizable.kb()
         } else if number / 1000000000 < 1 {
             newNumber = number / 1000000
-            return keepThreeDigits(number: newNumber).description + R.string.localizable.mb.callAsFunction()
+            return keepThreeDigits(number: newNumber).description + R.string.localizable.mb()
         } else {
             newNumber = number / 10000000000
-            return keepThreeDigits(number: newNumber).description + R.string.localizable.gb.callAsFunction()
+            return keepThreeDigits(number: newNumber).description + R.string.localizable.gb()
         }
     }
     

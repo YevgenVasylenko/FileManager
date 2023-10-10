@@ -79,7 +79,7 @@ private extension RootView {
             .padding()
             .contextMenu {
                 if !file.storageType.isLocal {
-                    Button(R.string.localizable.disconnect.callAsFunction(), role: .destructive) {
+                    Button(R.string.localizable.disconnect(), role: .destructive) {
                         viewModel.logoutFromCloud()
                     }
                     .disabled(!viewModel.isLoggedToCloud())
@@ -96,7 +96,7 @@ private extension RootView {
         Button {
             viewModel.loggingToCloud()
         } label: {
-            Label(R.string.localizable.connect.callAsFunction(), systemImage: "plus")
+            Label(R.string.localizable.connect(), systemImage: "plus")
                 .padding()
         }
         .font(.title)
@@ -106,7 +106,7 @@ private extension RootView {
     func cancelButtonForFolderSelection(chooseAction: @escaping () -> Void) -> some View {
         Group {
             if fileSelectDelegate != nil {
-                Button(R.string.localizable.cancel.callAsFunction()) {
+                Button(R.string.localizable.cancel()) {
                     chooseAction()
                 }
             }

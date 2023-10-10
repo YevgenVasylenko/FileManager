@@ -60,7 +60,7 @@ private extension FileOptionsButtonView {
         Button {
             delegate(.rename)
         } label: {
-            Label(R.string.localizable.rename.callAsFunction(), systemImage: "character.cursor.ibeam")
+            Label(R.string.localizable.rename(), systemImage: "character.cursor.ibeam")
         }
     }
     
@@ -68,7 +68,7 @@ private extension FileOptionsButtonView {
         Button {
             delegate(.move)
         } label: {
-            Label(R.string.localizable.move_to.callAsFunction(), systemImage: "arrow.right.doc.on.clipboard")
+            Label(R.string.localizable.move_to(), systemImage: "arrow.right.doc.on.clipboard")
         }
     }
     
@@ -76,7 +76,7 @@ private extension FileOptionsButtonView {
         Button {
             delegate(.copy)
         } label: {
-            Label(R.string.localizable.copy_to.callAsFunction(), systemImage: "square.and.arrow.up.on.square")
+            Label(R.string.localizable.copy_to(), systemImage: "square.and.arrow.up.on.square")
         }
     }
     
@@ -84,7 +84,7 @@ private extension FileOptionsButtonView {
         Button {
             delegate(.moveToTrash)
         } label: {
-            Label(R.string.localizable.move_to_trash.callAsFunction(), systemImage: "rectangle.portrait.and.arrow.forward")
+            Label(R.string.localizable.move_to_trash(), systemImage: "rectangle.portrait.and.arrow.forward")
             Label("", systemImage: "trash")
         }
     }
@@ -93,7 +93,7 @@ private extension FileOptionsButtonView {
         Button {
             delegate(.restoreFromTrash)
         } label: {
-            Label(R.string.localizable.restore.callAsFunction(), systemImage: "tray.and.arrow.up")
+            Label(R.string.localizable.restore(), systemImage: "tray.and.arrow.up")
         }
     }
     
@@ -101,7 +101,7 @@ private extension FileOptionsButtonView {
         Button {
             delegate(.delete)
         } label: {
-            Label(R.string.localizable.delete.callAsFunction(), systemImage: "trash")
+            Label(R.string.localizable.delete(), systemImage: "trash")
         }
     }
     
@@ -109,7 +109,7 @@ private extension FileOptionsButtonView {
         Button {
             delegate(.clean)
         } label: {
-            Label(R.string.localizable.clean.callAsFunction(), systemImage: "paintbrush.pointed")
+            Label(R.string.localizable.clean(), systemImage: "paintbrush.pointed")
         }
     }
     
@@ -117,7 +117,7 @@ private extension FileOptionsButtonView {
         Button {
             delegate(.info)
         } label: {
-            Label(R.string.localizable.info.callAsFunction(), systemImage: "info.circle")
+            Label(R.string.localizable.info(), systemImage: "info.circle")
         }
     }
 }

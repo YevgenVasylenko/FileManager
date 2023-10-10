@@ -109,28 +109,28 @@ private extension FolderView {
                     HStack {
                         if viewModel.state.folder.folderAffiliation != .system(.trash) {
                             Spacer()
-                            Button(R.string.localizable.copy_to.callAsFunction()) {
+                            Button(R.string.localizable.copy_to()) {
                                 viewModel.copyChosen()
                             }
                             .buttonStyle(.automatic)
                             Spacer()
-                            Button(R.string.localizable.move_to.callAsFunction()) {
+                            Button(R.string.localizable.move_to()) {
                                 viewModel.moveChosen()
                             }
                             .buttonStyle(.automatic)
                             Spacer()
-                            Button(R.string.localizable.move_to_trash.callAsFunction()) {
+                            Button(R.string.localizable.move_to_trash()) {
                                 viewModel.moveToTrash()
                             }
                             .buttonStyle(.automatic)
                             Spacer()
                         } else if viewModel.state.folder.storageType.isDropbox {
-                            Button(R.string.localizable.restore.callAsFunction()) {
+                            Button(R.string.localizable.restore()) {
                                 viewModel.restoreFromTrash()
                             }
                             .buttonStyle(.automatic)
                         } else if viewModel.state.folder.storageType.isLocal {
-                            Button(R.string.localizable.delete.callAsFunction()) {
+                            Button(R.string.localizable.delete()) {
                                 viewModel.delete()
                             }
                             .buttonStyle(.automatic)
@@ -170,17 +170,17 @@ private extension FolderView {
     func nameOfActionSelection(fileActionType: FileActionType) -> String {
         switch fileActionType {
         case .copy:
-            return R.string.localizable.copy_to.callAsFunction()
+            return R.string.localizable.copy_to()
         case .move:
-            return R.string.localizable.move_to.callAsFunction()
+            return R.string.localizable.move_to()
         }
     }
     
     func nameChangeOfChoose(isChoosing: Bool) -> String {
         if !isChoosing {
-            return R.string.localizable.choose.callAsFunction()
+            return R.string.localizable.choose()
         } else {
-            return R.string.localizable.done.callAsFunction()
+            return R.string.localizable.done()
         }
     }
 
@@ -202,7 +202,7 @@ private extension FolderView {
 private extension View {
   
     func fileCreatingPopover(viewModel: FolderViewModel, newName: Binding<String>) -> some View {
-        alert(R.string.localizable.folderCreating.callAsFunction(),
+        alert(R.string.localizable.folderCreating(),
               isPresented: .constant((viewModel.state.folderCreating != nil)),
               actions: {
             TextField(viewModel.state.folderCreating ?? "", text: newName)
@@ -210,7 +210,7 @@ private extension View {
                 .interactiveDismissDisabled()
                 .autocorrectionDisabled()
             HStack {
-                Button(R.string.localizable.createFolder.callAsFunction()) {
+                Button(R.string.localizable.createFolder()) {
                     if newName.wrappedValue.isEmpty {
                         viewModel.createFolder(newName: viewModel.state.folderCreating ?? "")
                     } else {
@@ -219,7 +219,7 @@ private extension View {
                     newName.wrappedValue = ""
                 }
                 Spacer()
-                Button(R.string.localizable.cancel.callAsFunction()) {
+                Button(R.string.localizable.cancel()) {
                     viewModel.state.folderCreating = nil
                     newName.wrappedValue = ""
                 }

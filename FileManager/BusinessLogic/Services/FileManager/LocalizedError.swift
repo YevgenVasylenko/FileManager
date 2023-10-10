@@ -16,9 +16,9 @@ enum Error: LocalizedError {
         var errorDescription: String? {
             switch self {
             case .nameExist:
-                return R.string.localizable.name_is_exist.callAsFunction()
+                return R.string.localizable.name_is_exist()
             case .unknown:
-                return R.string.localizable.unknown_error.callAsFunction()
+                return R.string.localizable.unknown_error()
             case .dropbox(let description):
                 return description
             }

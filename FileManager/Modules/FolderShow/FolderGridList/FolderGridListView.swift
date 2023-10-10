@@ -126,8 +126,8 @@ private extension FolderGridListView {
                 Spacer()
                 showFileActionMenu(file: file)
             }
-            .listRowBackground(Color.clear)
             .disabled(isFileViewDisabled(file: file))
+            .listRowBackground(Color.clear)
         }
         .background(.clear)
         .scrollContentBackground(.hidden)
@@ -153,20 +153,19 @@ private extension FolderGridListView {
         }
     }
     
+    @ViewBuilder
     func fileView(file: File, style: FileView.Style) -> some View {
-        Group {
-            switch style {
-            case .grid:
-                NavigationLink(value: file) {
-                    FileView(file: file, style: style, infoPresented: fileInfoPopoverBinding(for: file))
-                }
-            case .list:
-                ListViewItemWithoutDisclosureIndicator(value: file) {
-                    FileView(file: file, style: style, infoPresented: fileInfoPopoverBinding(for: file))
-                }
-            case .info:
-                EmptyView()
+        switch style {
+        case .grid:
+            NavigationLink(value: file) {
+                FileView(file: file, style: style, infoPresented: fileInfoPopoverBinding(for: file))
             }
+        case .list:
+            ListViewItemWithoutDisclosureIndicator(value: file) {
+                FileView(file: file, style: style, infoPresented: fileInfoPopoverBinding(for: file))
+            }
+        case .info:
+            EmptyView()
         }
     }
     
@@ -185,17 +184,17 @@ private extension FolderGridListView {
 private extension View {
     func renamePopover(viewModel: FolderGridListViewModel, newName: Binding<String>) -> some View {
         alert(
-            R.string.localizable.renamePopupTitle.callAsFunction()
+            R.string.localizable.renamePopupTitle()
             + (viewModel.state.file?.name ?? ""),
                      isPresented: .constant(viewModel.state.isFileRenameInProgress),
                      actions: {
-            TextField(R.string.localizable.new_name.callAsFunction(),
+            TextField(R.string.localizable.new_name(),
                       text: newName)
                 .padding()
                 .interactiveDismissDisabled()
                 .autocorrectionDisabled()
             HStack {
-                Button(R.string.localizable.rename.callAsFunction()) {
+                Button(R.string.localizable.rename()) {
                     viewModel.rename(newName: newName.wrappedValue)
                     newName.wrappedValue = ""
                 }

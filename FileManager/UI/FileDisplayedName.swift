@@ -11,18 +11,18 @@ extension File {
     
     func displayedName() -> String {
         if self.name == "/" {
-            return R.string.localizable.dropbox.callAsFunction()
+            return R.string.localizable.dropbox()
         }
         if self.name == "root" {
-            return R.string.localizable.root.callAsFunction()
+            return R.string.localizable.root()
         }
         switch self.folderAffiliation {
         case .user:
             return self.name
         case .system(.trash):
-            return R.string.localizable.trash.callAsFunction()
+            return R.string.localizable.trash()
         case .system(.download):
-            return R.string.localizable.downloads.callAsFunction()
+            return R.string.localizable.downloads()
         }
     }
 }

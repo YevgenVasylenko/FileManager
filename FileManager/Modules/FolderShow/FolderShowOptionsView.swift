@@ -26,12 +26,12 @@ struct FolderShowOptionsView: View {
                 Button {
                     optionSelected(FileDisplayOptions(layout: .grid, sort: options.sort))
                 } label: {
-                    Label(R.string.localizable.grid.callAsFunction(), systemImage: "square.grid.2x2")
+                    Label(R.string.localizable.grid(), systemImage: "square.grid.2x2")
                 }
                 Button {
                     optionSelected(FileDisplayOptions(layout: .list, sort: options.sort))
                 } label: {
-                    Label(R.string.localizable.list.callAsFunction(), systemImage: "list.bullet")
+                    Label(R.string.localizable.list(), systemImage: "list.bullet")
                 }
             }
             
@@ -75,13 +75,13 @@ private extension FolderShowOptionsView {
     func buttonName(sortOptionAttribute: SortOption.Attribute) -> String {
         switch sortOptionAttribute {
         case .name:
-           return R.string.localizable.name.callAsFunction()
+           return R.string.localizable.name()
         case .type:
-            return R.string.localizable.type.callAsFunction()
+            return R.string.localizable.type()
         case .date:
-            return R.string.localizable.date.callAsFunction()
+            return R.string.localizable.date()
         case .size:
-            return R.string.localizable.size.callAsFunction()
+            return R.string.localizable.size()
         }
     }
     
