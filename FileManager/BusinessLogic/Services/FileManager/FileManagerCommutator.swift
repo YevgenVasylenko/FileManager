@@ -113,14 +113,18 @@ extension FileManagerCommutator: FileManager {
     
     func restoreFromTrash(
         filesToRestore: [File],
-        completion: @escaping (Result<Void, Error>) -> Void
+        conflictResolver: NameConflictResolver,
+        completion: @escaping (Result<OperationResult, Error>) -> Void
     ) {
         guard let firstFile = filesToRestore.first else {
-            completion(.success(()))
+            completion(.success((.cancelled)))
             return
         }
         let fileManager = FileManagerFactory.makeFileManager(file: firstFile)
-        fileManager.restoreFromTrash(filesToRestore: filesToRestore, completion: completion)
+        fileManager.restoreFromTrash(
+            filesToRestore: filesToRestore,
+            conflictResolver: conflictResolver,
+            completion: completion)
     }
     
     func deleteFile(files: [File], completion: @escaping (Result<Void, Error>) -> Void) {

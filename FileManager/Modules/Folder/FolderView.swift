@@ -38,7 +38,9 @@ struct FolderView: View {
             else {
                 folderView()
             }
-            if viewModel.state.folder.folderAffiliation != .system(.trash) {
+            if // viewModel.state.folder.hasParent(file: LocalFileManager().trashFolder) == false // ||
+                viewModel.state.folder.isDeleted == false
+            {
                 createFolderButton()
             }
             actionMenuBarForChosenFiles()
@@ -56,6 +58,10 @@ struct FolderView: View {
         .conflictPopover(
             conflictName: viewModel.state.nameConflict,
             resolveConflictWithUserChoice: viewModel.userConflictResolveChoice
+        )
+        .deleteConfirmationPopover(
+            isShowing: $viewModel.state.deletingFromTrash,
+            deletingConfirmed: viewModel.delete
         )
         .fileCreatingPopover(viewModel: viewModel, newName: $newName)
         .errorAlert(error: $viewModel.state.error)
@@ -124,14 +130,21 @@ private extension FolderView {
                             }
                             .buttonStyle(.automatic)
                             Spacer()
-                        } else if viewModel.state.folder.storageType.isDropbox {
+                        } else if viewModel.state.folder.storageType.isLocal && viewModel.state.folder.isDeleted {
+                            Spacer()
+                            Button(R.string.localizable.delete()) {
+                                viewModel.startDeleting()
+                            }
+                            .buttonStyle(.automatic)
+                            Spacer()
                             Button(R.string.localizable.restore()) {
                                 viewModel.restoreFromTrash()
                             }
                             .buttonStyle(.automatic)
-                        } else if viewModel.state.folder.storageType.isLocal {
-                            Button(R.string.localizable.delete()) {
-                                viewModel.delete()
+                            Spacer()
+                        } else {
+                            Button(R.string.localizable.restore()) {
+                                viewModel.restoreFromTrash()
                             }
                             .buttonStyle(.automatic)
                         }

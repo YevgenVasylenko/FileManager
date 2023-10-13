@@ -123,6 +123,10 @@ struct File {
         )
     }
     
+    func parentFolder() -> File {
+        return File(path: path.deletingLastPathComponent(), storageType: storageType)
+    }
+    
     func isFolder() -> Bool {
         return path.hasDirectoryPath
     }
@@ -141,6 +145,10 @@ struct File {
     mutating func addTimeToName() {
         let newName = name + Date.now.formatted(date: .omitted, time: .standard)
         path = self.rename(name: newName).path
+    }
+    
+    func hasParent(file: File) -> Bool {
+        path.path.hasPrefix(file.path.path)
     }
 }
 

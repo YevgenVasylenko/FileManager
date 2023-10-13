@@ -161,7 +161,11 @@ extension DropboxFileManager: FileManager {
         }
     }
     
-    func restoreFromTrash(filesToRestore: [File], completion: @escaping (Result<Void, Error>) -> Void) {
+    func restoreFromTrash(
+        filesToRestore: [File],
+        conflictResolver: NameConflictResolver,
+        completion: @escaping (Result<OperationResult, Error>) -> Void
+    ) {
         guard let client = DropboxClientsManager.authorizedClient else {
             completion(.failure(.unknown))
             return
@@ -186,7 +190,7 @@ extension DropboxFileManager: FileManager {
             }
         }
         group.notify(queue: DispatchQueue.main) {
-            completion(.success(()))
+            completion(.success(.finished))
         }
     }
     

@@ -60,3 +60,6 @@
 
 "grid" = "Icons";
 "list" = "List";
+
+"sureToDelete" = "Are you sure you want to delete";
+"deleteForever" = "Deleting will be permanently";

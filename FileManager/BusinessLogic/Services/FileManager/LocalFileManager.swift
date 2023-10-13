@@ -147,6 +147,7 @@ extension LocalFileManager: FileManager {
                     fileToTrashTemp.addTimeToName()
                 }
                 try SystemFileManger.default.moveItem(at: file.path, to: trashedFilePath)
+                Database.Tables.FilesInTrash.insertRowToFilesInTrashDB(fileToTrash: file, fileInTrashPath: trashedFilePath)
             } catch {
                 completion(.failure(Error(error: error)))
                 return
@@ -155,21 +156,41 @@ extension LocalFileManager: FileManager {
         completion(.success(()))
     }
     
-    func restoreFromTrash(filesToRestore: [File], completion: @escaping (Result<Void, Error>) -> Void) {
+    func restoreFromTrash(
+        filesToRestore: [File],
+        conflictResolver: NameConflictResolver,
+        completion: @escaping (Result<OperationResult, Error>) -> Void
+    ) {
         for file in filesToRestore {
-            do {
-                try print(SystemFileManger.default.attributesOfItem(atPath: file.path.path))
-            } catch {
-                completion(.failure(Error(error: error)))
+            guard let pathToRestore = Database.Tables.FilesInTrash.getPathForRestore(file: file) else {
+                completion(.failure(Error.unknown))
+                return
+            }
+            let restoredFile = File(path: pathToRestore, storageType: .local(LocalStorageData()))
+            let parentFolderOfRestoredFile = restoredFile.parentFolder()
+            if isParentFolderExist(parentFolder: parentFolderOfRestoredFile) {
+                moveFromTrashIfParentFolderExist(
+                    file: file,
+                    parentDestination: parentFolderOfRestoredFile,
+                    conflictResolver: conflictResolver,
+                    completion: completion
+                )
+            } else {
+                moveFromTrashIfParentFolderNotExist(
+                    file: file,
+                    parentDestination: parentFolderOfRestoredFile,
+                    conflictResolver: conflictResolver,
+                    completion: completion
+                )
             }
         }
-        completion(.success(()))
     }
     
     func deleteFile(files: [File], completion: (Result<Void, Error>) -> Void) {
         for file in files {
             do {
                 try SystemFileManger.default.removeItem(at: file.path)
+                Database.Tables.FilesInTrash.deleteFromDB(file: file)
             }
             catch {
                 completion(.failure(Error(error: error)))
@@ -309,7 +330,7 @@ private extension LocalFileManager {
             file.actions = FileAction.downloadsFolderActions
         } else if file == trashFolder.makeSubfile(name: file.name) ||
                     file == trashFolder.makeSubfile(name: file.name, isDirectory: true) || file.isDeleted {
-            file.actions = [FileAction.delete]
+            file.actions = [FileAction.delete, FileAction.restoreFromTrash]
             file.isDeleted = true
         } else {
             file.actions = FileAction.regularFolder
@@ -431,6 +452,54 @@ private extension LocalFileManager {
         }
     }
 
+    func isParentFolderExist(parentFolder: File) -> Bool {
+        SystemFileManger.default.fileExists(atPath: parentFolder.path.path)
+    }
+    
+    func moveFromTrashIfParentFolderExist(
+        file: File,
+        parentDestination: File,
+        conflictResolver: NameConflictResolver,
+        completion: @escaping (Result<OperationResult, Error>) -> Void
+    ) {
+        move(
+            file: file,
+            destination: parentDestination,
+            conflictResolver: conflictResolver,
+            completion: { result in
+                switch result {
+                case .success(let choice):
+                    switch choice {
+                    case .finished:
+                        Database.Tables.FilesInTrash.deleteFromDB(file: file)
+                        completion(.success((.finished)))
+                    case .cancelled:
+                        completion(.success(.cancelled))
+                    }
+                case .failure(let error):
+                    completion(.failure(error))
+                }
+            })
+    }
+    
+    func moveFromTrashIfParentFolderNotExist(
+        file: File,
+        parentDestination: File,
+        conflictResolver: NameConflictResolver,
+        completion: @escaping (Result<OperationResult, Error>) -> Void
+    ) {
+        do {
+            try SystemFileManger.default.createDirectory(at: parentDestination.path, withIntermediateDirectories: true)
+            move(
+                file: file,
+                destination: parentDestination,
+                conflictResolver: conflictResolver,
+                completion: completion
+            )
+        } catch {
+            completion(.failure(Error(error: error)))
+        }
+    }
 }
 
 struct NameConflictResolverError: NameConflictResolver {

@@ -44,6 +44,10 @@ struct FolderGridListView: View {
             conflictName: viewModel.state.nameConflict,
             resolveConflictWithUserChoice: viewModel.userConflictResolveChoice
         )
+        .deleteConfirmationPopover(
+            isShowing: $viewModel.state.deletingFromTrash,
+            deletingConfirmed: viewModel.delete
+        )
     }
 }
 

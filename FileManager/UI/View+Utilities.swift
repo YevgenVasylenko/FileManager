@@ -49,6 +49,20 @@ extension View {
         }
     }
     
+    func deleteConfirmationPopover(
+        isShowing: Binding<Bool>,
+        deletingConfirmed: @escaping () -> Void
+    ) -> some View {
+        alert(R.string.localizable.sureToDelete(), isPresented: isShowing) {
+            Button(R.string.localizable.delete(), role: .destructive) {
+                deletingConfirmed()
+            }
+        } message: {
+            Text(R.string.localizable.deleteForever())
+        }
+
+    }
+    
     func nameForConflictResult(nameResult: ConflictNameResult) -> String {
         switch nameResult {
         case .cancel:

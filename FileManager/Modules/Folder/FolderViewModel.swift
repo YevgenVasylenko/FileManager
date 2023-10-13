@@ -84,6 +84,7 @@ final class FolderViewModel: ObservableObject {
         var chosenFiles: Set<File>?
         var folderCreating: String?
         var fileDisplayOptions: FileDisplayOptions
+        var deletingFromTrash = false
     }
     
     private let file: File
@@ -158,7 +159,8 @@ final class FolderViewModel: ObservableObject {
         fileManagerCommutator.newNameForCreationOfFolder(
             at: file,
             newFolderName: R.string.localizable.newFolder()
-        ) { [weak self] result in
+        ) {
+            [weak self] result in
             switch result {
             case .success(let file):
                 self?.state.folderCreating = file.name
@@ -205,7 +207,10 @@ final class FolderViewModel: ObservableObject {
     }
 
     func restoreFromTrash() {
-        fileManagerCommutator.restoreFromTrash(filesToRestore: filesForAction) { [weak self] result in
+        fileManagerCommutator.restoreFromTrash(
+            filesToRestore: filesForAction,
+            conflictResolver: self
+        ) { [weak self] result in
             switch result {
             case .success:
                 self?.state.chosenFiles = nil
@@ -213,6 +218,10 @@ final class FolderViewModel: ObservableObject {
                 self?.state.error = failure
             }
         }
+    }
+    
+    func startDeleting() {
+        state.deletingFromTrash = true
     }
     
     func delete() {

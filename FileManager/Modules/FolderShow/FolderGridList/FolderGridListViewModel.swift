@@ -18,6 +18,7 @@ class FolderGridListViewModel: ObservableObject {
         var newNameForRename = ""
         var error: Error?
         var nameConflict: NameConflict?
+        var deletingFromTrash = false
     }
     
     private var fileManagerCommutator = FileManagerCommutator()
@@ -67,9 +68,19 @@ class FolderGridListViewModel: ObservableObject {
    
     func deleteOne(file: File) {
         state.file = file
-        delete()
+        state.deletingFromTrash = true
     }
     
+    func delete() {
+        fileManagerCommutator.deleteFile(files: filesForAction) { [weak self] result in
+            switch result {
+            case .success:
+                self?.state.file = nil
+            case .failure(let failure):
+                self?.state.error = failure
+            }
+        }
+    }
     
     func clear(file: File) {
         fileManagerCommutator.cleanTrashFolder(fileForFileManager: file) { [weak self] result in
@@ -125,17 +136,6 @@ class FolderGridListViewModel: ObservableObject {
 
 private extension FolderGridListViewModel {
     
-    func delete() {
-        fileManagerCommutator.deleteFile(files: filesForAction) { [weak self] result in
-            switch result {
-            case .success:
-                self?.state.file = nil
-            case .failure(let failure):
-                self?.state.error = failure
-            }
-        }
-    }
-    
     func moveToTrash() {
         fileManagerCommutator.moveToTrash(filesToTrash: filesForAction) { [weak self] result in
             switch result {
@@ -148,7 +148,10 @@ private extension FolderGridListViewModel {
     }
     
     func restoreFromTrash() {
-        fileManagerCommutator.restoreFromTrash(filesToRestore: filesForAction) { [weak self] result in
+        fileManagerCommutator.restoreFromTrash(
+            filesToRestore: filesForAction,
+            conflictResolver: self
+        ) { [weak self] result in
             switch result {
             case .success:
                 self?.state.file = nil

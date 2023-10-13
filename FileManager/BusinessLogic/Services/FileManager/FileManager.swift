@@ -31,17 +31,23 @@ protocol FileManager {
         files: [File],
         destination: File,
         conflictResolver: NameConflictResolver,
-        completion: @escaping (Result<OperationResult, Error>) -> Void)
+        completion: @escaping (Result<OperationResult, Error>) -> Void
+    )
 
     func move(
         files: [File],
         destination: File,
         conflictResolver: NameConflictResolver,
-        completion: @escaping (Result<OperationResult, Error>) -> Void)
+        completion: @escaping (Result<OperationResult, Error>) -> Void
+    )
    
     func moveToTrash(filesToTrash: [File], completion: @escaping (Result<Void, Error>) -> Void)
     
-    func restoreFromTrash(filesToRestore: [File], completion: @escaping (Result<Void, Error>) -> Void)
+    func restoreFromTrash(
+        filesToRestore: [File],
+        conflictResolver: NameConflictResolver,
+        completion: @escaping (Result<OperationResult, Error>) -> Void
+    )
     
     func cleanTrashFolder(fileForFileManager: File, completion: @escaping (Result<Void, Error>) -> Void)
 

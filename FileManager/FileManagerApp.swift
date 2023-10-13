@@ -12,6 +12,7 @@ import SwiftyDropbox
 struct FileManagerApp: App {
     
     init() {
+        Database.createTables()
         DropboxClientsManager.setupWithAppKey("jnv9ukpc8e9kvr7")
     }
     
