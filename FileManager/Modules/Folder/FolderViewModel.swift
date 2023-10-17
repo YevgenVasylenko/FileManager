@@ -271,6 +271,11 @@ final class FolderViewModel: ObservableObject {
             }
         }
     }
+    
+    func isFolderOkForFolderCreationButton() -> Bool {
+        state.folder.hasParent(file: LocalFileManager().trashFolder) == false &&
+                state.folder.folderAffiliation != .system(.trash)
+    }
 }
 
 private extension FolderViewModel {

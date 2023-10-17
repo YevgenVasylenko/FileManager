@@ -11,7 +11,7 @@ final class FileManagerCommutator {
 }
 
 extension FileManagerCommutator: FileManager {
-
+    
    func contents(of file: File, completion: @escaping (Result<[File], Error>) -> Void) {
         FileManagerFactory.makeFileManager(file: file).contents(of: file, completion: completion)
     }

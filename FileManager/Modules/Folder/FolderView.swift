@@ -38,9 +38,7 @@ struct FolderView: View {
             else {
                 folderView()
             }
-            if // viewModel.state.folder.hasParent(file: LocalFileManager().trashFolder) == false // ||
-                viewModel.state.folder.isDeleted == false
-            {
+            if  viewModel.isFolderOkForFolderCreationButton() {
                 createFolderButton()
             }
             actionMenuBarForChosenFiles()
@@ -113,7 +111,8 @@ private extension FolderView {
                 VStack {
                     Spacer()
                     HStack {
-                        if viewModel.state.folder.folderAffiliation != .system(.trash) {
+                        if //viewModel.state.folder.folderAffiliation != .system(.trash) {
+                            !viewModel.state.folder.hasParent(file: LocalFileManager().trashFolder) {
                             Spacer()
                             Button(R.string.localizable.copy_to()) {
                                 viewModel.copyChosen()
@@ -130,7 +129,8 @@ private extension FolderView {
                             }
                             .buttonStyle(.automatic)
                             Spacer()
-                        } else if viewModel.state.folder.storageType.isLocal && viewModel.state.folder.isDeleted {
+                        } else if viewModel.state.folder.storageType.isLocal {
+                        //    viewModel.state.folder.hasParent(file: LocalFileManager().trashFolder) {
                             Spacer()
                             Button(R.string.localizable.delete()) {
                                 viewModel.startDeleting()

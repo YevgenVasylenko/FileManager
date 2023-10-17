@@ -495,7 +495,7 @@ private extension DropboxFileManager {
             }
             var files: [File] = []
             if let result = response {
-                for fileInResult in result.entries {
+                for fileInResult in result.entries.reversed() {
                     switch fileInResult {
                     case let deletedMetadata as Files.DeletedMetadata:
                         var fileInFolder = File(
@@ -503,6 +503,14 @@ private extension DropboxFileManager {
                             storageType: .dropbox(DropboxStorageData())
                         )
                         self.correctFolderPath(file: &fileInFolder)
+                        if fileInFolder.isFolder() {
+                            let isFileInOtherTrashedFolder = files.contains {
+                                fileInFolder.hasParent(file: $0)
+                           }
+                            if isFileInOtherTrashedFolder {
+                                continue
+                            }
+                        }
                         fileInFolder.actions = [FileAction.restoreFromTrash]
                         fileInFolder.isDeleted = true
                         files.append(fileInFolder)
