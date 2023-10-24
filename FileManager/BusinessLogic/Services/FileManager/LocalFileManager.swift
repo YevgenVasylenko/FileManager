@@ -34,7 +34,7 @@ extension LocalFileManager: FileManager {
         do {
             var files: [File] = []
             for path in try SystemFileManger.default.contentsOfDirectory(at: file.path, includingPropertiesForKeys: nil) {
-                var newFile = File(path: path, storageType: .local(LocalStorageData()))
+                var newFile = File(path: path, storageType: .local)
                 if file.isDeleted {
                     newFile.isDeleted = true
                 }
@@ -166,7 +166,7 @@ extension LocalFileManager: FileManager {
                 completion(.failure(Error.unknown))
                 return
             }
-            let restoredFile = File(path: pathToRestore, storageType: .local(LocalStorageData()))
+            let restoredFile = File(path: pathToRestore, storageType: .local)
             let parentFolderOfRestoredFile = restoredFile.parentFolder()
             if isParentFolderExist(parentFolder: parentFolderOfRestoredFile) {
                 moveFromTrashIfParentFolderExist(
@@ -264,7 +264,7 @@ extension LocalFileManager: LocalTemporaryFolderConnector {
             let temporaryStorage = File(
                 path: SystemFileManger.default.temporaryDirectory.appendingPathComponent(
                     UUID().uuidString, isDirectory: true),
-                storageType: .local(LocalStorageData())
+                storageType: .local
             )
             createFolder(at: temporaryStorage) { _ in
             }
@@ -309,7 +309,7 @@ extension LocalFileManager: LocalTemporaryFolderConnector {
 private extension LocalFileManager {
     
     func makeDefaultFolder(name: String, destination: URL) -> File {
-        var file = File(path: destination.appendingPathComponent(name), storageType: .local(LocalStorageData()))
+        var file = File(path: destination.appendingPathComponent(name), storageType: .local)
         if SystemFileManger.default.fileExists(atPath: file.path.path) {
             return file
         }
@@ -427,7 +427,7 @@ private extension LocalFileManager {
     }
     
     func conflictResolve(fileToCopy: File, destination: File, conflictResolver: NameConflictResolver, completion: @escaping (Result<OperationResult, Error>) -> Void)  {
-        let placeOfConflict = File(path: destination.path.deletingLastPathComponent(), storageType: .local(LocalStorageData()))
+        let placeOfConflict = File(path: destination.path.deletingLastPathComponent(), storageType: .local)
         conflictResolver.resolve(conflictedFile: fileToCopy, placeOfConflict: placeOfConflict) { result in
             switch result {
             case .cancel:

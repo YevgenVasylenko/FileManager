@@ -14,7 +14,7 @@ extension File {
     }
     
     func imageNameDefine() -> String {
-        switch fileType {
+        switch fileType() {
         case .folder:
             return R.image.folder.name
         case .image:

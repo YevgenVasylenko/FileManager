@@ -111,8 +111,7 @@ private extension FolderView {
                 VStack {
                     Spacer()
                     HStack {
-                        if //viewModel.state.folder.folderAffiliation != .system(.trash) {
-                            !viewModel.state.folder.hasParent(file: LocalFileManager().trashFolder) {
+                        if !viewModel.state.folder.hasParent(file: LocalFileManager().trashFolder) {
                             Spacer()
                             Button(R.string.localizable.copy_to()) {
                                 viewModel.copyChosen()
@@ -130,7 +129,6 @@ private extension FolderView {
                             .buttonStyle(.automatic)
                             Spacer()
                         } else if viewModel.state.folder.storageType.isLocal {
-                        //    viewModel.state.folder.hasParent(file: LocalFileManager().trashFolder) {
                             Spacer()
                             Button(R.string.localizable.delete()) {
                                 viewModel.startDeleting()

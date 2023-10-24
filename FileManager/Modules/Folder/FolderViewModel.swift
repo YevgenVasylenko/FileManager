@@ -7,71 +7,6 @@
 
 import Foundation
 
-enum NameConflict {
-    case resolving(File, File)
-    case resolved(ConflictNameResult)
-    
-    var conflictedFile: File? {
-        switch self {
-        case .resolving(let file, _):
-            return file
-        case .resolved:
-            return nil
-        }
-    }
-    
-    var placeOfConflict: File? {
-        switch self {
-        case .resolving(_, let file):
-            return file
-        case .resolved:
-            return nil
-        }
-    }
-}
-
-struct FileSelectDelegate {
-    let type: FileActionType
-    let selectedFiles: [File]
-    let selected: (File?) -> Void
-}
-
-struct SortOption: Hashable, Codable {
-    enum Attribute: CaseIterable, Hashable, Codable {
-        case name
-        case type
-        case date
-        case size
-    }
-
-    enum Direction: Hashable, Codable {
-        case ascending
-        case descending
-        
-        var isAscending: Bool {
-            switch self {
-            case .ascending: return true
-            case .descending: return false
-            }
-        }
-        
-        func toggled() -> Self {
-            switch self {
-            case .ascending: return .descending
-            case .descending: return .ascending
-            }
-        }
-    }
-
-    let attribute: Attribute
-    var direction: Direction = .ascending
-}
-
-enum LayoutOption: Codable {
-    case grid
-    case list
-}
-
 final class FolderViewModel: ObservableObject {
     
     struct State {
@@ -387,11 +322,4 @@ enum FileDisplayOptionsManager {
         }
         return options
     }
-}
-
-struct FileDisplayOptions: Codable {
-    var layout: LayoutOption
-    var sort: SortOption
-    
-    static var initial = Self(layout: .grid, sort: SortOption(attribute: .name))
 }

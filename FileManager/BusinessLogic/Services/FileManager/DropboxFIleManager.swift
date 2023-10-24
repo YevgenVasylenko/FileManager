@@ -13,11 +13,14 @@ final class DropboxFileManager {
         static let trash = "trash"
     }
     
-    private(set) lazy var rootFolder = File(path: URL(fileURLWithPath: ""),
-                                            storageType: .dropbox(DropboxStorageData()))
+    private(set) lazy var rootFolder = File(
+        path: URL(fileURLWithPath: ""),
+        storageType: .dropbox
+    )
+
     private(set) lazy var trashFolder = File(
         path: URL(fileURLWithPath: "/\(Constants.trash)"),
-        storageType: .dropbox(DropboxStorageData())
+        storageType: .dropbox
     )
 }
 
@@ -46,7 +49,7 @@ extension DropboxFileManager: FileManager {
                 for fileInResult in result.entries {
                     var fileInFolder = File(
                         path: URL(fileURLWithPath: fileInResult.pathDisplay!),
-                        storageType: .dropbox(DropboxStorageData())
+                        storageType: .dropbox
                     )
                     self.correctFolderPath(file: &fileInFolder)
                     fileInFolder.actions = FileAction.regularFolder
@@ -76,7 +79,7 @@ extension DropboxFileManager: FileManager {
     ) {
         var destinationFile: File
         if file == rootFolder {
-            destinationFile = File(path: URL(fileURLWithPath: "/\(newFolderName)"), storageType: .dropbox(DropboxStorageData()))
+            destinationFile = File(path: URL(fileURLWithPath: "/\(newFolderName)"), storageType: .dropbox)
         } else {
             destinationFile = file.makeSubfile(name: newFolderName, isDirectory: true)
         }
@@ -227,7 +230,7 @@ extension DropboxFileManager: FileManager {
     }
     
     func makeFolderMonitor(file: File) -> FolderMonitor? {
-        return DropboxFolderMonitor(url: file.path)
+        nil
     }
     
     func getFileAttributes(file: File, completion: @escaping (Result<FileAttributes, Error>) -> Void) {
@@ -300,7 +303,7 @@ extension DropboxFileManager: LocalTemporaryFolderConnector {
             let destinationFile = File(
                 path: SystemFileManger.default.temporaryDirectory
                     .appendingPathComponent(UUID().uuidString, isDirectory: true),
-                storageType: .local(LocalStorageData())
+                storageType: .local
             )
             FileManagerCommutator().createFolder(at: destinationFile) { result in
                 switch result {
@@ -508,7 +511,7 @@ private extension DropboxFileManager {
                     case let deletedMetadata as Files.DeletedMetadata:
                         var fileInFolder = File(
                             path: URL(fileURLWithPath: deletedMetadata.pathDisplay!),
-                            storageType: .dropbox(DropboxStorageData())
+                            storageType: .dropbox
                         )
                         self.correctFolderPath(file: &fileInFolder)
                         if fileInFolder.isFolder() {

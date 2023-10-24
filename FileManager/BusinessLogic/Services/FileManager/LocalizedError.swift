@@ -36,21 +36,21 @@ enum Error: LocalizedError {
     
     init<T>(dropboxError: CallError<T>) {
         switch dropboxError {
-        case .internalServerError(let int, let string, let string2):
+        case .internalServerError(_, let string, _):
             self = .dropbox(string ?? "")
-        case .badInputError(let string, let string2):
+        case .badInputError(let string, _):
             self = .dropbox(string ?? "")
-        case .rateLimitError(let rateLimitError, let string, let string2, let string3):
+        case .rateLimitError(_, let string, _, _):
             self = .dropbox(string ?? "")
-        case .httpError(let int, let string, let string2):
+        case .httpError(_, let string, _):
             self = .dropbox(string ?? "")
-        case .authError(let authError, let string, let string2, let string3):
+        case .authError(_, let string, _, _):
             self = .dropbox(string ?? "")
-        case .accessError(let accessError, let string, let string2, let string3):
+        case .accessError(_, let string, _, _):
             self = .dropbox(string ?? "")
-        case .routeError(let box, let string, let string2, let string3):
-            self = .dropbox(string2 ?? "")
-        case .clientError(let error):
+        case .routeError(_, _, let string, _):
+            self = .dropbox(string ?? "")
+        case .clientError:
             self = .unknown
         }
     }

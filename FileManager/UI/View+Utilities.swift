@@ -104,10 +104,8 @@ extension Error {
         switch self {
         case .nameExist:
             return R.string.localizable.file_with_same_name_is_already_exist()
-        case .unknown:
-            return R.string.localizable.try_smth_else()
-        case .dropbox:
-            return R.string.localizable.try_smth_else()
+        case .unknown, .dropbox:
+            return R.string.localizable.unknown_error()
         }
     }
 }
