@@ -30,8 +30,8 @@ extension DropboxFileManager: FileManager {
         }
         let path = dropboxPath(file: file)
         
-        if path == self.trashFolder.path.path {
-            contentOfTrashFolder(completion: completion)
+        if file.isDeleted || path == self.trashFolder.path.path {
+            contentOfTrashFolder(file: file, completion: completion)
             return
         }
         client.files.listFolder(path: path).response { response, error in
@@ -179,7 +179,10 @@ extension DropboxFileManager: FileManager {
                     completion(.failure(Error(dropboxError: error)))
                     return
                 }
-                guard let lastRevision = response?.entries.last else { return }
+                guard let lastRevision = response?.entries.last else {
+                    print("No revisons")
+                    return
+                }
                 client.files.restore(path: path, rev: lastRevision.rev).response { response, error in
                     defer { group.leave() }
                     if let error = error {
@@ -483,13 +486,18 @@ private extension DropboxFileManager {
         return file == rootFolder ? "" : file.path.path
     }
     
-    func contentOfTrashFolder(completion: @escaping (Result<[File], Error>) -> Void) {
+    func contentOfTrashFolder(file: File, completion: @escaping (Result<[File], Error>) -> Void) {
         guard let client = DropboxClientsManager.authorizedClient else {
             completion(.failure(.unknown))
             return
         }
-        client.files.listFolder(path: "", recursive: true, includeDeleted: true).response { response, error in
+        var path = ""
+        if dropboxPath(file: file) != trashFolder.path.path {
+            path = dropboxPath(file: file)
+        }
+        client.files.listFolder(path: path, recursive: true, includeDeleted: true).response { response, error in
             if let error = error {
+                print(path)
                 completion(.failure(Error(dropboxError: error)))
                 return
             }
