@@ -61,6 +61,7 @@ extension DropboxFileManager: FileManager {
     }
    
     func contentBySearchingName(file: File, name: String, completion: @escaping (Result<[File], Error>) -> Void) {
+        //TO DO
     }
     
     func createFolder(at file: File, completion: @escaping (Result<Void, Error>) -> Void) {

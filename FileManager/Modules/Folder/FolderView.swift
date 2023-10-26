@@ -14,9 +14,6 @@ struct FolderView: View {
     
     @State
     private var newName: String = ""
-    
-//    @State
-//    private var searching: String = ""
 
     private let fileSelectDelegate: FileSelectDelegate?
 
@@ -167,7 +164,6 @@ private extension FolderView {
         HStack {
             FolderShowOptionsView() { options in
                 viewModel.update(fileDisplayOptions: options)
-                    
             }
             
             if fileSelectDelegate?.type == nil {
@@ -176,13 +172,6 @@ private extension FolderView {
             }
             Spacer()
                 .searchable(text: $viewModel.state.searchingName)
-            
-//            Button {
-//                Text("Hi")
-//            } label: {
-//                Image(systemName: "magnifyingglass")
-//            }
-
             if let fileSelectDelegate = fileSelectDelegate {
                 Button(nameOfActionSelection(fileActionType: fileSelectDelegate.type)) {
                     chooseAction()
@@ -190,7 +179,6 @@ private extension FolderView {
                 .disabled(viewModel.isFilesInCurrentFolder(files: fileSelectDelegate.selectedFiles) ?? true)
             }
         }
-        
     }
 
     func nameOfActionSelection(fileActionType: FileActionType) -> String {

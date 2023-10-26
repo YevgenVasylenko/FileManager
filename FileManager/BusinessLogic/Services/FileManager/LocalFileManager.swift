@@ -51,17 +51,21 @@ extension LocalFileManager: FileManager {
     func contentBySearchingName(file: File, name: String, completion: @escaping (Result<[File], Error>) -> Void) {
         do {
             var files: [File] = []
-            if let enumerator = SystemFileManger.default.enumerator(at: file.path, includingPropertiesForKeys: [.isRegularFileKey, .isDirectoryKey], options: [.skipsHiddenFiles, .skipsPackageDescendants]) {
-                for case let fileURL as URL in enumerator {
-                    do {
-                        let fileAttributes = try fileURL.resourceValues(forKeys:[.isRegularFileKey, .isDirectoryKey])
-                        if fileAttributes.isRegularFile! || fileAttributes.isDirectory! {
-                            var newFile = File(path: fileURL, storageType: .local)
-                            updateFileActionsAndDeleteStatus(file: &newFile)
-                            updateFolderAffiliation(file: &newFile)
-                            if newFile.name.contains(name) {
-                                files.append(newFile)
-                            }
+            guard let enumerator = SystemFileManger.default.enumerator(at: file.path, includingPropertiesForKeys: [.isRegularFileKey, .isDirectoryKey], options: [.skipsHiddenFiles, .skipsPackageDescendants])
+            else {
+                return
+            }
+            for case let fileURL as URL in enumerator {
+                do {
+                    let fileAttributes = try fileURL.resourceValues(forKeys:[.isRegularFileKey, .isDirectoryKey])
+                    guard let isRegularFile = fileAttributes.isRegularFile else { return }
+                    guard let isDirectory = fileAttributes.isDirectory else { return }
+                    if isRegularFile || isDirectory {
+                        var newFile = File(path: fileURL, storageType: .local)
+                        updateFileActionsAndDeleteStatus(file: &newFile)
+                        updateFolderAffiliation(file: &newFile)
+                        if newFile.name.lowercased().contains(name.lowercased()) {
+                            files.append(newFile)
                         }
                     }
                 }

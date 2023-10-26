@@ -131,7 +131,6 @@ final class FolderViewModel: ObservableObject {
         state.isLoading = true
         fileManagerCommutator.createFolder(at: createdFile) { [weak self] result in
             guard let self else { return }
-            
             switch result {
             case .success:
                 break
