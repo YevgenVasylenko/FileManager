@@ -14,6 +14,9 @@ struct FolderView: View {
     
     @State
     private var newName: String = ""
+    
+//    @State
+//    private var searching: String = ""
 
     private let fileSelectDelegate: FileSelectDelegate?
 
@@ -43,6 +46,13 @@ struct FolderView: View {
             }
             actionMenuBarForChosenFiles()
         }
+        .onChange(of: viewModel.state.searchingName, perform: { newValue in
+            if viewModel.state.searchingName.isEmpty {
+                viewModel.loadContent()
+            } else {
+                viewModel.loadContentSearchedByName()
+            }
+        })
         .onAppear {
             if EnvironmentUtils.isPreview == false {
                 viewModel.loadContent()
@@ -157,18 +167,22 @@ private extension FolderView {
         HStack {
             FolderShowOptionsView() { options in
                 viewModel.update(fileDisplayOptions: options)
+                    
             }
             
             if fileSelectDelegate?.type == nil {
                 let isChoosing = chooseInProgressBinding()
                 Toggle(nameChangeOfChoose(isChoosing: isChoosing.wrappedValue), isOn: isChoosing)
             }
+            Spacer()
+                .searchable(text: $viewModel.state.searchingName)
             
-            Button {
-            } label: {
-                Image(systemName: "magnifyingglass")
-            }
-            
+//            Button {
+//                Text("Hi")
+//            } label: {
+//                Image(systemName: "magnifyingglass")
+//            }
+
             if let fileSelectDelegate = fileSelectDelegate {
                 Button(nameOfActionSelection(fileActionType: fileSelectDelegate.type)) {
                     chooseAction()
@@ -176,6 +190,7 @@ private extension FolderView {
                 .disabled(viewModel.isFilesInCurrentFolder(files: fileSelectDelegate.selectedFiles) ?? true)
             }
         }
+        
     }
 
     func nameOfActionSelection(fileActionType: FileActionType) -> String {

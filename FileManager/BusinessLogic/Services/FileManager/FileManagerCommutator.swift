@@ -16,6 +16,10 @@ extension FileManagerCommutator: FileManager {
         FileManagerFactory.makeFileManager(file: file).contents(of: file, completion: completion)
     }
     
+    func contentBySearchingName(file: File, name: String, completion: @escaping (Result<[File], Error>) -> Void) {
+        FileManagerFactory.makeFileManager(file: file).contentBySearchingName(file: file, name: name, completion: completion)
+    }
+    
     func createFolder(at file: File, completion: @escaping (Result<Void, Error>) -> Void) {
         FileManagerFactory.makeFileManager(file: file).createFolder(at: file, completion: completion)
     }

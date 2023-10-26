@@ -20,6 +20,7 @@ final class FolderViewModel: ObservableObject {
         var folderCreating: String?
         var fileDisplayOptions: FileDisplayOptions
         var deletingFromTrash = false
+        var searchingName = ""
     }
     
     private let file: File
@@ -77,6 +78,25 @@ final class FolderViewModel: ObservableObject {
         folderMonitor?.startMonitoring()
         state.isLoading = true
         fileManagerCommutator.contents(of: file) { [weak self] result in
+            guard let self else { return }
+            switch result {
+            case .success(let files):
+                self.state.files = files
+            case .failure(let failure):
+                self.state.error = failure
+            }
+            self.sort()
+            self.state.isLoading = false
+        }
+        makeAtributesForFiles()
+    }
+    
+    func loadContentSearchedByName() {
+        state.isLoading = true
+        fileManagerCommutator.contentBySearchingName(
+            file: file, name: state.searchingName
+        ) {
+            [weak self] result in
             guard let self else { return }
             switch result {
             case .success(let files):
