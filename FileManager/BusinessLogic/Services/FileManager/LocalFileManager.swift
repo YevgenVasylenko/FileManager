@@ -53,13 +53,20 @@ extension LocalFileManager: FileManager {
             var files: [File] = []
             guard let enumerator = SystemFileManger.default.enumerator(at: file.path, includingPropertiesForKeys: [.isRegularFileKey, .isDirectoryKey], options: [.skipsHiddenFiles, .skipsPackageDescendants])
             else {
+                completion(.failure(.unknown))
                 return
             }
             for case let fileURL as URL in enumerator {
                 do {
                     let fileAttributes = try fileURL.resourceValues(forKeys:[.isRegularFileKey, .isDirectoryKey])
-                    guard let isRegularFile = fileAttributes.isRegularFile else { return }
-                    guard let isDirectory = fileAttributes.isDirectory else { return }
+                    guard let isRegularFile = fileAttributes.isRegularFile else {
+                        completion(.failure(.unknown))
+                        return
+                    }
+                    guard let isDirectory = fileAttributes.isDirectory else {
+                        completion(.failure(.unknown))
+                        return
+                    }
                     if isRegularFile || isDirectory {
                         var newFile = File(path: fileURL, storageType: .local)
                         updateFileActionsAndDeleteStatus(file: &newFile)
