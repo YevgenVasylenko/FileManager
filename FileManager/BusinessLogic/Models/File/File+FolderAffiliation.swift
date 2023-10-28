@@ -10,6 +10,7 @@ import Foundation
 extension File {
     enum FolderAffiliation: Equatable {
         enum SystemFolderName {
+            case root
             case trash
             case download
         }

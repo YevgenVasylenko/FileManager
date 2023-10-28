@@ -21,6 +21,7 @@ final class FolderViewModel: ObservableObject {
         var fileDisplayOptions: FileDisplayOptions
         var deletingFromTrash = false
         var searchingName = ""
+        var placeForSearch: SearchingPlace?
     }
     
     private let file: File
@@ -44,6 +45,7 @@ final class FolderViewModel: ObservableObject {
             folder: file,
             fileDisplayOptions: FileDisplayOptionsManager.options)
         )
+        state.placeForSearch = defaultPlaceForSearch()
     }
     
     var filesForAction: [File] {
@@ -229,6 +231,30 @@ final class FolderViewModel: ObservableObject {
     func isFolderOkForFolderCreationButton() -> Bool {
         state.folder.hasParent(file: LocalFileManager().trashFolder) == false &&
                 state.folder.folderAffiliation != .system(.trash)
+    }
+    
+    func suggestedPlacesForSearch() -> [SearchingPlace] {
+        if state.folder.folderAffiliation == .system(.root) {
+            return SearchingPlace.whenInRootOrTrashFolder
+        } else if state.folder.folderAffiliation == .system(.trash) {
+            return SearchingPlace.whenInRootOrTrashFolder
+        } else if state.folder.folderAffiliation == .user {
+            return SearchingPlace.allCases
+        } else {
+            return SearchingPlace.allCases
+        }
+    }
+    
+    func defaultPlaceForSearch() -> SearchingPlace {
+        if state.folder.folderAffiliation == .system(.root) {
+            return .currentStorage
+        } else if state.folder.folderAffiliation == .system(.trash) {
+            return .currentTrash
+        } else if state.folder.folderAffiliation == .user {
+            return .currentFolder
+        } else {
+            return .currentFolder
+        }
     }
 }
 

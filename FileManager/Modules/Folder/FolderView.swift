@@ -14,7 +14,7 @@ struct FolderView: View {
     
     @State
     private var newName: String = ""
-
+    
     private let fileSelectDelegate: FileSelectDelegate?
 
     init(
@@ -31,6 +31,7 @@ struct FolderView: View {
     }
     
     var body: some View {
+        suggestedPlaceForSearchMenuBar()
         ZStack {
             if viewModel.state.isLoading {
                 ProgressView()
@@ -165,7 +166,6 @@ private extension FolderView {
             FolderShowOptionsView() { options in
                 viewModel.update(fileDisplayOptions: options)
             }
-            
             if fileSelectDelegate?.type == nil {
                 let isChoosing = chooseInProgressBinding()
                 Toggle(nameChangeOfChoose(isChoosing: isChoosing.wrappedValue), isOn: isChoosing)
@@ -177,6 +177,25 @@ private extension FolderView {
                     chooseAction()
                 }
                 .disabled(viewModel.isFilesInCurrentFolder(files: fileSelectDelegate.selectedFiles) ?? true)
+            }
+        }
+    }
+    
+    func suggestedPlaceForSearchMenuBar() -> some View {
+        Group {
+            if !viewModel.state.searchingName.isEmpty {
+                HStack {
+                    Spacer()
+                    ForEach(viewModel.suggestedPlacesForSearch(), id: \.self) { place in
+                        Toggle(
+                            place.namesForPlaces(file: viewModel.state.folder),
+                            isOn: choosePlaceBinding(choicePlace: place)
+                        )
+                            .toggleStyle(.button)
+                            .buttonStyle(.bordered)
+                    }
+                    Spacer()
+                }
             }
         }
     }
@@ -197,7 +216,7 @@ private extension FolderView {
             return R.string.localizable.done()
         }
     }
-
+    
     func chooseInProgressBinding() -> Binding<Bool> {
         Binding(
             get: {
@@ -208,6 +227,20 @@ private extension FolderView {
                     viewModel.state.chosenFiles = Set<File>()
                 } else {
                     viewModel.state.chosenFiles = nil
+                }
+            })
+    }
+    
+    func choosePlaceBinding(choicePlace: SearchingPlace) -> Binding<Bool> {
+        Binding(
+            get: {
+                viewModel.state.placeForSearch == choicePlace
+            },
+            set: { selected in
+                if selected {
+                    viewModel.state.placeForSearch = choicePlace
+                } else {
+                    viewModel.state.placeForSearch = nil
                 }
             })
     }

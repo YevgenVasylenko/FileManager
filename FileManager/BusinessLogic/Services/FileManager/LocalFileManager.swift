@@ -13,18 +13,28 @@ final class LocalFileManager {
         static let trash = "trash"
         static let downloads = "downloads"
     }
-    
-    private let fileManagerRootPath: FileManagerRootPath
-    private lazy var documentsURL = fileManagerRootPath.documentsURL
-    private(set) lazy var rootFolder = makeDefaultFolder(name: Constants.root, destination: documentsURL)
-    private(set) lazy var trashFolder = makeDefaultFolder(name: Constants.trash, destination: rootFolder.path)
-    private(set) lazy var downloadsFolder = makeDefaultFolder(name: Constants.downloads, destination: rootFolder.path)
-    
+
+    private(set) var rootFolder: File
+    private(set) var trashFolder: File
+    private(set) var downloadsFolder: File
+
     init(fileManagerRootPath: FileManagerRootPath = LocalFileMangerRootPath()) {
-        self.fileManagerRootPath = fileManagerRootPath
-        _ = rootFolder
-        _ = trashFolder
-        _ = downloadsFolder
+        rootFolder = Self.makeDefaultFolder(
+            name: Constants.root,
+            destination: fileManagerRootPath.documentsURL
+        )
+        trashFolder = Self.makeDefaultFolder(
+            name: Constants.trash,
+            destination: rootFolder.path
+        )
+        downloadsFolder = Self.makeDefaultFolder(
+            name: Constants.downloads,
+            destination: rootFolder.path
+        )
+
+        rootFolder = updatedFile(file: rootFolder)
+        trashFolder = updatedFile(file: trashFolder)
+        downloadsFolder = updatedFile(file: downloadsFolder)
     }
 }
 
@@ -38,8 +48,7 @@ extension LocalFileManager: FileManager {
                 if file.isDeleted {
                     newFile.isDeleted = true
                 }
-                updateFileActionsAndDeleteStatus(file: &newFile)
-                updateFolderAffiliation(file: &newFile)
+                newFile = updatedFile(file: newFile)
                 files.append(newFile)
             }
             completion(.success(files))
@@ -59,11 +68,10 @@ extension LocalFileManager: FileManager {
             for case let fileURL as URL in enumerator {
                 do {
                     let fileAttributes = try fileURL.resourceValues(forKeys:[.isRegularFileKey, .isDirectoryKey])
-                    guard let isRegularFile = fileAttributes.isRegularFile else {
-                        completion(.failure(.unknown))
-                        return
-                    }
-                    guard let isDirectory = fileAttributes.isDirectory else {
+                    guard
+                        let isRegularFile = fileAttributes.isRegularFile,
+                        let isDirectory = fileAttributes.isDirectory
+                    else {
                         completion(.failure(.unknown))
                         return
                     }
@@ -71,7 +79,7 @@ extension LocalFileManager: FileManager {
                         var newFile = File(path: fileURL, storageType: .local)
                         updateFileActionsAndDeleteStatus(file: &newFile)
                         updateFolderAffiliation(file: &newFile)
-                        if newFile.name.lowercased().contains(name.lowercased()) {
+                        if newFile.displayedName().lowercased().contains(name.lowercased()) {
                             files.append(newFile)
                         }
                     }
@@ -343,8 +351,8 @@ extension LocalFileManager: LocalTemporaryFolderConnector {
 
 private extension LocalFileManager {
     
-    func makeDefaultFolder(name: String, destination: URL) -> File {
-        var file = File(path: destination.appendingPathComponent(name), storageType: .local)
+    static func makeDefaultFolder(name: String, destination: URL) -> File {
+        let file = File(path: destination.appendingPathComponent(name), storageType: .local)
         if SystemFileManger.default.fileExists(atPath: file.path.path) {
             return file
         }
@@ -353,6 +361,11 @@ private extension LocalFileManager {
         } catch {
             fatalError("Failed to create directory with error: \(error)")
         }
+        return file
+    }
+    
+    func updatedFile(file: File) -> File {
+        var file = file
         updateFileActionsAndDeleteStatus(file: &file)
         updateFolderAffiliation(file: &file)
         return file
@@ -373,10 +386,14 @@ private extension LocalFileManager {
     }
     
     func updateFolderAffiliation(file: inout File) {
-        if file == trashFolder {
+        if file == rootFolder {
+            file.folderAffiliation = .system(.root)
+        } else if file == trashFolder {
             file.folderAffiliation = .system(.trash)
         } else if file == downloadsFolder {
             file.folderAffiliation = .system(.download)
+        } else {
+            file.folderAffiliation = .user
         }
     }
     

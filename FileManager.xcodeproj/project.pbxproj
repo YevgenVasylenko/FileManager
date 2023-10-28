@@ -17,6 +17,7 @@
 		0DA591A32AE82AED0092E07B /* FileSelectDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0DA591A22AE82AED0092E07B /* FileSelectDelegate.swift */; };
 		0DA591A72AE82B560092E07B /* FileDisplayOptions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0DA591A62AE82B560092E07B /* FileDisplayOptions.swift */; };
 		5D04653D2A71071900BE768E /* FileActionType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D04653C2A71071900BE768E /* FileActionType.swift */; };
+		5D05A8612AED497400BBAC09 /* SearchingPlace.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D05A8602AED497400BBAC09 /* SearchingPlace.swift */; };
 		5D0ACE492AA72BE900B834E8 /* FolderShowOptionsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D0ACE482AA72BE900B834E8 /* FolderShowOptionsView.swift */; };
 		5D0AFC152A7685AF000AA28F /* SwiftyDropbox in Frameworks */ = {isa = PBXBuildFile; productRef = 5D0AFC142A7685AF000AA28F /* SwiftyDropbox */; };
 		5D0B9CA32A4464530099021C /* FolderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D0B9CA22A4464530099021C /* FolderView.swift */; };
@@ -98,6 +99,7 @@
 		0DA591A22AE82AED0092E07B /* FileSelectDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileSelectDelegate.swift; sourceTree = "<group>"; };
 		0DA591A62AE82B560092E07B /* FileDisplayOptions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileDisplayOptions.swift; sourceTree = "<group>"; };
 		5D04653C2A71071900BE768E /* FileActionType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileActionType.swift; sourceTree = "<group>"; };
+		5D05A8602AED497400BBAC09 /* SearchingPlace.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchingPlace.swift; sourceTree = "<group>"; };
 		5D0ACE482AA72BE900B834E8 /* FolderShowOptionsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FolderShowOptionsView.swift; sourceTree = "<group>"; };
 		5D0B9CA22A4464530099021C /* FolderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FolderView.swift; sourceTree = "<group>"; };
 		5D0B9CA42A4466460099021C /* FileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileView.swift; sourceTree = "<group>"; };
@@ -407,6 +409,7 @@
 			children = (
 				5D78B1B02A4ECDAA00A76D0F /* Result+Utilities.swift */,
 				0DA5918A2AE826100092E07B /* UIApplication+Utilities.swift */,
+				5D05A8602AED497400BBAC09 /* SearchingPlace.swift */,
 			);
 			path = Utilities;
 			sourceTree = "<group>";
@@ -611,6 +614,7 @@
 				5D793A5D2AB87B8300A73D5C /* FolderGridListView.swift in Sources */,
 				5D793A5A2AB2162C00A73D5C /* RootViewModel.swift in Sources */,
 				0DA591A12AE82AA00092E07B /* NameConflict.swift in Sources */,
+				5D05A8612AED497400BBAC09 /* SearchingPlace.swift in Sources */,
 				5DEDB90E2A5AEDD2003CC86B /* EnvironmenttUtils.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
