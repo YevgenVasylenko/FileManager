@@ -57,10 +57,15 @@ extension LocalFileManager: FileManager {
         }
     }
     
-    func contentBySearchingName(file: File, name: String, completion: @escaping (Result<[File], Error>) -> Void) {
+    func contentBySearchingName(
+        searchingPlace: SearchingPlace,
+        file: File,
+        name: String,
+        completion: @escaping (Result<[File], Error>) -> Void
+    ) {
         do {
             var files: [File] = []
-            guard let enumerator = SystemFileManger.default.enumerator(at: file.path, includingPropertiesForKeys: [.isRegularFileKey, .isDirectoryKey], options: [.skipsHiddenFiles, .skipsPackageDescendants])
+            guard let enumerator = enumeratorDependOnSearchingPlace(searchingPlace: searchingPlace, file: file)
             else {
                 completion(.failure(.unknown))
                 return
@@ -551,6 +556,29 @@ private extension LocalFileManager {
         } catch {
             completion(.failure(Error(error: error)))
         }
+    }
+    
+    func enumeratorDependOnSearchingPlace(
+        searchingPlace: SearchingPlace,
+        file: File
+    ) -> SystemFileManger.DirectoryEnumerator? {
+        
+        switch searchingPlace {
+        case .currentStorage:
+           return  enumeratorForSearching(file: rootFolder)
+        case .currentFolder:
+            return enumeratorForSearching(file: file)
+        case .currentTrash:
+            return enumeratorForSearching(file: trashFolder)
+        case .allStorages:
+            // TO DO Correctly
+            return enumeratorForSearching(file: rootFolder)
+        }
+       
+    }
+    
+    func enumeratorForSearching(file: File) -> SystemFileManger.DirectoryEnumerator? {
+        return SystemFileManger.default.enumerator(at: file.path, includingPropertiesForKeys: [.isRegularFileKey, .isDirectoryKey], options: [.skipsHiddenFiles, .skipsPackageDescendants])
     }
 }
 

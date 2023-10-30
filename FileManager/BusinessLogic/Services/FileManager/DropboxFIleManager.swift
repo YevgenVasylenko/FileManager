@@ -10,18 +10,27 @@ import SwiftyDropbox
 
 final class DropboxFileManager {
     enum Constants {
+        static let root = ""
         static let trash = "trash"
     }
     
-    private(set) lazy var rootFolder = File(
-        path: URL(fileURLWithPath: ""),
-        storageType: .dropbox
-    )
-
-    private(set) lazy var trashFolder = File(
-        path: URL(fileURLWithPath: "/\(Constants.trash)"),
-        storageType: .dropbox
-    )
+    private(set) var rootFolder: File
+    private(set) var trashFolder: File
+    
+    init () {
+        rootFolder = File(
+            path: URL(fileURLWithPath: Constants.root),
+            storageType: .dropbox
+        )
+        
+        trashFolder = File(
+            path: URL(fileURLWithPath: "/\(Constants.trash)"),
+            storageType: .dropbox
+        )
+        
+        rootFolder = updatedFile(file: rootFolder)
+        trashFolder = updatedFile(file: trashFolder)
+    }
 }
 
 extension DropboxFileManager: FileManager {
@@ -52,7 +61,7 @@ extension DropboxFileManager: FileManager {
                         storageType: .dropbox
                     )
                     self.correctFolderPath(file: &fileInFolder)
-                    fileInFolder.actions = FileAction.regularFolder
+                    fileInFolder = self.updatedFile(file: fileInFolder)
                     files.append(fileInFolder)
                 }
             }
@@ -60,7 +69,12 @@ extension DropboxFileManager: FileManager {
         }
     }
    
-    func contentBySearchingName(file: File, name: String, completion: @escaping (Result<[File], Error>) -> Void) {
+    func contentBySearchingName(
+        searchingPlace: SearchingPlace,
+        file: File,
+        name: String,
+        completion: @escaping (Result<[File], Error>
+        ) -> Void) {
         //TO DO
     }
     
@@ -399,6 +413,35 @@ private extension DropboxFileManager {
         }
     }
     
+    func updatedFile(file: File) -> File {
+        var file = file
+        updateFileActionsAndDeleteStatus(file: &file)
+        updateFolderAffiliation(file: &file)
+        return file
+    }
+    
+    func updateFileActionsAndDeleteStatus(file: inout File) {
+        if file == trashFolder {
+            file.actions = FileAction.trashFolderActions
+        } else if file == trashFolder.makeSubfile(name: file.name) ||
+                    file == trashFolder.makeSubfile(name: file.name, isDirectory: true) || file.isDeleted {
+            file.actions = [FileAction.restoreFromTrash]
+            file.isDeleted = true
+        } else {
+            file.actions = FileAction.regularFolder
+        }
+    }
+    
+    func updateFolderAffiliation(file: inout File) {
+        if file == rootFolder {
+            file.folderAffiliation = .system(.root)
+        } else if file == trashFolder {
+            file.folderAffiliation = .system(.trash)
+        } else {
+            file.folderAffiliation = .user
+        }
+    }
+    
     func copyOne(
         file: File,
         destination: File,
@@ -526,8 +569,8 @@ private extension DropboxFileManager {
                                 continue
                             }
                         }
-                        fileInFolder.actions = [FileAction.restoreFromTrash]
                         fileInFolder.isDeleted = true
+                        fileInFolder = self.updatedFile(file: fileInFolder)
                         files.append(fileInFolder)
                     default:
                         continue

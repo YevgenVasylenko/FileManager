@@ -7,7 +7,7 @@
 
 import Foundation
 
-enum SearchingPlace: CaseIterable {
+enum SearchingPlace: CaseIterable, Equatable {
     case currentStorage
     case currentFolder
     case currentTrash

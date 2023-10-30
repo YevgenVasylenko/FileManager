@@ -22,6 +22,10 @@ final class FolderViewModel: ObservableObject {
         var deletingFromTrash = false
         var searchingName = ""
         var placeForSearch: SearchingPlace?
+        var observedObjectsForSearching: [String] {[
+            searchingName,
+            placeForSearch.debugDescription
+        ]}
     }
     
     private let file: File
@@ -95,8 +99,11 @@ final class FolderViewModel: ObservableObject {
     
     func loadContentSearchedByName() {
         state.isLoading = true
+        guard let searchingPlace = state.placeForSearch else { return }
         fileManagerCommutator.contentBySearchingName(
-            file: file, name: state.searchingName
+            searchingPlace: searchingPlace,
+            file: file,
+            name: state.searchingName
         ) {
             [weak self] result in
             guard let self else { return }
