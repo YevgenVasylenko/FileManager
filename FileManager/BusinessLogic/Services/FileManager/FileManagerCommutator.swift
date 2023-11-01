@@ -22,12 +22,47 @@ extension FileManagerCommutator: FileManager {
         name: String,
         completion: @escaping (Result<[File], Error>) -> Void
     ) {
-        FileManagerFactory.makeFileManager(file: file).contentBySearchingName(
-            searchingPlace: searchingPlace,
-            file: file,
-            name: name,
-            completion: completion
-        )
+        if searchingPlace == .allStorages {
+            var searchedFilesAcrossAll: [File] = []
+            let group = DispatchGroup()
+            group.enter()
+            FileManagerFactory.makeFileManager(file: LocalFileManager().rootFolder).contentBySearchingName(
+                searchingPlace: searchingPlace,
+                file: file,
+                name: name) { result in
+                    switch result {
+                    case .success(let files):
+                        searchedFilesAcrossAll += files
+                    case .failure(let error):
+                        completion(.failure(error))
+                        return
+                    }
+                }
+            FileManagerFactory.makeFileManager(file: DropboxFileManager().rootFolder).contentBySearchingName(
+                searchingPlace: searchingPlace,
+                file: file,
+                name: name) { result in
+                    switch result {
+                    case .success(let files):
+                        searchedFilesAcrossAll += files
+                        group.leave()
+                    case .failure(let error):
+                        completion(.failure(error))
+                        return
+                    }
+                }
+            group.notify(queue: DispatchQueue.main) {
+                completion(.success(searchedFilesAcrossAll))
+                return
+            }
+        } else {
+            FileManagerFactory.makeFileManager(file: file).contentBySearchingName(
+                searchingPlace: searchingPlace,
+                file: file,
+                name: name,
+                completion: completion
+            )
+        }
     }
     
     func createFolder(at file: File, completion: @escaping (Result<Void, Error>) -> Void) {

@@ -14,10 +14,10 @@ extension File {
         case .user:
             return self.name
         case .system(.root):
-            if self.name == "/" {
+            if self.storageType == .dropbox {
                 return R.string.localizable.dropbox()
             }
-            if self.name == "root" {
+            if self.storageType == .local {
                 return R.string.localizable.root()
             }
             return self.name

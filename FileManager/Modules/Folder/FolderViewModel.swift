@@ -116,7 +116,6 @@ final class FolderViewModel: ObservableObject {
             self.sort()
             self.state.isLoading = false
         }
-        makeAtributesForFiles()
     }
     
     func startCreatingFolder() {
@@ -241,25 +240,27 @@ final class FolderViewModel: ObservableObject {
     }
     
     func suggestedPlacesForSearch() -> [SearchingPlace] {
-        if state.folder.folderAffiliation == .system(.root) {
-            return SearchingPlace.whenInRootOrTrashFolder
-        } else if state.folder.folderAffiliation == .system(.trash) {
-            return SearchingPlace.whenInRootOrTrashFolder
-        } else if state.folder.folderAffiliation == .user {
+        switch state.folder.folderAffiliation {
+        case .user:
             return SearchingPlace.allCases
-        } else {
+        case .system(.root):
+            return SearchingPlace.whenInRootOrTrashFolder
+        case .system(.trash):
+            return SearchingPlace.whenInRootOrTrashFolder
+        default:
             return SearchingPlace.allCases
         }
     }
     
     func defaultPlaceForSearch() -> SearchingPlace {
-        if state.folder.folderAffiliation == .system(.root) {
-            return .currentStorage
-        } else if state.folder.folderAffiliation == .system(.trash) {
-            return .currentTrash
-        } else if state.folder.folderAffiliation == .user {
+        switch state.folder.folderAffiliation {
+        case .user:
             return .currentFolder
-        } else {
+        case .system(.root):
+            return .currentStorage
+        case .system(.trash):
+            return .currentTrash
+        default:
             return .currentFolder
         }
     }

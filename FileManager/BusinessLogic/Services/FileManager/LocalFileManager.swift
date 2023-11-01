@@ -381,8 +381,8 @@ private extension LocalFileManager {
             file.actions = FileAction.trashFolderActions
         } else if file == downloadsFolder {
             file.actions = FileAction.downloadsFolderActions
-        } else if file == trashFolder.makeSubfile(name: file.name) ||
-                    file == trashFolder.makeSubfile(name: file.name, isDirectory: true) || file.isDeleted {
+        } else if file.isFileIsSub(file: trashFolder) ||
+                    file.isFileIsSub(file: trashFolder, isDirectory: true) || file.isDeleted {
             file.actions = [FileAction.delete, FileAction.restoreFromTrash]
             file.isDeleted = true
         } else {
@@ -571,10 +571,8 @@ private extension LocalFileManager {
         case .currentTrash:
             return enumeratorForSearching(file: trashFolder)
         case .allStorages:
-            // TO DO Correctly
             return enumeratorForSearching(file: rootFolder)
         }
-       
     }
     
     func enumeratorForSearching(file: File) -> SystemFileManger.DirectoryEnumerator? {

@@ -45,7 +45,7 @@ struct FolderView: View {
             actionMenuBarForChosenFiles()
         }
         .onChange(of: viewModel.state.observedObjectsForSearching,
-                  perform: { newValue in
+                  perform: { _ in
             if viewModel.state.searchingName.isEmpty {
                 viewModel.loadContent()
             } else {
