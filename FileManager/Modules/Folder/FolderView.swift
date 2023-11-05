@@ -44,9 +44,9 @@ struct FolderView: View {
             }
             actionMenuBarForChosenFiles()
         }
-        .onChange(of: viewModel.state.observedObjectsForSearching,
+        .onChange(of: viewModel.state.searchingInfo,
                   perform: { _ in
-            if viewModel.state.searchingName.isEmpty {
+            if viewModel.state.searchingInfo.searchingName.isEmpty {
                 viewModel.loadContent()
             } else {
                 viewModel.loadContentSearchedByName()
@@ -113,51 +113,50 @@ private extension FolderView {
             }
         }
     }
-    
+
+    @ViewBuilder
     func actionMenuBarForChosenFiles() -> some View {
-        Group {
-            if chooseInProgressBinding().wrappedValue {
-                VStack {
-                    Spacer()
-                    HStack {
-                        if !viewModel.state.folder.hasParent(file: LocalFileManager().trashFolder) {
-                            Spacer()
-                            Button(R.string.localizable.copy_to()) {
-                                viewModel.copyChosen()
-                            }
-                            .buttonStyle(.automatic)
-                            Spacer()
-                            Button(R.string.localizable.move_to()) {
-                                viewModel.moveChosen()
-                            }
-                            .buttonStyle(.automatic)
-                            Spacer()
-                            Button(R.string.localizable.move_to_trash()) {
-                                viewModel.moveToTrash()
-                            }
-                            .buttonStyle(.automatic)
-                            Spacer()
-                        } else if viewModel.state.folder.storageType.isLocal {
-                            Spacer()
-                            Button(R.string.localizable.delete()) {
-                                viewModel.startDeleting()
-                            }
-                            .buttonStyle(.automatic)
-                            Spacer()
-                            Button(R.string.localizable.restore()) {
-                                viewModel.restoreFromTrash()
-                            }
-                            .buttonStyle(.automatic)
-                            Spacer()
-                        } else {
-                            Button(R.string.localizable.restore()) {
-                                viewModel.restoreFromTrash()
-                            }
-                            .buttonStyle(.automatic)
+        if chooseInProgressBinding().wrappedValue {
+            VStack {
+                Spacer()
+                HStack {
+                    if !viewModel.state.folder.hasParent(file: LocalFileManager().trashFolder) {
+                        Spacer()
+                        Button(R.string.localizable.copy_to()) {
+                            viewModel.copyChosen()
                         }
+                        .buttonStyle(.automatic)
+                        Spacer()
+                        Button(R.string.localizable.move_to()) {
+                            viewModel.moveChosen()
+                        }
+                        .buttonStyle(.automatic)
+                        Spacer()
+                        Button(R.string.localizable.move_to_trash()) {
+                            viewModel.moveToTrash()
+                        }
+                        .buttonStyle(.automatic)
+                        Spacer()
+                    } else if viewModel.state.folder.storageType.isLocal {
+                        Spacer()
+                        Button(R.string.localizable.delete()) {
+                            viewModel.startDeleting()
+                        }
+                        .buttonStyle(.automatic)
+                        Spacer()
+                        Button(R.string.localizable.restore()) {
+                            viewModel.restoreFromTrash()
+                        }
+                        .buttonStyle(.automatic)
+                        Spacer()
+                    } else {
+                        Button(R.string.localizable.restore()) {
+                            viewModel.restoreFromTrash()
+                        }
+                        .buttonStyle(.automatic)
                     }
-                    .disabled(viewModel.filesForAction.isEmpty)
                 }
+                .disabled(viewModel.filesForAction.isEmpty)
             }
         }
     }
@@ -171,8 +170,6 @@ private extension FolderView {
                 let isChoosing = chooseInProgressBinding()
                 Toggle(nameChangeOfChoose(isChoosing: isChoosing.wrappedValue), isOn: isChoosing)
             }
-            Spacer()
-                .searchable(text: $viewModel.state.searchingName)
             if let fileSelectDelegate = fileSelectDelegate {
                 Button(nameOfActionSelection(fileActionType: fileSelectDelegate.type)) {
                     chooseAction()
@@ -180,23 +177,23 @@ private extension FolderView {
                 .disabled(viewModel.isFilesInCurrentFolder(files: fileSelectDelegate.selectedFiles) ?? true)
             }
         }
+        .searchable(text: $viewModel.state.searchingInfo.searchingName)
     }
-    
+
+    @ViewBuilder
     func suggestedPlaceForSearchMenuBar() -> some View {
-        Group {
-            if !viewModel.state.searchingName.isEmpty {
-                HStack {
-                    Spacer()
-                    ForEach(viewModel.suggestedPlacesForSearch(), id: \.self) { place in
-                        Toggle(
-                            place.namesForPlaces(file: viewModel.state.folder),
-                            isOn: choosePlaceBinding(choicePlace: place)
-                        )
-                            .toggleStyle(.button)
-                            .buttonStyle(.bordered)
-                    }
-                    Spacer()
+        if !viewModel.state.searchingInfo.searchingName.isEmpty {
+            HStack {
+                Spacer()
+                ForEach(viewModel.suggestedPlacesForSearch(), id: \.self) { place in
+                    Toggle(
+                        place.namesForPlaces(file: viewModel.state.folder),
+                        isOn: choosePlaceBinding(choicePlace: place)
+                    )
+                    .toggleStyle(.button)
+                    .buttonStyle(.bordered)
                 }
+                Spacer()
             }
         }
     }
@@ -235,13 +232,13 @@ private extension FolderView {
     func choosePlaceBinding(choicePlace: SearchingPlace) -> Binding<Bool> {
         Binding(
             get: {
-                viewModel.state.placeForSearch == choicePlace
+                viewModel.state.searchingInfo.placeForSearch == choicePlace
             },
             set: { selected in
                 if selected {
-                    viewModel.state.placeForSearch = choicePlace
+                    viewModel.state.searchingInfo.placeForSearch = choicePlace
                 } else {
-                    viewModel.state.placeForSearch = nil
+                    viewModel.state.searchingInfo.placeForSearch = nil
                 }
             })
     }

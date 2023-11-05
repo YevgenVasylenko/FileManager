@@ -14,7 +14,7 @@ extension Database.Tables {
         static let id = Expression<Int64>("id")
         static let pathInTrash = Expression<String>("pathInTrash")
         static let pathToRestore = Expression<String>("pathToRestore")
-
+        
         static func create() {
             do {
                 try Database.connection.run(
@@ -28,7 +28,7 @@ extension Database.Tables {
                 print(error)
             }
         }
-
+        
         static func insertRowToFilesInTrashDB(fileToTrash: File, fileInTrashPath: URL) {
             do {
                 let query = table.insert(
@@ -40,7 +40,7 @@ extension Database.Tables {
                 print(error)
             }
         }
-
+        
         static func deleteFromDB(file: File) {
             let deleteFileQuery = table.filter(
                 pathInTrash == pathWithOutHomeDirectory(path: file.path)
@@ -51,7 +51,7 @@ extension Database.Tables {
                 print(error)
             }
         }
-
+        
         static func getPathForRestore(file: File) -> URL? {
             let pathInTrashFolder = pathWithOutHomeDirectory(path: file.path)
             if preLastFolder(file: file) == LocalFileManager.Constants.trash {
@@ -83,26 +83,28 @@ extension Database.Tables {
             }
             return nil
         }
+    }
+}
 
-        static func pathWithOutHomeDirectory(path: URL) -> String {
-            return path.path.replacingOccurrences(of: NSHomeDirectory(), with: "")
-        }
+private extension Database.Tables.FilesInTrash {
+    static func pathWithOutHomeDirectory(path: URL) -> String {
+        return path.path.replacingOccurrences(of: NSHomeDirectory(), with: "")
+    }
 
-        static func preLastFolder(file: File) -> String {
-            return file.path.deletingLastPathComponent().lastPathComponent
-        }
+    static func preLastFolder(file: File) -> String {
+        return file.path.deletingLastPathComponent().lastPathComponent
+    }
 
-        static func firstNameInTrash(path: String) -> String {
-            return URL(filePath: path.replacingOccurrences(of: LocalFileManager().trashFolder.path.path, with: "")).pathComponents[1]
-        }
+    static func firstNameInTrash(path: String) -> String {
+        return URL(filePath: path.replacingOccurrences(of: LocalFileManager().trashFolder.path.path, with: "")).pathComponents[1]
+    }
 
-        static func pathFromTrashRootToFile(path: String) -> String {
-            return path.replacingOccurrences(of: LocalFileManager().trashFolder.path.appending(component: firstNameInTrash(path: path)).path, with: "")
-        }
+    static func pathFromTrashRootToFile(path: String) -> String {
+        return path.replacingOccurrences(of: LocalFileManager().trashFolder.path.appending(component: firstNameInTrash(path: path)).path, with: "")
+    }
 
-        static func pathToFolderInTrash(path: String) -> String {
-            let path = LocalFileManager().trashFolder.path.appending(component: firstNameInTrash(path: path))
-            return pathWithOutHomeDirectory(path: path)
-        }
+    static func pathToFolderInTrash(path: String) -> String {
+        let path = LocalFileManager().trashFolder.path.appending(component: firstNameInTrash(path: path))
+        return pathWithOutHomeDirectory(path: path)
     }
 }

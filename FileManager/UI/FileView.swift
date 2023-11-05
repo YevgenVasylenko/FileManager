@@ -52,17 +52,16 @@ private extension FileView {
             .font(.headline)
             .lineLimit(lineLimit())
     }
-    
+
+    @ViewBuilder
     func container(@ViewBuilder content: () -> some View) -> some View {
-        Group {
-            switch style {
-            case .grid:
-                VStack(content: content)
-            case .list:
-                HStack(content: content)
-            case .info:
-                VStack(content: content)
-            }
+        switch style {
+        case .grid:
+            VStack(content: content)
+        case .list:
+            HStack(content: content)
+        case .info:
+            VStack(content: content)
         }
     }
     

@@ -22,46 +22,30 @@ extension FileManagerCommutator: FileManager {
         name: String,
         completion: @escaping (Result<[File], Error>) -> Void
     ) {
-        if searchingPlace == .allStorages {
-            var searchedFilesAcrossAll: [File] = []
-            let group = DispatchGroup()
+        var searchedFilesAcrossAll: [File] = []
+        let group = DispatchGroup()
+        var error: Error?
+        for storage in makeListOfActiveFileManagers(file: file, searchingPlace: searchingPlace) {
             group.enter()
-            FileManagerFactory.makeFileManager(file: LocalFileManager().rootFolder).contentBySearchingName(
+            storage.contentBySearchingName(
                 searchingPlace: searchingPlace,
                 file: file,
                 name: name) { result in
+                    defer { group.leave() }
                     switch result {
                     case .success(let files):
                         searchedFilesAcrossAll += files
-                    case .failure(let error):
-                        completion(.failure(error))
-                        return
+                    case .failure(let _error):
+                        error = _error
                     }
                 }
-            FileManagerFactory.makeFileManager(file: DropboxFileManager().rootFolder).contentBySearchingName(
-                searchingPlace: searchingPlace,
-                file: file,
-                name: name) { result in
-                    switch result {
-                    case .success(let files):
-                        searchedFilesAcrossAll += files
-                        group.leave()
-                    case .failure(let error):
-                        completion(.failure(error))
-                        return
-                    }
-                }
-            group.notify(queue: DispatchQueue.main) {
+        }
+        group.notify(queue: .main) {
+            if let error {
+                completion(.failure(error))
+            } else {
                 completion(.success(searchedFilesAcrossAll))
-                return
             }
-        } else {
-            FileManagerFactory.makeFileManager(file: file).contentBySearchingName(
-                searchingPlace: searchingPlace,
-                file: file,
-                name: name,
-                completion: completion
-            )
         }
     }
     
@@ -206,5 +190,20 @@ extension FileManagerCommutator: FileManager {
     func getFileAttributes(file: File, completion: @escaping (Result<FileAttributes, Error>) -> Void) {
         let fileManager = FileManagerFactory.makeFileManager(file: file)
         fileManager.getFileAttributes(file: file, completion: completion)
+    }
+}
+
+private extension FileManagerCommutator {
+    func makeListOfActiveFileManagers(file: File, searchingPlace: SearchingPlace) -> [FileManager] {
+        var storages: [FileManager] = []
+        if searchingPlace == .allStorages {
+            storages.append(FileManagerFactory.makeFileManager(file: LocalFileManager().rootFolder))
+            if DropboxLoginManager.isLogged {
+                storages.append(FileManagerFactory.makeFileManager(file: DropboxFileManager().rootFolder))
+            }
+        } else {
+            storages.append(FileManagerFactory.makeFileManager(file: file))
+        }
+        return storages
     }
 }

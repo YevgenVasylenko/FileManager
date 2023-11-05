@@ -417,7 +417,7 @@ extension DropboxFileManager: LocalTemporaryFolderConnector {
 private extension DropboxFileManager {
     
     func correctFolderPath(file: inout File) {
-//    TO DO make extension for file
+//    TODO make extension for file
         if file.path.pathExtension == "" {
             file.path = file.path.appendingPathExtension(for: .folder)
         }

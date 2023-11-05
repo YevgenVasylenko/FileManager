@@ -102,13 +102,12 @@ private extension RootView {
         .font(.title)
         .buttonStyle(.borderedProminent)
     }
-    
+
+    @ViewBuilder
     func cancelButtonForFolderSelection(chooseAction: @escaping () -> Void) -> some View {
-        Group {
-            if fileSelectDelegate != nil {
-                Button(R.string.localizable.cancel()) {
-                    chooseAction()
-                }
+        if fileSelectDelegate != nil {
+            Button(R.string.localizable.cancel()) {
+                chooseAction()
             }
         }
     }

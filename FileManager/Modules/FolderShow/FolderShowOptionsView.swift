@@ -93,15 +93,14 @@ private extension FolderShowOptionsView {
             return "arrow.down"
         }
     }
-    
+
+    @ViewBuilder
     func labelForButton(sortOption: SortOption) -> some View {
-        Group {
-            if self.options.sort == sortOption {
-                 Label(buttonName(sortOptionAttribute: sortOption.attribute),
-                       systemImage: arrowImage(sortOptionDirection: sortOption.direction))
-            } else {
-                 Text(buttonName(sortOptionAttribute: sortOption.attribute))
-            }
+        if self.options.sort == sortOption {
+            Label(buttonName(sortOptionAttribute: sortOption.attribute),
+                  systemImage: arrowImage(sortOptionDirection: sortOption.direction))
+        } else {
+            Text(buttonName(sortOptionAttribute: sortOption.attribute))
         }
     }
 }

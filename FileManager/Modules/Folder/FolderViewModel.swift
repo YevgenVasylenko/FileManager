@@ -20,12 +20,7 @@ final class FolderViewModel: ObservableObject {
         var folderCreating: String?
         var fileDisplayOptions: FileDisplayOptions
         var deletingFromTrash = false
-        var searchingName = ""
-        var placeForSearch: SearchingPlace?
-        var observedObjectsForSearching: [String] {[
-            searchingName,
-            placeForSearch.debugDescription
-        ]}
+        var searchingInfo = SearchingInfo()
     }
     
     private let file: File
@@ -49,7 +44,7 @@ final class FolderViewModel: ObservableObject {
             folder: file,
             fileDisplayOptions: FileDisplayOptionsManager.options)
         )
-        state.placeForSearch = defaultPlaceForSearch()
+        state.searchingInfo.placeForSearch = defaultPlaceForSearch()
     }
     
     var filesForAction: [File] {
@@ -99,11 +94,11 @@ final class FolderViewModel: ObservableObject {
     
     func loadContentSearchedByName() {
         state.isLoading = true
-        guard let searchingPlace = state.placeForSearch else { return }
+        guard let searchingPlace = state.searchingInfo.placeForSearch else { return }
         fileManagerCommutator.contentBySearchingName(
             searchingPlace: searchingPlace,
             file: file,
-            name: state.searchingName
+            name: state.searchingInfo.searchingName
         ) {
             [weak self] result in
             guard let self else { return }
