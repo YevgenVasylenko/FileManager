@@ -60,3 +60,8 @@
 
 "sureToDelete" = "Are you sure you want to delete";
 "deleteForever" = "Deleting will be permanently";
+
+"LocalStorage" = "Local storage";
+"DropboxStorage" = "Dropbox storage";
+"currentTrash" = "In trash";
+"allStorages" = "Across all";

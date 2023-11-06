@@ -16,6 +16,39 @@ extension FileManagerCommutator: FileManager {
         FileManagerFactory.makeFileManager(file: file).contents(of: file, completion: completion)
     }
     
+    func contentBySearchingName(
+        searchingPlace: SearchingPlace,
+        file: File,
+        name: String,
+        completion: @escaping (Result<[File], Error>) -> Void
+    ) {
+        var searchedFilesAcrossAll: [File] = []
+        let group = DispatchGroup()
+        var error: Error?
+        for storage in makeListOfActiveFileManagers(file: file, searchingPlace: searchingPlace) {
+            group.enter()
+            storage.contentBySearchingName(
+                searchingPlace: searchingPlace,
+                file: file,
+                name: name) { result in
+                    defer { group.leave() }
+                    switch result {
+                    case .success(let files):
+                        searchedFilesAcrossAll += files
+                    case .failure(let _error):
+                        error = _error
+                    }
+                }
+        }
+        group.notify(queue: .main) {
+            if let error {
+                completion(.failure(error))
+            } else {
+                completion(.success(searchedFilesAcrossAll))
+            }
+        }
+    }
+    
     func createFolder(at file: File, completion: @escaping (Result<Void, Error>) -> Void) {
         FileManagerFactory.makeFileManager(file: file).createFolder(at: file, completion: completion)
     }
@@ -157,5 +190,20 @@ extension FileManagerCommutator: FileManager {
     func getFileAttributes(file: File, completion: @escaping (Result<FileAttributes, Error>) -> Void) {
         let fileManager = FileManagerFactory.makeFileManager(file: file)
         fileManager.getFileAttributes(file: file, completion: completion)
+    }
+}
+
+private extension FileManagerCommutator {
+    func makeListOfActiveFileManagers(file: File, searchingPlace: SearchingPlace) -> [FileManager] {
+        var storages: [FileManager] = []
+        if searchingPlace == .allStorages {
+            storages.append(FileManagerFactory.makeFileManager(file: LocalFileManager().rootFolder))
+            if DropboxLoginManager.isLogged {
+                storages.append(FileManagerFactory.makeFileManager(file: DropboxFileManager().rootFolder))
+            }
+        } else {
+            storages.append(FileManagerFactory.makeFileManager(file: file))
+        }
+        return storages
     }
 }

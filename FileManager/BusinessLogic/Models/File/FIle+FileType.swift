@@ -32,6 +32,8 @@ extension File {
             switch self.folderAffiliation {
             case .user:
                 return .folder
+            case .system(.root):
+                return .folder
             case .system(.trash):
                 return .trashFolder
             case .system(.download):

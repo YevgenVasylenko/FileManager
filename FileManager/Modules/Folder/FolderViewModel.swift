@@ -20,6 +20,7 @@ final class FolderViewModel: ObservableObject {
         var folderCreating: String?
         var fileDisplayOptions: FileDisplayOptions
         var deletingFromTrash = false
+        var searchingInfo = SearchingInfo()
     }
     
     private let file: File
@@ -43,6 +44,7 @@ final class FolderViewModel: ObservableObject {
             folder: file,
             fileDisplayOptions: FileDisplayOptionsManager.options)
         )
+        state.searchingInfo.placeForSearch = defaultPlaceForSearch()
     }
     
     var filesForAction: [File] {
@@ -90,6 +92,27 @@ final class FolderViewModel: ObservableObject {
         makeAtributesForFiles()
     }
     
+    func loadContentSearchedByName() {
+        state.isLoading = true
+        guard let searchingPlace = state.searchingInfo.placeForSearch else { return }
+        fileManagerCommutator.contentBySearchingName(
+            searchingPlace: searchingPlace,
+            file: file,
+            name: state.searchingInfo.searchingName
+        ) {
+            [weak self] result in
+            guard let self else { return }
+            switch result {
+            case .success(let files):
+                self.state.files = files
+            case .failure(let failure):
+                self.state.error = failure
+            }
+            self.sort()
+            self.state.isLoading = false
+        }
+    }
+    
     func startCreatingFolder() {
         fileManagerCommutator.newNameForCreationOfFolder(
             at: file,
@@ -111,7 +134,6 @@ final class FolderViewModel: ObservableObject {
         state.isLoading = true
         fileManagerCommutator.createFolder(at: createdFile) { [weak self] result in
             guard let self else { return }
-            
             switch result {
             case .success:
                 break
@@ -210,6 +232,32 @@ final class FolderViewModel: ObservableObject {
     func isFolderOkForFolderCreationButton() -> Bool {
         state.folder.hasParent(file: LocalFileManager().trashFolder) == false &&
                 state.folder.folderAffiliation != .system(.trash)
+    }
+    
+    func suggestedPlacesForSearch() -> [SearchingPlace] {
+        switch state.folder.folderAffiliation {
+        case .user:
+            return SearchingPlace.allCases
+        case .system(.root):
+            return SearchingPlace.whenInRootOrTrashFolder
+        case .system(.trash):
+            return SearchingPlace.whenInRootOrTrashFolder
+        default:
+            return SearchingPlace.allCases
+        }
+    }
+    
+    func defaultPlaceForSearch() -> SearchingPlace {
+        switch state.folder.folderAffiliation {
+        case .user:
+            return .currentFolder
+        case .system(.root):
+            return .currentStorage
+        case .system(.trash):
+            return .currentTrash
+        default:
+            return .currentFolder
+        }
     }
 }
 

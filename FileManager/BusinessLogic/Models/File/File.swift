@@ -34,6 +34,10 @@ struct File {
             storageType: storageType
         )
     }
+
+    func isFileIsSub(file: File, isDirectory: Bool = false) -> Bool {
+        self == file.makeSubfile(name: self.name, isDirectory: isDirectory)
+    }
     
     func parentFolder() -> File {
         return File(path: path.deletingLastPathComponent(), storageType: storageType)

@@ -18,6 +18,12 @@ protocol FileManager {
     
     func contents(of file: File, completion: @escaping (Result<[File], Error>) -> Void)
     
+    func contentBySearchingName(
+        searchingPlace: SearchingPlace,
+        file: File, name: String,
+        completion: @escaping (Result<[File], Error>) -> Void
+    )
+    
     func createFolder(at file: File, completion: @escaping (Result<Void, Error>) -> Void)
     
     func newNameForCreationOfFolder(

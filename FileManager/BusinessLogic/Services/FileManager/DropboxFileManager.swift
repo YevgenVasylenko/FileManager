@@ -1,5 +1,5 @@
 //
-//  DropboxFIleManager.swift
+//  DropboxFileManager.swift
 //  FileManager
 //
 //  Created by Yevgen Vasylenko on 31.07.2023.
@@ -10,18 +10,27 @@ import SwiftyDropbox
 
 final class DropboxFileManager {
     enum Constants {
+        static let root = ""
         static let trash = "trash"
     }
     
-    private(set) lazy var rootFolder = File(
-        path: URL(fileURLWithPath: ""),
-        storageType: .dropbox
-    )
-
-    private(set) lazy var trashFolder = File(
-        path: URL(fileURLWithPath: "/\(Constants.trash)"),
-        storageType: .dropbox
-    )
+    private(set) var rootFolder: File
+    private(set) var trashFolder: File
+    
+    init () {
+        rootFolder = File(
+            path: URL(fileURLWithPath: Constants.root),
+            storageType: .dropbox
+        )
+        
+        trashFolder = File(
+            path: URL(fileURLWithPath: "/\(Constants.trash)"),
+            storageType: .dropbox
+        )
+        
+        rootFolder = updatedFile(file: rootFolder)
+        trashFolder = updatedFile(file: trashFolder)
+    }
 }
 
 extension DropboxFileManager: FileManager {
@@ -52,11 +61,30 @@ extension DropboxFileManager: FileManager {
                         storageType: .dropbox
                     )
                     self.correctFolderPath(file: &fileInFolder)
-                    fileInFolder.actions = FileAction.regularFolder
+                    fileInFolder = self.updatedFile(file: fileInFolder)
                     files.append(fileInFolder)
                 }
             }
             completion(.success(files))
+        }
+    }
+   
+    func contentBySearchingName(
+        searchingPlace: SearchingPlace,
+        file: File,
+        name: String,
+        completion: @escaping (Result<[File], Error>) -> Void
+    ) {
+        getFilesDependOnSearchPlace(file: file, searchingPlace: searchingPlace) { result in
+            switch result {
+            case .success(let files):
+                let filteredFiles = files.filter { file in
+                    file.displayedName().lowercased().contains(name.lowercased())
+                }
+                completion(.success(filteredFiles))
+            case .failure(let failure):
+                completion(.failure(failure))
+            }
         }
     }
     
@@ -389,9 +417,39 @@ extension DropboxFileManager: LocalTemporaryFolderConnector {
 private extension DropboxFileManager {
     
     func correctFolderPath(file: inout File) {
-//    TO DO make extension for file
+//    TODO make extension for file
         if file.path.pathExtension == "" {
             file.path = file.path.appendingPathExtension(for: .folder)
+        }
+    }
+    
+    func updatedFile(file: File) -> File {
+        var file = file
+        updateFileActionsAndDeleteStatus(file: &file)
+        updateFolderAffiliation(file: &file)
+        return file
+    }
+    
+    func updateFileActionsAndDeleteStatus(file: inout File) {
+        if file == trashFolder {
+            file.actions = FileAction.trashFolderActions
+        } else if file.isFileIsSub(file: trashFolder) ||
+                    file.isFileIsSub(file: trashFolder, isDirectory: true) ||
+                    file.isDeleted {
+            file.actions = [FileAction.restoreFromTrash]
+            file.isDeleted = true
+        } else {
+            file.actions = FileAction.regularFolder
+        }
+    }
+    
+    func updateFolderAffiliation(file: inout File) {
+        if file == rootFolder {
+            file.folderAffiliation = .system(.root)
+        } else if file == trashFolder {
+            file.folderAffiliation = .system(.trash)
+        } else {
+            file.folderAffiliation = .user
         }
     }
     
@@ -522,8 +580,8 @@ private extension DropboxFileManager {
                                 continue
                             }
                         }
-                        fileInFolder.actions = [FileAction.restoreFromTrash]
                         fileInFolder.isDeleted = true
+                        fileInFolder = self.updatedFile(file: fileInFolder)
                         files.append(fileInFolder)
                     default:
                         continue
@@ -591,6 +649,52 @@ private extension DropboxFileManager {
                 }
                 completion(.success(size))
             }
+        }
+    }
+
+    func contentInSearching(of file: File, completion: @escaping (Result<[File], Error>) -> Void) {
+        guard let client = DropboxClientsManager.authorizedClient else {
+            completion(.failure(.unknown))
+            return
+        }
+        let path = dropboxPath(file: file)
+
+        client.files.listFolder(path: path, recursive: true).response { response, error in
+            if let error = error {
+                completion(.failure(Error(dropboxError: error)))
+                return
+            }
+            var files: [File] = []
+
+            if let result = response {
+                for fileInResult in result.entries {
+                    var fileInFolder = File(
+                        path: URL(fileURLWithPath: fileInResult.pathDisplay!),
+                        storageType: .dropbox
+                    )
+                    self.correctFolderPath(file: &fileInFolder)
+                    fileInFolder = self.updatedFile(file: fileInFolder)
+                    files.append(fileInFolder)
+                }
+            }
+            completion(.success(files))
+        }
+    }
+    
+    func getFilesDependOnSearchPlace(
+        file: File,
+        searchingPlace: SearchingPlace,
+        completion: @escaping (Result<[File], Error>) -> Void
+    ) {
+        switch searchingPlace {
+        case .currentStorage:
+            contentInSearching(of: rootFolder, completion: completion)
+        case .currentFolder:
+            contentInSearching(of: file, completion: completion)
+        case .currentTrash:
+            contentOfTrashFolder(file: file, completion: completion)
+        case .allStorages:
+            contentInSearching(of: rootFolder, completion: completion)
         }
     }
 }

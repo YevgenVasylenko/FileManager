@@ -93,17 +93,16 @@ private extension FolderGridListView {
             }
         }
     }
-    
+
+    @ViewBuilder
     func filesChooseToggle(file: File) -> some View {
-        Group {
-            if selectedFiles.wrappedValue != nil && file.folderAffiliation.isSystem == false {
-                Toggle(isOn: selectedFileBinding(for: file)) {
-                    Image(systemName: selectedFileBinding(for: file).wrappedValue ? "checkmark.square.fill" : "square")
-                        .foregroundColor(selectedFileBinding(for: file).wrappedValue ? .blue : .gray)
-                        .font(.system(size: 30))
-                }
-                .toggleStyle(.button)
+        if selectedFiles.wrappedValue != nil && file.folderAffiliation.isSystem == false {
+            Toggle(isOn: selectedFileBinding(for: file)) {
+                Image(systemName: selectedFileBinding(for: file).wrappedValue ? "checkmark.square.fill" : "square")
+                    .foregroundColor(selectedFileBinding(for: file).wrappedValue ? .blue : .gray)
+                    .font(.system(size: 30))
             }
+            .toggleStyle(.button)
         }
     }
 

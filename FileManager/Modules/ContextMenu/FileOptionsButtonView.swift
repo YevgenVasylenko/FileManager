@@ -15,41 +15,38 @@ struct FileOptionsButtonView: View {
         self.file = file
         self.delegate = delegate
     }
-    
+
+    @ViewBuilder
     var body: some View {
-        Group {
-            if !file.actions.isEmpty {
-                Menu {
-                    Group {
-                        ForEach(file.actions, id: \.self) { action in
+        if !file.actions.isEmpty {
+            Menu {
+                ForEach(file.actions, id: \.self) { action in
 
-                            switch action {
-                            case .rename:
-                                renameButton()
-                            case .move:
-                                moveButton()
-                            case .copy:
-                                copyButton()
-                            case .moveToTrash:
-                                moveToTrashButton()
-                            case .restoreFromTrash:
-                                restoreFromTrash()
-                            case .delete:
-                                deleteButton()
-                            case .clean:
-                                cleanButton()
-                            case .info:
-                                infoButton()
-                            }
-
-                        }
+                    switch action {
+                    case .rename:
+                        renameButton()
+                    case .move:
+                        moveButton()
+                    case .copy:
+                        copyButton()
+                    case .moveToTrash:
+                        moveToTrashButton()
+                    case .restoreFromTrash:
+                        restoreFromTrash()
+                    case .delete:
+                        deleteButton()
+                    case .clean:
+                        cleanButton()
+                    case .info:
+                        infoButton()
                     }
-                    .buttonStyle(.plain)
-                } label: {
-                    Image(systemName: "ellipsis")
-                        .font(.headline)
-                        .padding()
+                    
                 }
+                .buttonStyle(.plain)
+            } label: {
+                Image(systemName: "ellipsis")
+                    .font(.headline)
+                    .padding()
             }
         }
     }

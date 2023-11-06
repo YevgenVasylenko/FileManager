@@ -60,3 +60,8 @@
 
 "sureToDelete" = "Ви дійсно бажаєте видалити?";
 "deleteForever" = "Видалення буде безповоротне";
+
+"LocalStorage" = "Локальне сховище";
+"DropboxStorage" = "Dropbox сховище";
+"currentTrash" = "У смітті";
+"allStorages" = "Повсюду";

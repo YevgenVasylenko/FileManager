@@ -10,14 +10,16 @@ import Foundation
 extension File {
     
     func displayedName() -> String {
-        if self.name == "/" {
-            return R.string.localizable.dropbox()
-        }
-        if self.name == "root" {
-            return R.string.localizable.root()
-        }
         switch self.folderAffiliation {
         case .user:
+            return self.name
+        case .system(.root):
+            if self.storageType == .dropbox {
+                return R.string.localizable.dropbox()
+            }
+            if self.storageType == .local {
+                return R.string.localizable.root()
+            }
             return self.name
         case .system(.trash):
             return R.string.localizable.trash()

@@ -13,18 +13,28 @@ final class LocalFileManager {
         static let trash = "trash"
         static let downloads = "downloads"
     }
-    
-    private let fileManagerRootPath: FileManagerRootPath
-    private lazy var documentsURL = fileManagerRootPath.documentsURL
-    private(set) lazy var rootFolder = makeDefaultFolder(name: Constants.root, destination: documentsURL)
-    private(set) lazy var trashFolder = makeDefaultFolder(name: Constants.trash, destination: rootFolder.path)
-    private(set) lazy var downloadsFolder = makeDefaultFolder(name: Constants.downloads, destination: rootFolder.path)
-    
+
+    private(set) var rootFolder: File
+    private(set) var trashFolder: File
+    private(set) var downloadsFolder: File
+
     init(fileManagerRootPath: FileManagerRootPath = LocalFileMangerRootPath()) {
-        self.fileManagerRootPath = fileManagerRootPath
-        _ = rootFolder
-        _ = trashFolder
-        _ = downloadsFolder
+        rootFolder = Self.makeDefaultFolder(
+            name: Constants.root,
+            destination: fileManagerRootPath.documentsURL
+        )
+        trashFolder = Self.makeDefaultFolder(
+            name: Constants.trash,
+            destination: rootFolder.path
+        )
+        downloadsFolder = Self.makeDefaultFolder(
+            name: Constants.downloads,
+            destination: rootFolder.path
+        )
+
+        rootFolder = updatedFile(file: rootFolder)
+        trashFolder = updatedFile(file: trashFolder)
+        downloadsFolder = updatedFile(file: downloadsFolder)
     }
 }
 
@@ -38,9 +48,47 @@ extension LocalFileManager: FileManager {
                 if file.isDeleted {
                     newFile.isDeleted = true
                 }
-                updateFileActionsAndDeleteStatus(file: &newFile)
-                updateFolderAffiliation(file: &newFile)
+                newFile = updatedFile(file: newFile)
                 files.append(newFile)
+            }
+            completion(.success(files))
+        } catch {
+            completion(.failure(Error(error: error)))
+        }
+    }
+    
+    func contentBySearchingName(
+        searchingPlace: SearchingPlace,
+        file: File,
+        name: String,
+        completion: @escaping (Result<[File], Error>) -> Void
+    ) {
+        do {
+            var files: [File] = []
+            guard let enumerator = enumeratorDependOnSearchingPlace(searchingPlace: searchingPlace, file: file)
+            else {
+                completion(.failure(.unknown))
+                return
+            }
+            for case let fileURL as URL in enumerator {
+                do {
+                    let fileAttributes = try fileURL.resourceValues(forKeys:[.isRegularFileKey, .isDirectoryKey])
+                    guard
+                        let isRegularFile = fileAttributes.isRegularFile,
+                        let isDirectory = fileAttributes.isDirectory
+                    else {
+                        completion(.failure(.unknown))
+                        return
+                    }
+                    if isRegularFile || isDirectory {
+                        var newFile = File(path: fileURL, storageType: .local)
+                        updateFileActionsAndDeleteStatus(file: &newFile)
+                        updateFolderAffiliation(file: &newFile)
+                        if newFile.displayedName().lowercased().contains(name.lowercased()) {
+                            files.append(newFile)
+                        }
+                    }
+                }
             }
             completion(.success(files))
         } catch {
@@ -308,8 +356,8 @@ extension LocalFileManager: LocalTemporaryFolderConnector {
 
 private extension LocalFileManager {
     
-    func makeDefaultFolder(name: String, destination: URL) -> File {
-        var file = File(path: destination.appendingPathComponent(name), storageType: .local)
+    static func makeDefaultFolder(name: String, destination: URL) -> File {
+        let file = File(path: destination.appendingPathComponent(name), storageType: .local)
         if SystemFileManger.default.fileExists(atPath: file.path.path) {
             return file
         }
@@ -318,6 +366,11 @@ private extension LocalFileManager {
         } catch {
             fatalError("Failed to create directory with error: \(error)")
         }
+        return file
+    }
+    
+    func updatedFile(file: File) -> File {
+        var file = file
         updateFileActionsAndDeleteStatus(file: &file)
         updateFolderAffiliation(file: &file)
         return file
@@ -328,8 +381,8 @@ private extension LocalFileManager {
             file.actions = FileAction.trashFolderActions
         } else if file == downloadsFolder {
             file.actions = FileAction.downloadsFolderActions
-        } else if file == trashFolder.makeSubfile(name: file.name) ||
-                    file == trashFolder.makeSubfile(name: file.name, isDirectory: true) || file.isDeleted {
+        } else if file.isFileIsSub(file: trashFolder) ||
+                    file.isFileIsSub(file: trashFolder, isDirectory: true) || file.isDeleted {
             file.actions = [FileAction.delete, FileAction.restoreFromTrash]
             file.isDeleted = true
         } else {
@@ -338,10 +391,14 @@ private extension LocalFileManager {
     }
     
     func updateFolderAffiliation(file: inout File) {
-        if file == trashFolder {
+        if file == rootFolder {
+            file.folderAffiliation = .system(.root)
+        } else if file == trashFolder {
             file.folderAffiliation = .system(.trash)
         } else if file == downloadsFolder {
             file.folderAffiliation = .system(.download)
+        } else {
+            file.folderAffiliation = .user
         }
     }
     
@@ -499,6 +556,27 @@ private extension LocalFileManager {
         } catch {
             completion(.failure(Error(error: error)))
         }
+    }
+    
+    func enumeratorDependOnSearchingPlace(
+        searchingPlace: SearchingPlace,
+        file: File
+    ) -> SystemFileManger.DirectoryEnumerator? {
+        
+        switch searchingPlace {
+        case .currentStorage:
+           return  enumeratorForSearching(file: rootFolder)
+        case .currentFolder:
+            return enumeratorForSearching(file: file)
+        case .currentTrash:
+            return enumeratorForSearching(file: trashFolder)
+        case .allStorages:
+            return enumeratorForSearching(file: rootFolder)
+        }
+    }
+    
+    func enumeratorForSearching(file: File) -> SystemFileManger.DirectoryEnumerator? {
+        return SystemFileManger.default.enumerator(at: file.path, includingPropertiesForKeys: [.isRegularFileKey, .isDirectoryKey], options: [.skipsHiddenFiles, .skipsPackageDescendants])
     }
 }
 
