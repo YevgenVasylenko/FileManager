@@ -12,6 +12,9 @@ struct RootView: View {
     
     @StateObject
     private var viewModel: RootViewModel
+
+    @State
+    var string: String = ""
     
     init(fileSelectDelegate: FileSelectDelegate? = nil) {
         self.fileSelectDelegate = fileSelectDelegate
@@ -32,6 +35,9 @@ struct RootView: View {
                 connectionButton()
                     .toolbar(.hidden)
             }
+        }
+        .searchable(text: $string) {
+            Text("Hello").searchCompletion("Hello")
         }
         .onOpenURL { url in
             DropboxLoginManager.openUrl(url: url)

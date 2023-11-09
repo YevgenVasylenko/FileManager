@@ -197,9 +197,9 @@ private extension FileManagerCommutator {
     func makeListOfActiveFileManagers(file: File, searchingPlace: SearchingPlace) -> [FileManager] {
         var storages: [FileManager] = []
         if searchingPlace == .allStorages {
-            storages.append(FileManagerFactory.makeFileManager(file: LocalFileManager().rootFolder))
+            storages.append(LocalFileManager())
             if DropboxLoginManager.isLogged {
-                storages.append(FileManagerFactory.makeFileManager(file: DropboxFileManager().rootFolder))
+                storages.append(DropboxFileManager())
             }
         } else {
             storages.append(FileManagerFactory.makeFileManager(file: file))

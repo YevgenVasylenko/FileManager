@@ -8,14 +8,18 @@
 import SwiftUI
 
 struct FolderView: View {
+
+    private let fileSelectDelegate: FileSelectDelegate?
     
     @StateObject
     private var viewModel: FolderViewModel
-    
+
     @State
     private var newName: String = ""
-    
-    private let fileSelectDelegate: FileSelectDelegate?
+
+    @Environment(\.dismissSearch) private var dismissSearch
+
+    @Environment(\.isSearching) private var isSearching
 
     init(
         file: File,
@@ -44,17 +48,14 @@ struct FolderView: View {
             }
             actionMenuBarForChosenFiles()
         }
+        Text(isSearching ? "Searching" : "Not searching")
         .onChange(of: viewModel.state.searchingInfo,
                   perform: { _ in
-            if viewModel.state.searchingInfo.searchingName.isEmpty {
-                viewModel.loadContent()
-            } else {
-                viewModel.loadContentSearchedByName()
-            }
+            loadContentOfFolderOrBySearchingName()
         })
         .onAppear {
             if EnvironmentUtils.isPreview == false {
-                viewModel.loadContent()
+                loadContentOfFolderOrBySearchingName()
             }
         }
         .destinationPopover(
@@ -82,6 +83,10 @@ struct FolderView: View {
                     fileSelectDelegate?.selected(viewModel.state.folder)
                 })
         }
+        .simultaneousGesture(DragGesture().onChanged({ _ in
+            dismissSearch()
+        }))
+        
     }
 }
 
@@ -177,7 +182,10 @@ private extension FolderView {
                 .disabled(viewModel.isFilesInCurrentFolder(files: fileSelectDelegate.selectedFiles) ?? true)
             }
         }
-        .searchable(text: $viewModel.state.searchingInfo.searchingName)
+        .searchable(text: $viewModel.state.searchingInfo.searchingName) {
+            Text("Hello").searchCompletion("Hello")
+        }
+
     }
 
     @ViewBuilder
@@ -241,6 +249,14 @@ private extension FolderView {
                     viewModel.state.searchingInfo.placeForSearch = nil
                 }
             })
+    }
+
+    func loadContentOfFolderOrBySearchingName() {
+        if viewModel.state.searchingInfo.searchingName.isEmpty {
+            viewModel.loadContent()
+        } else {
+            viewModel.loadContentSearchedByName()
+        }
     }
 }
 

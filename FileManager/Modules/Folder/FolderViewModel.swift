@@ -27,6 +27,7 @@ final class FolderViewModel: ObservableObject {
     private var conflictCompletion: ((ConflictNameResult) -> Void)?
     private var fileManagerCommutator = FileManagerCommutator()
     private lazy var folderMonitor = fileManagerCommutator.makeFolderMonitor(file: file)
+    private let debouncer = Debouncer()
     
     @Published
     var state: State
@@ -95,21 +96,23 @@ final class FolderViewModel: ObservableObject {
     func loadContentSearchedByName() {
         state.isLoading = true
         guard let searchingPlace = state.searchingInfo.placeForSearch else { return }
-        fileManagerCommutator.contentBySearchingName(
-            searchingPlace: searchingPlace,
-            file: file,
-            name: state.searchingInfo.searchingName
-        ) {
-            [weak self] result in
-            guard let self else { return }
-            switch result {
-            case .success(let files):
-                self.state.files = files
-            case .failure(let failure):
-                self.state.error = failure
+        debouncer.perform {
+            self.fileManagerCommutator.contentBySearchingName(
+                searchingPlace: searchingPlace,
+                file: self.file,
+                name: self.state.searchingInfo.searchingName
+            ) {
+                [weak self] result in
+                guard let self else { return }
+                switch result {
+                case .success(let files):
+                    self.state.files = files
+                case .failure(let failure):
+                    self.state.error = failure
+                }
+                self.sort()
+                self.state.isLoading = false
             }
-            self.sort()
-            self.state.isLoading = false
         }
     }
     

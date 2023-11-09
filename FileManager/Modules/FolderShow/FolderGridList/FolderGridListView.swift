@@ -9,11 +9,12 @@ import SwiftUI
 
 struct FolderGridListView: View {
 
-    @StateObject
-    private var viewModel: FolderGridListViewModel
     private let fileSelectDelegate: FileSelectDelegate?
     private let selectedFiles: Binding<Set<File>?>
-    
+
+    @StateObject
+    private var viewModel: FolderGridListViewModel
+
     @State
     private var redraw = Date.now
     
@@ -33,6 +34,7 @@ struct FolderGridListView: View {
             case .grid: folderGridView()
             case .list: folderListView()
             }
+            
         }
         .renamePopover(viewModel: viewModel, newName: $viewModel.state.newNameForRename)
         .destinationPopover(
