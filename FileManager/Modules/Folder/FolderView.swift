@@ -17,16 +17,20 @@ struct FolderView: View {
     @State
     private var newName: String = ""
 
-    @Environment(\.dismissSearch) private var dismissSearch
+    var searchingName: String = ""
 
     @Environment(\.isSearching) private var isSearching
 
+    @Environment(\.dismissSearch) private var dismissSearch
+
     init(
         file: File,
-        fileSelectDelegate: FileSelectDelegate?
+        fileSelectDelegate: FileSelectDelegate?,
+        searchingName: String
     ) {
         self._viewModel = StateObject(wrappedValue: FolderViewModel(file: file))
         self.fileSelectDelegate = fileSelectDelegate
+        self.searchingName = searchingName
     }
     
     init(viewModel: FolderViewModel, fileSelectDelegate: FileSelectDelegate?) {
@@ -47,9 +51,9 @@ struct FolderView: View {
                 createFolderButton()
             }
             actionMenuBarForChosenFiles()
+            Text(isSearching ? "Searching" : "Not searching")
         }
-        Text(isSearching ? "Searching" : "Not searching")
-        .onChange(of: viewModel.state.searchingInfo,
+        .onChange(of: searchingName,
                   perform: { _ in
             loadContentOfFolderOrBySearchingName()
         })
@@ -182,9 +186,9 @@ private extension FolderView {
                 .disabled(viewModel.isFilesInCurrentFolder(files: fileSelectDelegate.selectedFiles) ?? true)
             }
         }
-        .searchable(text: $viewModel.state.searchingInfo.searchingName) {
-            Text("Hello").searchCompletion("Hello")
-        }
+//        .searchable(text: $viewModel.state.searchingInfo.searchingName) {
+//            Text("Hello").searchCompletion("Hello")
+//        }
 
     }
 
@@ -252,9 +256,11 @@ private extension FolderView {
     }
 
     func loadContentOfFolderOrBySearchingName() {
-        if viewModel.state.searchingInfo.searchingName.isEmpty {
+//        if viewModel.state.searchingInfo.searchingName.isEmpty {
+        if searchingName.isEmpty {
             viewModel.loadContent()
         } else {
+            viewModel.state.searchingInfo.searchingName = searchingName
             viewModel.loadContentSearchedByName()
         }
     }

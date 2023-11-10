@@ -17,7 +17,7 @@ struct FolderGridListView: View {
 
     @State
     private var redraw = Date.now
-    
+
     init(
         files: [File],
         fileSelectDelegate: FileSelectDelegate?,
@@ -34,7 +34,6 @@ struct FolderGridListView: View {
             case .grid: folderGridView()
             case .list: folderListView()
             }
-            
         }
         .renamePopover(viewModel: viewModel, newName: $viewModel.state.newNameForRename)
         .destinationPopover(

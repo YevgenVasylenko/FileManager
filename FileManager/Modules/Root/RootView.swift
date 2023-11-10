@@ -12,9 +12,6 @@ struct RootView: View {
     
     @StateObject
     private var viewModel: RootViewModel
-
-    @State
-    var string: String = ""
     
     init(fileSelectDelegate: FileSelectDelegate? = nil) {
         self.fileSelectDelegate = fileSelectDelegate
@@ -36,9 +33,6 @@ struct RootView: View {
                     .toolbar(.hidden)
             }
         }
-        .searchable(text: $string) {
-            Text("Hello").searchCompletion("Hello")
-        }
         .onOpenURL { url in
             DropboxLoginManager.openUrl(url: url)
         }
@@ -52,9 +46,13 @@ private extension RootView {
     func folderView(file: File) -> some View {
         FolderView(
             file: file,
-            fileSelectDelegate: fileSelectDelegate
+            fileSelectDelegate: fileSelectDelegate,
+            searchingName: viewModel.state.searchingName
         )
         .id(file)
+        .searchable(text: $viewModel.state.searchingName, placement: .toolbar) {
+            Text("Hello").searchCompletion("Hello")
+        }
     }
     
     @ViewBuilder

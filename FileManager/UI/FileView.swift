@@ -17,7 +17,7 @@ struct FileView: View {
     private let file: File
     private let style: Style
     private let infoPresented: Binding<Bool>
-    
+
     init(file: File, style: Style, infoPresented: Binding<Bool>) {
         self.file = file
         self.style = style
@@ -29,7 +29,6 @@ struct FileView: View {
             imageOfFile(imageName: file.imageName)
             nameOfFile(fileName: file.displayedName())
         }
-//        .padding()
         .frame(width: width())
         .popover(isPresented: infoPresented) {
             FileInfoView(file: file)
