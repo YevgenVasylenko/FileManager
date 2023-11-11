@@ -46,13 +46,9 @@ private extension RootView {
     func folderView(file: File) -> some View {
         FolderView(
             file: file,
-            fileSelectDelegate: fileSelectDelegate,
-            searchingName: viewModel.state.searchingName
+            fileSelectDelegate: fileSelectDelegate
         )
         .id(file)
-        .searchable(text: $viewModel.state.searchingName, placement: .toolbar) {
-            Text("Hello").searchCompletion("Hello")
-        }
     }
     
     @ViewBuilder

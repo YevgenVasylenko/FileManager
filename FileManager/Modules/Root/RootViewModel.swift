@@ -13,7 +13,6 @@ final class RootViewModel: ObservableObject {
         var selectedStorage: File?
         var detailNavigationStack = NavigationPath()
         var isDropboxLogged = false
-        var searchingName = ""
     }
     
     @Published

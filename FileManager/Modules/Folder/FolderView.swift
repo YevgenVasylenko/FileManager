@@ -14,83 +14,70 @@ struct FolderView: View {
     @StateObject
     private var viewModel: FolderViewModel
 
-    @State
-    private var newName: String = ""
-
-    var searchingName: String = ""
-
-    @Environment(\.isSearching) private var isSearching
-
-    @Environment(\.dismissSearch) private var dismissSearch
-
     init(
         file: File,
-        fileSelectDelegate: FileSelectDelegate?,
-        searchingName: String
+        fileSelectDelegate: FileSelectDelegate?
     ) {
         self._viewModel = StateObject(wrappedValue: FolderViewModel(file: file))
-        self.fileSelectDelegate = fileSelectDelegate
-        self.searchingName = searchingName
-    }
-    
-    init(viewModel: FolderViewModel, fileSelectDelegate: FileSelectDelegate?) {
-        self._viewModel = StateObject(wrappedValue: viewModel)
         self.fileSelectDelegate = fileSelectDelegate
     }
     
     var body: some View {
-        suggestedPlaceForSearchMenuBar()
-        ZStack {
-            if viewModel.state.isLoading {
-                ProgressView()
-            }
-            else {
-                folderView()
-            }
-            if  viewModel.isFolderOkForFolderCreationButton() {
-                createFolderButton()
-            }
-            actionMenuBarForChosenFiles()
-            Text(isSearching ? "Searching" : "Not searching")
-        }
-        .onChange(of: searchingName,
-                  perform: { _ in
-            loadContentOfFolderOrBySearchingName()
-        })
-        .onAppear {
-            if EnvironmentUtils.isPreview == false {
-                loadContentOfFolderOrBySearchingName()
-            }
-        }
-        .destinationPopover(
-            actionType: $viewModel.state.fileActionType,
-            files: viewModel.filesForAction,
-            moveOrCopyToFolder: viewModel.moveOrCopyWithUserChosen
-        )
-        .conflictPopover(
-            conflictName: viewModel.state.nameConflict,
-            resolveConflictWithUserChoice: viewModel.userConflictResolveChoice
-        )
-        .deleteConfirmationPopover(
-            isShowing: $viewModel.state.deletingFromTrash,
-            deletingConfirmed: viewModel.delete
-        )
-        .fileCreatingPopover(viewModel: viewModel, newName: $newName)
-        .errorAlert(error: $viewModel.state.error)
-        .navigationViewStyle(.stack)
-        .buttonStyle(.plain)
-        .padding()
-        .navigationTitle(viewModel.state.folder.displayedName())
-        .toolbar {
-            navigationBar(
-                chooseAction: {
-                    fileSelectDelegate?.selected(viewModel.state.folder)
-                })
-        }
-        .simultaneousGesture(DragGesture().onChanged({ _ in
-            dismissSearch()
-        }))
-        
+        Searchable(
+            searchInfo: $viewModel.state.searchingInfo,
+            onChanged: { searchInfo in
+                if searchInfo.searchingName.isEmpty {
+                    viewModel.loadContent()
+                }
+                else {
+                    viewModel.loadContentSearchedByName()
+                }
+            },
+            content: {
+                suggestedPlaceForSearchMenuBar()
+                ZStack {
+                    if viewModel.state.isLoading {
+                        ProgressView()
+                    }
+                    else {
+                        folderView()
+                    }
+                    if  viewModel.isFolderOkForFolderCreationButton() {
+                        createFolderButton()
+                    }
+                    actionMenuBarForChosenFiles()
+                }
+                .onAppear {
+                    if EnvironmentUtils.isPreview == false {
+                        viewModel.loadContent()
+                    }
+                }
+                .destinationPopover(
+                    actionType: $viewModel.state.fileActionType,
+                    files: viewModel.filesForAction,
+                    moveOrCopyToFolder: viewModel.moveOrCopyWithUserChosen
+                )
+                .conflictPopover(
+                    conflictName: viewModel.state.nameConflict,
+                    resolveConflictWithUserChoice: viewModel.userConflictResolveChoice
+                )
+                .deleteConfirmationPopover(
+                    isShowing: $viewModel.state.deletingFromTrash,
+                    deletingConfirmed: viewModel.delete
+                )
+                .fileCreatingPopover(viewModel: viewModel, newName: $viewModel.state.newNameForRename)
+                .errorAlert(error: $viewModel.state.error)
+                .navigationViewStyle(.stack)
+                .buttonStyle(.plain)
+                .padding()
+                .navigationTitle(viewModel.state.folder.displayedName())
+                .toolbar {
+                    navigationBar(
+                        chooseAction: {
+                            fileSelectDelegate?.selected(viewModel.state.folder)
+                        })
+                }
+            })
     }
 }
 
@@ -186,10 +173,6 @@ private extension FolderView {
                 .disabled(viewModel.isFilesInCurrentFolder(files: fileSelectDelegate.selectedFiles) ?? true)
             }
         }
-//        .searchable(text: $viewModel.state.searchingInfo.searchingName) {
-//            Text("Hello").searchCompletion("Hello")
-//        }
-
     }
 
     @ViewBuilder
@@ -253,16 +236,6 @@ private extension FolderView {
                     viewModel.state.searchingInfo.placeForSearch = nil
                 }
             })
-    }
-
-    func loadContentOfFolderOrBySearchingName() {
-//        if viewModel.state.searchingInfo.searchingName.isEmpty {
-        if searchingName.isEmpty {
-            viewModel.loadContent()
-        } else {
-            viewModel.state.searchingInfo.searchingName = searchingName
-            viewModel.loadContentSearchedByName()
-        }
     }
 }
 

@@ -21,6 +21,7 @@ final class FolderViewModel: ObservableObject {
         var fileDisplayOptions: FileDisplayOptions
         var deletingFromTrash = false
         var searchingInfo = SearchingInfo()
+        var newNameForRename = ""
     }
     
     private let file: File
