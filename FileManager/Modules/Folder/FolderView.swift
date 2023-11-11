@@ -35,6 +35,7 @@ struct FolderView: View {
             },
             content: {
                 suggestedPlaceForSearchMenuBar()
+                EmptyView()
                 ZStack {
                     if viewModel.state.isLoading {
                         ProgressView()
@@ -77,7 +78,11 @@ struct FolderView: View {
                             fileSelectDelegate?.selected(viewModel.state.folder)
                         })
                 }
-            })
+            },
+            searchableSuggestions: {
+                searchSuggestingNames()
+            }
+        )
     }
 }
 
@@ -237,6 +242,12 @@ private extension FolderView {
                 }
             })
     }
+
+    func searchSuggestingNames() -> some View {
+        ForEach(viewModel.makeSearchingSuggestingNames(), id: \.self) { name in
+            Text(name).searchCompletion(name)
+        }
+    }
 }
 
 private extension View {
@@ -278,3 +289,4 @@ private extension View {
 //                             files: PreviewFiles.filesInTrash)), fileSelectDelegate: nil)
 //    }
 //}
+

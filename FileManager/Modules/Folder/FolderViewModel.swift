@@ -97,11 +97,12 @@ final class FolderViewModel: ObservableObject {
     func loadContentSearchedByName() {
         state.isLoading = true
         guard let searchingPlace = state.searchingInfo.placeForSearch else { return }
-        debouncer.perform {
-            self.fileManagerCommutator.contentBySearchingName(
+        debouncer.perform(timeInterval: 1.5) { [self] in
+            Database.Tables.SearchHistory.insertOrUpdate(newSearchName: self.state.searchingInfo.searchingName)
+            fileManagerCommutator.contentBySearchingName(
                 searchingPlace: searchingPlace,
-                file: self.file,
-                name: self.state.searchingInfo.searchingName
+                file: file,
+                name: state.searchingInfo.searchingName
             ) {
                 [weak self] result in
                 guard let self else { return }
@@ -262,6 +263,10 @@ final class FolderViewModel: ObservableObject {
         default:
             return .currentFolder
         }
+    }
+
+    func makeSearchingSuggestingNames() -> [String] {
+        return Database.Tables.SearchHistory.getSearchNamesFromDB()
     }
 }
 

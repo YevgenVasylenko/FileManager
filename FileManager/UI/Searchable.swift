@@ -14,9 +14,14 @@ struct Searchable<Content: View>: View {
     @ViewBuilder
     let content: () -> Content
 
+    @ViewBuilder
+    let searchableSuggestions: () -> Content
+
     var body: some View {
         SearchView(content: content)
-            .searchable(text: searchInfo.searchingName)
+            .searchable(text: searchInfo.searchingName, suggestions: {
+                SearchableSuggestions(content: searchableSuggestions)
+            })
             .onChange(of: searchInfo.wrappedValue) { _ in
                 onChanged(searchInfo.wrappedValue)
             }
@@ -35,8 +40,14 @@ private struct SearchView<Content: View>: View {
     
     var body: some View {
         content()
-            .onTapGesture {
-                dismissSearch()
-            }
+    }
+}
+
+private struct SearchableSuggestions<Content: View>: View {
+    @ViewBuilder
+    let content: () -> Content
+
+    var body: some View {
+        content()
     }
 }

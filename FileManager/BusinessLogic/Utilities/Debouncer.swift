@@ -10,10 +10,10 @@ import Foundation
 class Debouncer {
     var searchTimer: Timer?
 
-    func perform(completion: @escaping () -> Void) {
+    func perform(timeInterval: Double, completion: @escaping () -> Void) {
         self.searchTimer?.invalidate()
 
-        searchTimer = Timer.scheduledTimer(withTimeInterval: 1.5, repeats: false, block: { [weak self] (timer) in
+        searchTimer = Timer.scheduledTimer(withTimeInterval: timeInterval, repeats: false, block: { [weak self] (timer) in
             DispatchQueue.global(qos: .userInteractive).async { [weak self] in
                 completion()
             }
