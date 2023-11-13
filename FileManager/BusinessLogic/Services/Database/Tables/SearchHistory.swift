@@ -28,10 +28,12 @@ extension Database.Tables {
         }
 
         static func insertOrUpdate(newSearchName: String) {
-            if isTableHaveToBeUpdated() {
-                updateRowsInTable(newSearchName: newSearchName)
-            } else {
-                insertRowToDB(newSearchName: newSearchName)
+            if !newSearchName.isEmpty {
+                if isTableHaveToBeUpdated() {
+                    updateRowsInTable(newSearchName: newSearchName)
+                } else {
+                    insertRowToDB(newSearchName: newSearchName)
+                }
             }
         }
 

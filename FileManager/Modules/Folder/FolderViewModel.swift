@@ -265,8 +265,8 @@ final class FolderViewModel: ObservableObject {
         }
     }
 
-    func makeSearchingSuggestingNames() -> [String] {
-        return Database.Tables.SearchHistory.getSearchNamesFromDB()
+    func updateSearchingSuggestingNames() {
+        state.searchingInfo.suggestedSearchingNames = Database.Tables.SearchHistory.getSearchNamesFromDB()
     }
 }
 

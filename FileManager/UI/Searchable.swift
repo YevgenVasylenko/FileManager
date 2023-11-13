@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct Searchable<Content: View>: View {
+struct Searchable<Content: View, Suggestions: View>: View {
     let searchInfo: Binding<SearchingInfo>
     let onChanged: (_ searchInfo: SearchingInfo) -> Void
 
@@ -15,7 +15,7 @@ struct Searchable<Content: View>: View {
     let content: () -> Content
 
     @ViewBuilder
-    let searchableSuggestions: () -> Content
+    let searchableSuggestions: () -> Suggestions
 
     var body: some View {
         SearchView(content: content)

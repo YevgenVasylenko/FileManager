@@ -26,6 +26,7 @@ struct FolderView: View {
         Searchable(
             searchInfo: $viewModel.state.searchingInfo,
             onChanged: { searchInfo in
+                viewModel.updateSearchingSuggestingNames()
                 if searchInfo.searchingName.isEmpty {
                     viewModel.loadContent()
                 }
@@ -244,8 +245,10 @@ private extension FolderView {
     }
 
     func searchSuggestingNames() -> some View {
-        ForEach(viewModel.makeSearchingSuggestingNames(), id: \.self) { name in
-            Text(name).searchCompletion(name)
+        ForEach(viewModel.state.searchingInfo.suggestedSearchingNames.reversed(), id: \.self) { name in
+            HStack {
+                Label(name, systemImage: "clock.arrow.circlepath").searchCompletion(name)
+            }
         }
     }
 }
