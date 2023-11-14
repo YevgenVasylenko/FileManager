@@ -8,15 +8,13 @@
 import Foundation
 
 class Debouncer {
-    var searchTimer: Timer?
+    private var searchTimer: Timer?
 
     func perform(timeInterval: Double, completion: @escaping () -> Void) {
-        self.searchTimer?.invalidate()
+        searchTimer?.invalidate()
 
-        searchTimer = Timer.scheduledTimer(withTimeInterval: timeInterval, repeats: false, block: { [weak self] (timer) in
-            DispatchQueue.global(qos: .userInteractive).async { [weak self] in
-                completion()
-            }
-          })
+        searchTimer = Timer.scheduledTimer(withTimeInterval: timeInterval, repeats: false, block: { [weak self] _ in
+            completion()
+        })
     }
 }

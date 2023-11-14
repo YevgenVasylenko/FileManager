@@ -9,7 +9,6 @@ import SwiftUI
 
 struct Searchable<Content: View, Suggestions: View>: View {
     let searchInfo: Binding<SearchingInfo>
-    let onChanged: (_ searchInfo: SearchingInfo) -> Void
 
     @ViewBuilder
     let content: () -> Content
@@ -17,10 +16,12 @@ struct Searchable<Content: View, Suggestions: View>: View {
     @ViewBuilder
     let searchableSuggestions: () -> Suggestions
 
+    let onChanged: (_ searchInfo: SearchingInfo) -> Void
+
     var body: some View {
         SearchView(content: content)
             .searchable(text: searchInfo.searchingName, suggestions: {
-                SearchableSuggestions(content: searchableSuggestions)
+                searchableSuggestions()
             })
             .onChange(of: searchInfo.wrappedValue) { _ in
                 onChanged(searchInfo.wrappedValue)
@@ -38,15 +39,6 @@ private struct SearchView<Content: View>: View {
     @Environment(\.dismissSearch)
     private var dismissSearch
     
-    var body: some View {
-        content()
-    }
-}
-
-private struct SearchableSuggestions<Content: View>: View {
-    @ViewBuilder
-    let content: () -> Content
-
     var body: some View {
         content()
     }

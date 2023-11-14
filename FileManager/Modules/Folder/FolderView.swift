@@ -25,6 +25,12 @@ struct FolderView: View {
     var body: some View {
         Searchable(
             searchInfo: $viewModel.state.searchingInfo,
+            content: {
+                completeFolderView()
+            },
+            searchableSuggestions: {
+                searchSuggestingNames()
+            },
             onChanged: { searchInfo in
                 viewModel.updateSearchingSuggestingNames()
                 if searchInfo.searchingName.isEmpty {
@@ -33,55 +39,6 @@ struct FolderView: View {
                 else {
                     viewModel.loadContentSearchedByName()
                 }
-            },
-            content: {
-                suggestedPlaceForSearchMenuBar()
-                EmptyView()
-                ZStack {
-                    if viewModel.state.isLoading {
-                        ProgressView()
-                    }
-                    else {
-                        folderView()
-                    }
-                    if  viewModel.isFolderOkForFolderCreationButton() {
-                        createFolderButton()
-                    }
-                    actionMenuBarForChosenFiles()
-                }
-                .onAppear {
-                    if EnvironmentUtils.isPreview == false {
-                        viewModel.loadContent()
-                    }
-                }
-                .destinationPopover(
-                    actionType: $viewModel.state.fileActionType,
-                    files: viewModel.filesForAction,
-                    moveOrCopyToFolder: viewModel.moveOrCopyWithUserChosen
-                )
-                .conflictPopover(
-                    conflictName: viewModel.state.nameConflict,
-                    resolveConflictWithUserChoice: viewModel.userConflictResolveChoice
-                )
-                .deleteConfirmationPopover(
-                    isShowing: $viewModel.state.deletingFromTrash,
-                    deletingConfirmed: viewModel.delete
-                )
-                .fileCreatingPopover(viewModel: viewModel, newName: $viewModel.state.newNameForRename)
-                .errorAlert(error: $viewModel.state.error)
-                .navigationViewStyle(.stack)
-                .buttonStyle(.plain)
-                .padding()
-                .navigationTitle(viewModel.state.folder.displayedName())
-                .toolbar {
-                    navigationBar(
-                        chooseAction: {
-                            fileSelectDelegate?.selected(viewModel.state.folder)
-                        })
-                }
-            },
-            searchableSuggestions: {
-                searchSuggestingNames()
             }
         )
     }
@@ -113,6 +70,54 @@ private extension FolderView {
                 }
                 .padding()
             }
+        }
+    }
+
+    @ViewBuilder
+    func completeFolderView() -> some View {
+        suggestedPlaceForSearchMenuBar()
+        EmptyView()
+        ZStack {
+            if viewModel.state.isLoading {
+                ProgressView()
+            }
+            else {
+                folderView()
+            }
+            if  viewModel.isFolderOkForFolderCreationButton() {
+                createFolderButton()
+            }
+            actionMenuBarForChosenFiles()
+        }
+        .onAppear {
+            if EnvironmentUtils.isPreview == false {
+                viewModel.loadContent()
+            }
+        }
+        .destinationPopover(
+            actionType: $viewModel.state.fileActionType,
+            files: viewModel.filesForAction,
+            moveOrCopyToFolder: viewModel.moveOrCopyWithUserChosen
+        )
+        .conflictPopover(
+            conflictName: viewModel.state.nameConflict,
+            resolveConflictWithUserChoice: viewModel.userConflictResolveChoice
+        )
+        .deleteConfirmationPopover(
+            isShowing: $viewModel.state.deletingFromTrash,
+            deletingConfirmed: viewModel.delete
+        )
+        .fileCreatingPopover(viewModel: viewModel, newName: $viewModel.state.newNameForRename)
+        .errorAlert(error: $viewModel.state.error)
+        .navigationViewStyle(.stack)
+        .buttonStyle(.plain)
+        .padding()
+        .navigationTitle(viewModel.state.folder.displayedName())
+        .toolbar {
+            navigationBar(
+                chooseAction: {
+                    fileSelectDelegate?.selected(viewModel.state.folder)
+                })
         }
     }
 

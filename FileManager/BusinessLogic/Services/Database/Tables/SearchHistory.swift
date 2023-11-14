@@ -68,19 +68,11 @@ private extension Database.Tables.SearchHistory {
 
     static func updateRowsInTable(newSearchName: String) {
         do {
-            let firstRow = table.select(searchName).filter(id == 1)
-            let secondRow = table.select(searchName).filter(id == 2)
-            let thirdRow = table.select(searchName).filter(id == 3)
-
-            for name in try Database.connection.prepare(secondRow) {
-                try Database.connection.run(firstRow.update(searchName <- name[searchName]))
+            try Database.connection.transaction {
+                    let firstRow = table.select(searchName).limit(1)
+                    try Database.connection.run(firstRow.delete())
+                    insertRowToDB(newSearchName: newSearchName)
             }
-
-            for name in try Database.connection.prepare(thirdRow) {
-                try Database.connection.run(secondRow.update(searchName <- name[searchName]))
-            }
-
-            try Database.connection.run(thirdRow.update(searchName <- newSearchName))
         } catch {
             print(error)
         }
@@ -89,7 +81,7 @@ private extension Database.Tables.SearchHistory {
     static func isTableHaveToBeUpdated() -> Bool {
         do {
             let numberOfNames = try Database.connection.scalar(table.count)
-            return numberOfNames == 3
+            return numberOfNames > 3
         } catch {
             print(error)
             return false
