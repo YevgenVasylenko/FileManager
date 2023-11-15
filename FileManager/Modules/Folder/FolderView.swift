@@ -250,10 +250,8 @@ private extension FolderView {
     }
 
     func searchSuggestingNames() -> some View {
-        ForEach(viewModel.state.searchingInfo.suggestedSearchingNames.reversed(), id: \.self) { name in
-            HStack {
-                Label(name, systemImage: "clock.arrow.circlepath").searchCompletion(name)
-            }
+        ForEach(viewModel.state.searchingInfo.suggestedSearchingNames, id: \.self) { name in
+            Label(name, systemImage: "clock.arrow.circlepath").searchCompletion(name)
         }
     }
 }

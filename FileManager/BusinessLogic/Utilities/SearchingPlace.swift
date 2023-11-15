@@ -39,3 +39,4 @@ struct SearchingInfo: Equatable {
     var placeForSearch: SearchingPlace?
     var suggestedSearchingNames: [String] = []
 }
+

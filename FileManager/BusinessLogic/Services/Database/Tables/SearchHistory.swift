@@ -28,13 +28,9 @@ extension Database.Tables {
         }
 
         static func insertOrUpdate(newSearchName: String) {
-            if !newSearchName.isEmpty {
-                if isTableHaveToBeUpdated() {
-                    updateRowsInTable(newSearchName: newSearchName)
-                } else {
-                    insertRowToDB(newSearchName: newSearchName)
-                }
-            }
+            if newSearchName.isEmpty { return }
+            insertRowToDB(newSearchName: newSearchName)
+            updateRowsInTable(newSearchName: newSearchName)
         }
 
         static func getSearchNamesFromDB() -> [String] {
@@ -50,7 +46,7 @@ extension Database.Tables {
             } catch {
                 print(error)
             }
-            return searchNames
+            return searchNames.reversed()
         }
     }
 }
@@ -67,12 +63,10 @@ private extension Database.Tables.SearchHistory {
     }
 
     static func updateRowsInTable(newSearchName: String) {
+        if !isTableHaveToBeUpdated() { return }
         do {
-            try Database.connection.transaction {
-                    let firstRow = table.select(searchName).limit(1)
-                    try Database.connection.run(firstRow.delete())
-                    insertRowToDB(newSearchName: newSearchName)
-            }
+            let firstRow = table.select(searchName).limit(1)
+            try Database.connection.run(firstRow.delete())
         } catch {
             print(error)
         }

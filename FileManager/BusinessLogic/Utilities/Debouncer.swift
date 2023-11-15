@@ -13,7 +13,7 @@ class Debouncer {
     func perform(timeInterval: Double, completion: @escaping () -> Void) {
         searchTimer?.invalidate()
 
-        searchTimer = Timer.scheduledTimer(withTimeInterval: timeInterval, repeats: false, block: { [weak self] _ in
+        searchTimer = Timer.scheduledTimer(withTimeInterval: timeInterval, repeats: false, block: { _ in
             completion()
         })
     }
