@@ -188,7 +188,7 @@ private extension FolderView {
 
     @ViewBuilder
     func suggestedPlaceForSearchMenuBar() -> some View {
-        if !viewModel.state.searchingInfo.searchingName.isEmpty {
+        if !viewModel.state.searchingInfo.searchingRequest.searchingName.isEmpty {
             HStack {
                 Spacer()
                 ForEach(viewModel.suggestedPlacesForSearch(), id: \.self) { place in
@@ -238,13 +238,13 @@ private extension FolderView {
     func choosePlaceBinding(choicePlace: SearchingPlace) -> Binding<Bool> {
         Binding(
             get: {
-                viewModel.state.searchingInfo.placeForSearch == choicePlace
+                viewModel.state.searchingInfo.searchingRequest.placeForSearch == choicePlace
             },
             set: { selected in
                 if selected {
-                    viewModel.state.searchingInfo.placeForSearch = choicePlace
+                    viewModel.state.searchingInfo.searchingRequest.placeForSearch = choicePlace
                 } else {
-                    viewModel.state.searchingInfo.placeForSearch = nil
+                    viewModel.state.searchingInfo.searchingRequest.placeForSearch = nil
                 }
             })
     }

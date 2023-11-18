@@ -16,15 +16,15 @@ struct Searchable<Content: View, Suggestions: View>: View {
     @ViewBuilder
     let searchableSuggestions: () -> Suggestions
 
-    let onChanged: (_ searchInfo: SearchingInfo) -> Void
+    let onChanged: (_ searchInfo: SearchingInfo.SearchingRequest) -> Void
 
     var body: some View {
         SearchView(content: content)
-            .searchable(text: searchInfo.searchingName, suggestions: {
+            .searchable(text: searchInfo.searchingRequest.searchingName, suggestions: {
                 searchableSuggestions()
             })
-            .onChange(of: searchInfo.wrappedValue) { _ in
-                onChanged(searchInfo.wrappedValue)
+            .onChange(of: searchInfo.searchingRequest.wrappedValue) { _ in
+                onChanged(searchInfo.searchingRequest.wrappedValue)
             }
     }
 }

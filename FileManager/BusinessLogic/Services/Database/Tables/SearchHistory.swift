@@ -19,7 +19,7 @@ extension Database.Tables {
                 try Database.connection.run(
                     table.create(ifNotExists: true) { t in
                         t.column(id, primaryKey: .autoincrement)
-                        t.column(searchName, unique: false)
+                        t.column(searchName, unique: true)
                     }
                 )
             } catch {
@@ -27,16 +27,25 @@ extension Database.Tables {
             }
         }
 
-        static func insertOrUpdate(newSearchName: String) {
+        static func update(newSearchName: String) {
             if newSearchName.isEmpty { return }
-            insertRowToDB(newSearchName: newSearchName)
-            updateRowsInTable(newSearchName: newSearchName)
+            do {
+                try Database.connection.transaction {
+                    let query = table.select(searchName).filter(searchName == newSearchName)
+                    if try Database.connection.scalar(query.count) > 0 {
+                        return
+                    }
+                    insertRowToDB(newSearchName: newSearchName)
+                    deleteOldRows(newSearchName: newSearchName)
+                }
+            } catch {
+                print(error)
+            }
         }
 
         static func getSearchNamesFromDB() -> [String] {
             var searchNames: [String] = []
-            let query = table
-                .select(searchName)
+            let query = table.select(searchName).order(id.desc)
             do {
                 let names = try Database.connection.prepare(query)
                 for name in names {
@@ -46,7 +55,7 @@ extension Database.Tables {
             } catch {
                 print(error)
             }
-            return searchNames.reversed()
+            return searchNames
         }
     }
 }
@@ -62,8 +71,8 @@ private extension Database.Tables.SearchHistory {
         }
     }
 
-    static func updateRowsInTable(newSearchName: String) {
-        if !isTableHaveToBeUpdated() { return }
+    static func deleteOldRows(newSearchName: String) {
+        if !isShouldDeleteOldRows() { return }
         do {
             let firstRow = table.select(searchName).limit(1)
             try Database.connection.run(firstRow.delete())
@@ -72,7 +81,7 @@ private extension Database.Tables.SearchHistory {
         }
     }
 
-    static func isTableHaveToBeUpdated() -> Bool {
+    static func isShouldDeleteOldRows() -> Bool {
         do {
             let numberOfNames = try Database.connection.scalar(table.count)
             return numberOfNames > 3

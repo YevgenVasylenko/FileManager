@@ -46,7 +46,7 @@ final class FolderViewModel: ObservableObject {
             folder: file,
             fileDisplayOptions: FileDisplayOptionsManager.options)
         )
-        state.searchingInfo.placeForSearch = defaultPlaceForSearch()
+        state.searchingInfo.searchingRequest.placeForSearch = defaultPlaceForSearch()
     }
     
     var filesForAction: [File] {
@@ -96,13 +96,13 @@ final class FolderViewModel: ObservableObject {
     
     func loadContentSearchedByName() {
         state.isLoading = true
-        guard let searchingPlace = state.searchingInfo.placeForSearch else { return }
+        guard let searchingPlace = state.searchingInfo.searchingRequest.placeForSearch else { return }
         debouncer.perform(timeInterval: 1.5) { [self] in
-            Database.Tables.SearchHistory.insertOrUpdate(newSearchName: self.state.searchingInfo.searchingName)
+            Database.Tables.SearchHistory.update(newSearchName: self.state.searchingInfo.searchingRequest.searchingName)
             fileManagerCommutator.contentBySearchingName(
                 searchingPlace: searchingPlace,
                 file: file,
-                name: state.searchingInfo.searchingName
+                name: state.searchingInfo.searchingRequest.searchingName
             ) {
                 [weak self] result in
                 guard let self else { return }
@@ -116,6 +116,7 @@ final class FolderViewModel: ObservableObject {
                 self.state.isLoading = false
             }
         }
+        
     }
     
     func startCreatingFolder() {
