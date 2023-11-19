@@ -8,14 +8,11 @@
 import SwiftUI
 
 struct FolderView: View {
+
+    private let fileSelectDelegate: FileSelectDelegate?
     
     @StateObject
     private var viewModel: FolderViewModel
-    
-    @State
-    private var newName: String = ""
-    
-    private let fileSelectDelegate: FileSelectDelegate?
 
     init(
         file: File,
@@ -25,63 +22,25 @@ struct FolderView: View {
         self.fileSelectDelegate = fileSelectDelegate
     }
     
-    init(viewModel: FolderViewModel, fileSelectDelegate: FileSelectDelegate?) {
-        self._viewModel = StateObject(wrappedValue: viewModel)
-        self.fileSelectDelegate = fileSelectDelegate
-    }
-    
     var body: some View {
-        suggestedPlaceForSearchMenuBar()
-        ZStack {
-            if viewModel.state.isLoading {
-                ProgressView()
+        Searchable(
+            searchInfo: $viewModel.state.searchingInfo,
+            content: {
+                completeFolderView()
+            },
+            searchableSuggestions: {
+                searchSuggestingNames()
+            },
+            onChanged: { searchInfo in
+                viewModel.updateSearchingSuggestingNames()
+                if searchInfo.searchingName.isEmpty {
+                    viewModel.loadContent()
+                }
+                else {
+                    viewModel.loadContentSearchedByName()
+                }
             }
-            else {
-                folderView()
-            }
-            if  viewModel.isFolderOkForFolderCreationButton() {
-                createFolderButton()
-            }
-            actionMenuBarForChosenFiles()
-        }
-        .onChange(of: viewModel.state.searchingInfo,
-                  perform: { _ in
-            if viewModel.state.searchingInfo.searchingName.isEmpty {
-                viewModel.loadContent()
-            } else {
-                viewModel.loadContentSearchedByName()
-            }
-        })
-        .onAppear {
-            if EnvironmentUtils.isPreview == false {
-                viewModel.loadContent()
-            }
-        }
-        .destinationPopover(
-            actionType: $viewModel.state.fileActionType,
-            files: viewModel.filesForAction,
-            moveOrCopyToFolder: viewModel.moveOrCopyWithUserChosen
         )
-        .conflictPopover(
-            conflictName: viewModel.state.nameConflict,
-            resolveConflictWithUserChoice: viewModel.userConflictResolveChoice
-        )
-        .deleteConfirmationPopover(
-            isShowing: $viewModel.state.deletingFromTrash,
-            deletingConfirmed: viewModel.delete
-        )
-        .fileCreatingPopover(viewModel: viewModel, newName: $newName)
-        .errorAlert(error: $viewModel.state.error)
-        .navigationViewStyle(.stack)
-        .buttonStyle(.plain)
-        .padding()
-        .navigationTitle(viewModel.state.folder.displayedName())
-        .toolbar {
-            navigationBar(
-                chooseAction: {
-                    fileSelectDelegate?.selected(viewModel.state.folder)
-                })
-        }
     }
 }
 
@@ -111,6 +70,54 @@ private extension FolderView {
                 }
                 .padding()
             }
+        }
+    }
+
+    @ViewBuilder
+    func completeFolderView() -> some View {
+        suggestedPlaceForSearchMenuBar()
+        EmptyView()
+        ZStack {
+            if viewModel.state.isLoading {
+                ProgressView()
+            }
+            else {
+                folderView()
+            }
+            if  viewModel.isFolderOkForFolderCreationButton() {
+                createFolderButton()
+            }
+            actionMenuBarForChosenFiles()
+        }
+        .onAppear {
+            if EnvironmentUtils.isPreview == false {
+                viewModel.loadContent()
+            }
+        }
+        .destinationPopover(
+            actionType: $viewModel.state.fileActionType,
+            files: viewModel.filesForAction,
+            moveOrCopyToFolder: viewModel.moveOrCopyWithUserChosen
+        )
+        .conflictPopover(
+            conflictName: viewModel.state.nameConflict,
+            resolveConflictWithUserChoice: viewModel.userConflictResolveChoice
+        )
+        .deleteConfirmationPopover(
+            isShowing: $viewModel.state.deletingFromTrash,
+            deletingConfirmed: viewModel.delete
+        )
+        .fileCreatingPopover(viewModel: viewModel, newName: $viewModel.state.newNameForRename)
+        .errorAlert(error: $viewModel.state.error)
+        .navigationViewStyle(.stack)
+        .buttonStyle(.plain)
+        .padding()
+        .navigationTitle(viewModel.state.folder.displayedName())
+        .toolbar {
+            navigationBar(
+                chooseAction: {
+                    fileSelectDelegate?.selected(viewModel.state.folder)
+                })
         }
     }
 
@@ -177,12 +184,11 @@ private extension FolderView {
                 .disabled(viewModel.isFilesInCurrentFolder(files: fileSelectDelegate.selectedFiles) ?? true)
             }
         }
-        .searchable(text: $viewModel.state.searchingInfo.searchingName)
     }
 
     @ViewBuilder
     func suggestedPlaceForSearchMenuBar() -> some View {
-        if !viewModel.state.searchingInfo.searchingName.isEmpty {
+        if !viewModel.state.searchingInfo.searchingRequest.searchingName.isEmpty {
             HStack {
                 Spacer()
                 ForEach(viewModel.suggestedPlacesForSearch(), id: \.self) { place in
@@ -232,15 +238,21 @@ private extension FolderView {
     func choosePlaceBinding(choicePlace: SearchingPlace) -> Binding<Bool> {
         Binding(
             get: {
-                viewModel.state.searchingInfo.placeForSearch == choicePlace
+                viewModel.state.searchingInfo.searchingRequest.placeForSearch == choicePlace
             },
             set: { selected in
                 if selected {
-                    viewModel.state.searchingInfo.placeForSearch = choicePlace
+                    viewModel.state.searchingInfo.searchingRequest.placeForSearch = choicePlace
                 } else {
-                    viewModel.state.searchingInfo.placeForSearch = nil
+                    viewModel.state.searchingInfo.searchingRequest.placeForSearch = nil
                 }
             })
+    }
+
+    func searchSuggestingNames() -> some View {
+        ForEach(viewModel.state.searchingInfo.suggestedSearchingNames, id: \.self) { name in
+            Label(name, systemImage: "clock.arrow.circlepath").searchCompletion(name)
+        }
     }
 }
 
@@ -283,3 +295,4 @@ private extension View {
 //                             files: PreviewFiles.filesInTrash)), fileSelectDelegate: nil)
 //    }
 //}
+

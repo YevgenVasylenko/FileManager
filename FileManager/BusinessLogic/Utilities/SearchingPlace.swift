@@ -35,6 +35,11 @@ enum SearchingPlace: CaseIterable, Equatable {
 }
 
 struct SearchingInfo: Equatable {
-    var searchingName = ""
-    var placeForSearch: SearchingPlace?
+    struct SearchingRequest: Equatable {
+        var searchingName = ""
+        var placeForSearch: SearchingPlace?
+    }
+    var searchingRequest = SearchingRequest()
+    var suggestedSearchingNames: [String] = []
 }
+

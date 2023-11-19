@@ -21,12 +21,14 @@ final class FolderViewModel: ObservableObject {
         var fileDisplayOptions: FileDisplayOptions
         var deletingFromTrash = false
         var searchingInfo = SearchingInfo()
+        var newNameForRename = ""
     }
     
     private let file: File
     private var conflictCompletion: ((ConflictNameResult) -> Void)?
     private var fileManagerCommutator = FileManagerCommutator()
     private lazy var folderMonitor = fileManagerCommutator.makeFolderMonitor(file: file)
+    private let debouncer = Debouncer()
     
     @Published
     var state: State
@@ -44,7 +46,7 @@ final class FolderViewModel: ObservableObject {
             folder: file,
             fileDisplayOptions: FileDisplayOptionsManager.options)
         )
-        state.searchingInfo.placeForSearch = defaultPlaceForSearch()
+        state.searchingInfo.searchingRequest.placeForSearch = defaultPlaceForSearch()
     }
     
     var filesForAction: [File] {
@@ -94,23 +96,27 @@ final class FolderViewModel: ObservableObject {
     
     func loadContentSearchedByName() {
         state.isLoading = true
-        guard let searchingPlace = state.searchingInfo.placeForSearch else { return }
-        fileManagerCommutator.contentBySearchingName(
-            searchingPlace: searchingPlace,
-            file: file,
-            name: state.searchingInfo.searchingName
-        ) {
-            [weak self] result in
-            guard let self else { return }
-            switch result {
-            case .success(let files):
-                self.state.files = files
-            case .failure(let failure):
-                self.state.error = failure
+        guard let searchingPlace = state.searchingInfo.searchingRequest.placeForSearch else { return }
+        debouncer.perform(timeInterval: 1.5) { [self] in
+            Database.Tables.SearchHistory.update(newSearchName: self.state.searchingInfo.searchingRequest.searchingName)
+            fileManagerCommutator.contentBySearchingName(
+                searchingPlace: searchingPlace,
+                file: file,
+                name: state.searchingInfo.searchingRequest.searchingName
+            ) {
+                [weak self] result in
+                guard let self else { return }
+                switch result {
+                case .success(let files):
+                    self.state.files = files
+                case .failure(let failure):
+                    self.state.error = failure
+                }
+                self.sort()
+                self.state.isLoading = false
             }
-            self.sort()
-            self.state.isLoading = false
         }
+        
     }
     
     func startCreatingFolder() {
@@ -258,6 +264,10 @@ final class FolderViewModel: ObservableObject {
         default:
             return .currentFolder
         }
+    }
+
+    func updateSearchingSuggestingNames() {
+        state.searchingInfo.suggestedSearchingNames = Database.Tables.SearchHistory.getSearchNamesFromDB()
     }
 }
 
