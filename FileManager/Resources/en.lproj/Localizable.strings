@@ -65,3 +65,12 @@
 "DropboxStorage" = "Dropbox storage";
 "currentTrash" = "In trash";
 "allStorages" = "Across all";
+
+"red" = "Red";
+"orange" = "Orange";
+"yellow" = "Yellow";
+"green" = "Green";
+"blue" = "Blue";
+"indigo" = "Indigo";
+"violet" = "Violet";
+"grey" = "Grey";

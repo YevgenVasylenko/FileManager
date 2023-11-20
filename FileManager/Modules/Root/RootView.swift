@@ -20,9 +20,11 @@ struct RootView: View {
     
     var body: some View {
         NavigationSplitView {
-            List(viewModel.state.storages, id: \.self, selection: $viewModel.state.selectedStorage) { file in
-                storageListItem(file: file)
+            List {
+                sidebarStorageSection()
+                sidebarTagsSection()
             }
+            .listStyle(.sidebar)
         } detail: {
             if viewModel.isShouldConnectSelectedStorage() {
                 NavigationStack(path: $viewModel.state.detailNavigationStack) {
@@ -118,6 +120,40 @@ private extension RootView {
             return R.image.dropbox.name
         case .local:
             return R.image.folder.name
+        }
+    }
+
+    @ViewBuilder
+    func sidebarStorageSection() -> some View {
+        Section {
+            List(viewModel.state.storages, id: \.self, selection: $viewModel.state.selectedStorage) { file in
+                storageListItem(file: file)
+            }
+        } header: {
+            Text("Places")
+        }
+        .scaledToFit()
+    }
+
+    @ViewBuilder
+    func sidebarTagsSection() -> some View {
+        Section {
+            List(viewModel.state.tags, id: \.self, selection: $viewModel.state.selectedTag) { tag in
+                tagsListItem(tag: tag)
+            }
+        } header: {
+            Text("Tags")
+        }
+        .scaledToFit()
+    }
+
+    @ViewBuilder
+    func tagsListItem(tag: Tag) -> some View {
+        Label {
+            Text(tag.name)
+        } icon: {
+            Image(systemName: "circle.fill")
+                .foregroundColor(Color(uiColor: UIColor(hex: tag.color.rawValue) ?? .blue))
         }
     }
 }

@@ -65,3 +65,12 @@
 "DropboxStorage" = "Dropbox сховище";
 "currentTrash" = "У смітті";
 "allStorages" = "Повсюду";
+
+"red" = "Червоний";
+"orange" = "Помаранчевий";
+"yellow" = "Жовтий";
+"green" = "Зелений";
+"blue" = "Блакитний";
+"indigo" = "Синій";
+"violet" = "Фіолетовий";
+"grey" = "Сірий";

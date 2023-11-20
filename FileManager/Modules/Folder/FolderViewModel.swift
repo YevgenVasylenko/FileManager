@@ -97,12 +97,13 @@ final class FolderViewModel: ObservableObject {
     func loadContentSearchedByName() {
         state.isLoading = true
         guard let searchingPlace = state.searchingInfo.searchingRequest.placeForSearch else { return }
-        debouncer.perform(timeInterval: 1.5) { [self] in
+        debouncer.perform(timeInterval: 1.5) { [weak self] in
+            guard let self else { return }
             Database.Tables.SearchHistory.update(newSearchName: self.state.searchingInfo.searchingRequest.searchingName)
-            fileManagerCommutator.contentBySearchingName(
+            self.fileManagerCommutator.contentBySearchingName(
                 searchingPlace: searchingPlace,
-                file: file,
-                name: state.searchingInfo.searchingRequest.searchingName
+                file: self.file,
+                name: self.state.searchingInfo.searchingRequest.searchingName
             ) {
                 [weak self] result in
                 guard let self else { return }

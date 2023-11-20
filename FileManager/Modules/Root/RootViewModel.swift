@@ -13,6 +13,8 @@ final class RootViewModel: ObservableObject {
         var selectedStorage: File?
         var detailNavigationStack = NavigationPath()
         var isDropboxLogged = false
+        var tags: [Tag] = []
+        var selectedTag: Tag?
     }
     
     @Published
@@ -26,6 +28,7 @@ final class RootViewModel: ObservableObject {
     
     init() {
         reloadLoggedState()
+        fillUpTagsList()
         state.selectedStorage = state.storages.first
     }
     
@@ -61,9 +64,15 @@ final class RootViewModel: ObservableObject {
     func isShouldConnectSelectedStorage() -> Bool {
         isLoggedToCloud() || state.selectedStorage?.storageType.isLocal ?? true
     }
-    
-    private func reloadLoggedState() {
-        state.isDropboxLogged = DropboxLoginManager.isLogged
-    }
 }
 
+private extension RootViewModel {
+
+    func reloadLoggedState() {
+        state.isDropboxLogged = DropboxLoginManager.isLogged
+    }
+
+    func fillUpTagsList() {
+        state.tags = Database.Tables.Tags.getTagsFromDB()
+    }
+}

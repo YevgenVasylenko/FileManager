@@ -73,6 +73,10 @@
 		5DACCB4E2A445689000A0CA9 /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DACCB4D2A445689000A0CA9 /* RootView.swift */; };
 		5DACCB502A44568B000A0CA9 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 5DACCB4F2A44568B000A0CA9 /* Assets.xcassets */; };
 		5DACCB532A44568B000A0CA9 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 5DACCB522A44568B000A0CA9 /* Preview Assets.xcassets */; };
+		5DC9F2002B0A2CB20078D38D /* URL+ExtendedAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DC9F1FF2B0A2CB20078D38D /* URL+ExtendedAttributes.swift */; };
+		5DC9F2072B0B4D590078D38D /* Tags.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DC9F2062B0B4D590078D38D /* Tags.swift */; };
+		5DC9F2092B0B501C0078D38D /* UIColor+hex.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DC9F2082B0B501C0078D38D /* UIColor+hex.swift */; };
+		5DC9F20C2B0B9E840078D38D /* Tag.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DC9F20B2B0B9E830078D38D /* Tag.swift */; };
 		5DD776162A544B5600F9B55D /* FileManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DD776152A544B5600F9B55D /* FileManager.swift */; };
 		5DEDB9062A5ACAC2003CC86B /* FileAction.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DEDB9052A5ACAC2003CC86B /* FileAction.swift */; };
 		5DEDB90E2A5AEDD2003CC86B /* EnvironmenttUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DEDB90D2A5AEDD2003CC86B /* EnvironmenttUtils.swift */; };
@@ -146,6 +150,10 @@
 		5DACCB4D2A445689000A0CA9 /* RootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootView.swift; sourceTree = "<group>"; };
 		5DACCB4F2A44568B000A0CA9 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		5DACCB522A44568B000A0CA9 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
+		5DC9F1FF2B0A2CB20078D38D /* URL+ExtendedAttributes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "URL+ExtendedAttributes.swift"; sourceTree = "<group>"; };
+		5DC9F2062B0B4D590078D38D /* Tags.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Tags.swift; sourceTree = "<group>"; };
+		5DC9F2082B0B501C0078D38D /* UIColor+hex.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIColor+hex.swift"; sourceTree = "<group>"; };
+		5DC9F20B2B0B9E830078D38D /* Tag.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Tag.swift; sourceTree = "<group>"; };
 		5DD776152A544B5600F9B55D /* FileManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileManager.swift; sourceTree = "<group>"; };
 		5DEDB9052A5ACAC2003CC86B /* FileAction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileAction.swift; sourceTree = "<group>"; };
 		5DEDB90D2A5AEDD2003CC86B /* EnvironmenttUtils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EnvironmenttUtils.swift; sourceTree = "<group>"; };
@@ -190,6 +198,7 @@
 			children = (
 				0DA591962AE8289A0092E07B /* FilesInTrash.swift */,
 				5DA07C9C2AFFB0E200FF7AFC /* SearchHistory.swift */,
+				5DC9F2062B0B4D590078D38D /* Tags.swift */,
 			);
 			path = Tables;
 			sourceTree = "<group>";
@@ -276,6 +285,7 @@
 		5D954CC42A58548300A221DB /* UI */ = {
 			isa = PBXGroup;
 			children = (
+				5DC9F2082B0B501C0078D38D /* UIColor+hex.swift */,
 				5D0B9CA42A4466460099021C /* FileView.swift */,
 				5D954CD42A597FF800A221DB /* File+UI.swift */,
 				5D221D582A5D416A0072AA35 /* View+Utilities.swift */,
@@ -395,6 +405,14 @@
 			path = "Preview Content";
 			sourceTree = "<group>";
 		};
+		5DC9F2022B0A69AD0078D38D /* Tags */ = {
+			isa = PBXGroup;
+			children = (
+				5DC9F20B2B0B9E830078D38D /* Tag.swift */,
+			);
+			path = Tags;
+			sourceTree = "<group>";
+		};
 		5DEDB9032A5AC9D5003CC86B /* Services */ = {
 			isa = PBXGroup;
 			children = (
@@ -407,6 +425,7 @@
 		5DEDB9042A5ACA80003CC86B /* Models */ = {
 			isa = PBXGroup;
 			children = (
+				5DC9F2022B0A69AD0078D38D /* Tags */,
 				0DA591A42AE82B2D0092E07B /* File */,
 			);
 			path = Models;
@@ -419,6 +438,7 @@
 				0DA5918A2AE826100092E07B /* UIApplication+Utilities.swift */,
 				5D05A8602AED497400BBAC09 /* SearchingPlace.swift */,
 				5DA07C922AFCFA5E00FF7AFC /* Debouncer.swift */,
+				5DC9F1FF2B0A2CB20078D38D /* URL+ExtendedAttributes.swift */,
 			);
 			path = Utilities;
 			sourceTree = "<group>";
@@ -596,9 +616,11 @@
 				5D954CAC2A56D45A00A221DB /* FolderViewModel.swift in Sources */,
 				5D954CD52A597FF800A221DB /* File+UI.swift in Sources */,
 				5D45509C2AC6C1DF00C29B1C /* ListViewItemWithoutDisclosureIndicator.swift in Sources */,
+				5DC9F2072B0B4D590078D38D /* Tags.swift in Sources */,
 				5D0B9CA92A446D080099021C /* LocalFileManager.swift in Sources */,
 				0DA591912AE8274E0092E07B /* File+StorageType.swift in Sources */,
 				5D04653D2A71071900BE768E /* FileActionType.swift in Sources */,
+				5DC9F20C2B0B9E840078D38D /* Tag.swift in Sources */,
 				0DA5918B2AE826100092E07B /* UIApplication+Utilities.swift in Sources */,
 				5D221D5C2A5DA1170072AA35 /* LocalizedError.swift in Sources */,
 				5DF9C96B2AB9A365007AF29C /* FolderGridListViewModel.swift in Sources */,
@@ -615,6 +637,7 @@
 				5D1B5B132A8E7B56004C7AA8 /* LocalTemporaryFolderConnector.swift in Sources */,
 				5D627D8B2A79875100170451 /* FolderMonitor.swift in Sources */,
 				5DF5DBA42A9610B500F91A46 /* FileContentViewModel.swift in Sources */,
+				5DC9F2002B0A2CB20078D38D /* URL+ExtendedAttributes.swift in Sources */,
 				5D7B59822AD597D400AFB058 /* Database.swift in Sources */,
 				5DACCB4E2A445689000A0CA9 /* RootView.swift in Sources */,
 				5DACCB4C2A445689000A0CA9 /* FileManagerApp.swift in Sources */,
@@ -623,6 +646,7 @@
 				5D78B1B12A4ECDAA00A76D0F /* Result+Utilities.swift in Sources */,
 				5D0B9CA32A4464530099021C /* FolderView.swift in Sources */,
 				5D1B5B1E2A910598004C7AA8 /* FileDisplayedName.swift in Sources */,
+				5DC9F2092B0B501C0078D38D /* UIColor+hex.swift in Sources */,
 				5D793A5D2AB87B8300A73D5C /* FolderGridListView.swift in Sources */,
 				5D793A5A2AB2162C00A73D5C /* RootViewModel.swift in Sources */,
 				0DA591A12AE82AA00092E07B /* NameConflict.swift in Sources */,

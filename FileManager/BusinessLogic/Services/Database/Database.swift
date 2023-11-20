@@ -14,6 +14,7 @@ enum Database {
     static func createTables() {
         Tables.FilesInTrash.create()
         Tables.SearchHistory.create()
+        Tables.Tags.create()
     }
     
     private static func makeConnection() -> Connection {
