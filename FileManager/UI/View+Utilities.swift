@@ -106,6 +106,8 @@ extension Error {
             return R.string.localizable.file_with_same_name_is_already_exist()
         case .unknown, .dropbox:
             return R.string.localizable.unknown_error()
+        case .tagExist:
+            return R.string.localizable.tag_with_same_name_is_already_exist()
         }
     }
 }

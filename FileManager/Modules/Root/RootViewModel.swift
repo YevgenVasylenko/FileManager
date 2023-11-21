@@ -15,6 +15,9 @@ final class RootViewModel: ObservableObject {
         var isDropboxLogged = false
         var tags: [Tag] = []
         var selectedTag: Tag?
+        var tagForRename: Tag?
+        var newNameForTag: String = ""
+        var error: Error?
     }
     
     @Published
@@ -28,7 +31,7 @@ final class RootViewModel: ObservableObject {
     
     init() {
         reloadLoggedState()
-        fillUpTagsList()
+        updateTagsList()
         state.selectedStorage = state.storages.first
     }
     
@@ -64,6 +67,24 @@ final class RootViewModel: ObservableObject {
     func isShouldConnectSelectedStorage() -> Bool {
         isLoggedToCloud() || state.selectedStorage?.storageType.isLocal ?? true
     }
+
+    func deleteTagFromList(tag: Tag) {
+        Database.Tables.Tags.deleteFromDB(tag: tag)
+        updateTagsList()
+    }
+
+    func renameTag(tag: Tag, newName: String) {
+        Database.Tables.Tags.renameTag(tag: tag, newName: newName) { [weak self] result in
+            switch result {
+            case .success:
+                state.tagForRename = nil
+                updateTagsList()
+            case .failure(let error):
+                state.tagForRename = nil
+                self?.state.error = error
+            }
+        }
+    }
 }
 
 private extension RootViewModel {
@@ -72,7 +93,7 @@ private extension RootViewModel {
         state.isDropboxLogged = DropboxLoginManager.isLogged
     }
 
-    func fillUpTagsList() {
+    func updateTagsList() {
         state.tags = Database.Tables.Tags.getTagsFromDB()
     }
 }

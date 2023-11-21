@@ -10,6 +10,7 @@ import SwiftyDropbox
 
 enum Error: LocalizedError {
         case nameExist
+        case tagExist
         case unknown
         case dropbox(String)
     
@@ -17,6 +18,8 @@ enum Error: LocalizedError {
             switch self {
             case .nameExist:
                 return R.string.localizable.name_is_exist()
+            case .tagExist:
+                return R.string.localizable.tag_name_is_exist()
             case .unknown:
                 return R.string.localizable.unknown_error()
             case .dropbox(let description):

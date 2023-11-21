@@ -12,6 +12,11 @@ struct Tag: Hashable {
     let color: TagColor?
 }
 
+extension Tag: Identifiable {
+    var id: Self {
+        self
+    }
+}
 
 enum TagColor: Int, CaseIterable, Hashable {
     case red = 0xe81416
@@ -26,13 +31,13 @@ enum TagColor: Int, CaseIterable, Hashable {
     static func allColorsWithNames() -> [Tag] {
         var allColors: [Tag] = []
         for color in Self.allCases {
-            allColors.append(Tag(name: localizedColorNamesForDB(tag: color), color: color))
+            allColors.append(Tag(name: color.name(), color: color))
         }
         return allColors
     }
 
-    static func localizedColorNamesForDB(tag: TagColor) -> String {
-       switch tag {
+    func name() -> String {
+        switch self {
        case .red:
             return R.string.localizable.red()
        case .orange:

@@ -49,6 +49,7 @@ struct FolderGridListView: View {
             isShowing: $viewModel.state.deletingFromTrash,
             deletingConfirmed: viewModel.delete
         )
+        .errorAlert(error: $viewModel.state.error)
     }
 }
 

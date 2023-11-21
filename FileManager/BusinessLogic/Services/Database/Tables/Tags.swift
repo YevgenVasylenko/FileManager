@@ -45,6 +45,25 @@ extension Database.Tables {
             }
         }
 
+        static func renameTag(tag: Tag, newName: String, completion: (Swift.Result<Void, Error>) -> Void) {
+            do {
+                let renameTagQuery = table.filter(tagName == tag.name)
+                try Database.connection.run(renameTagQuery.update(tagName <- newName))
+                completion(.success(()))
+            } catch {
+                completion(.failure(.tagExist))
+            }
+        }
+
+        static func deleteFromDB(tag: Tag) {
+            let deleteTagQuery = table.filter(tagName == tag.name)
+            do {
+                try Database.connection.run(deleteTagQuery.delete())
+            } catch {
+                print(error)
+            }
+        }
+
         static func getTagsFromDB() -> [Tag] {
             var tags: [Tag] = []
             do {

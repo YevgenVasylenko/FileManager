@@ -38,6 +38,8 @@ struct RootView: View {
         .onOpenURL { url in
             DropboxLoginManager.openUrl(url: url)
         }
+        .renamePopover(viewModel: viewModel, newName: $viewModel.state.newNameForTag)
+        .errorAlert(error: $viewModel.state.error)
     }
 }
 
@@ -155,6 +157,53 @@ private extension RootView {
             Image(systemName: "circle.fill")
                 .foregroundColor(Color(uiColor: UIColor(rgb: tag.color?.rawValue ?? 0x000000)))
         }
+        .contextMenu {
+            tagsListItemContextMenu(tag: tag)
+        }
+    }
+
+    @ViewBuilder
+    func tagsListItemContextMenu(tag: Tag) -> some View {
+        Button(role: .destructive) {
+            viewModel.deleteTagFromList(tag: tag)
+        } label: {
+            Label("\(R.string.localizable.delete()) «\(tag.name)»", systemImage: "xmark")
+        }
+
+        Button {
+            viewModel.state.tagForRename = tag
+        } label: {
+            Label("\(R.string.localizable.rename()) «\(tag.name)»", systemImage: "pencil")
+        }
+    }
+}
+
+private extension View {
+    func renamePopover(viewModel: RootViewModel, newName: Binding<String>) -> some View {
+        alert(
+            R.string.localizable.renamePopupTitle()
+            + (viewModel.state.tagForRename?.name ?? ""),
+                     isPresented: .constant(viewModel.state.tagForRename != nil),
+                     actions: {
+            TextField(R.string.localizable.new_name(),
+                      text: newName)
+                .padding()
+                .interactiveDismissDisabled()
+                .autocorrectionDisabled()
+            HStack {
+                Button(R.string.localizable.rename()) {
+                    guard let tag = viewModel.state.tagForRename else { return }
+                    viewModel.renameTag(tag: tag, newName: newName.wrappedValue)
+                    newName.wrappedValue = ""
+                }
+                Spacer()
+                Button(R.string.localizable.cancel()) {
+                    viewModel.state.tagForRename = nil
+                    newName.wrappedValue = ""
+                }
+            }
+            .padding()
+        })
     }
 }
 
@@ -163,3 +212,4 @@ struct RootView_Previews: PreviewProvider {
         RootView()
     }
 }
+
