@@ -130,7 +130,7 @@ private extension RootView {
                 storageListItem(file: file)
             }
         } header: {
-            Text("Places")
+            Text(R.string.localizable.places())
         }
         .scaledToFit()
     }
@@ -142,7 +142,7 @@ private extension RootView {
                 tagsListItem(tag: tag)
             }
         } header: {
-            Text("Tags")
+            Text(R.string.localizable.tags())
         }
         .scaledToFit()
     }
@@ -153,7 +153,7 @@ private extension RootView {
             Text(tag.name)
         } icon: {
             Image(systemName: "circle.fill")
-                .foregroundColor(Color(uiColor: UIColor(hex: tag.color.rawValue) ?? .blue))
+                .foregroundColor(Color(uiColor: UIColor(rgb: tag.color?.rawValue ?? 0x000000)))
         }
     }
 }

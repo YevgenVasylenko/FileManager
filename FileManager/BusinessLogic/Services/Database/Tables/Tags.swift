@@ -13,7 +13,7 @@ extension Database.Tables {
         static let table = Table("tags")
         static let id = Expression<Int64>("id")
         static let tagName = Expression<String>("tagName")
-        static let tagColor = Expression<String>("tagColor")
+        static let tagColor = Expression<Int>("tagColor")
 
         static func create() {
             do {
@@ -36,7 +36,7 @@ extension Database.Tables {
             do {
                 let query = table.insert(
                     tagName <- tag.name,
-                    tagColor <- tag.color.rawValue
+                    tagColor <- tag.color?.rawValue ?? 0x000000
                 )
                 try Database.connection.run(query)
             } catch {
@@ -52,7 +52,7 @@ extension Database.Tables {
                 for tag in tagsFromDB {
                     let name = tag[tagName]
                     let color = tag[tagColor]
-                    tags.append(Tag(name: name, color: TagsColors.create(rawValue: color)))
+                    tags.append(Tag(name: name, color: TagColor(rawValue: color)))
                 }
             } catch {
                 print(error)
@@ -64,7 +64,7 @@ extension Database.Tables {
 
 private extension Database.Tables.Tags {
    static func writeDefaultTagsInDB() {
-        for tag in TagsColors.allColorsWithNames() {
+        for tag in TagColor.allColorsWithNames() {
             Self.insertRowToDB(tag: tag)
         }
     }

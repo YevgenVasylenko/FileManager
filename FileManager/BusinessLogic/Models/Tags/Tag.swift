@@ -9,20 +9,19 @@ import Foundation
 
 struct Tag: Hashable {
     let name: String
-    let color: TagsColors
+    let color: TagColor?
 }
 
 
-enum TagsColors: String, CaseIterable, Hashable {
-    case red = "#e81416"
-    case orange = "#ffa500"
-    case yellow = "#faeb36"
-    case green = "#79c314"
-    case blue = "#487de7"
-    case indigo = "#4b369d"
-    case violet = "#70369d"
-    case grey = "#808080"
-    case none = ""
+enum TagColor: Int, CaseIterable, Hashable {
+    case red = 0xe81416
+    case orange = 0xffa500
+    case yellow = 0xfaeb36
+    case green = 0x79c314
+    case blue = 0x487de7
+    case indigo = 0x4b369d
+    case violet = 0x70369d
+    case grey = 0x808080
 
     static func allColorsWithNames() -> [Tag] {
         var allColors: [Tag] = []
@@ -32,16 +31,7 @@ enum TagsColors: String, CaseIterable, Hashable {
         return allColors
     }
 
-    static func create(rawValue: String) -> TagsColors {
-            if let rawValue = TagsColors(rawValue: rawValue) {
-                return rawValue
-            }
-            else{
-                return .none
-            }
-        }
-
-    static func localizedColorNamesForDB(tag: TagsColors) -> String {
+    static func localizedColorNamesForDB(tag: TagColor) -> String {
        switch tag {
        case .red:
             return R.string.localizable.red()
@@ -59,8 +49,6 @@ enum TagsColors: String, CaseIterable, Hashable {
            return R.string.localizable.violet()
        case .grey:
            return R.string.localizable.grey()
-       case .none:
-           return ""
        }
     }
 }

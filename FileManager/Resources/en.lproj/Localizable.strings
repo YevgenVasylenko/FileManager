@@ -66,6 +66,9 @@
 "currentTrash" = "In trash";
 "allStorages" = "Across all";
 
+"places" = "Places";
+"tags" = "Tags";
+
 "red" = "Red";
 "orange" = "Orange";
 "yellow" = "Yellow";
