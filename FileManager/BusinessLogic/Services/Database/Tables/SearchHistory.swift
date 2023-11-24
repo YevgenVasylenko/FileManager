@@ -60,6 +60,8 @@ extension Database.Tables {
     }
 }
 
+// MARK: - Private
+
 private extension Database.Tables.SearchHistory {
 
     static func insertRowToDB(newSearchName: String) {

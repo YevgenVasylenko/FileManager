@@ -17,11 +17,13 @@ struct FileView: View {
     private let file: File
     private let style: Style
     private let infoPresented: Binding<Bool>
+    private let tagsPresented: Binding<Bool>
 
-    init(file: File, style: Style, infoPresented: Binding<Bool>) {
+    init(file: File, style: Style, infoPresented: Binding<Bool>, tagsPresented: Binding<Bool>) {
         self.file = file
         self.style = style
         self.infoPresented = infoPresented
+        self.tagsPresented = tagsPresented
     }
     
     var body: some View {
@@ -32,6 +34,9 @@ struct FileView: View {
         .frame(width: width())
         .popover(isPresented: infoPresented) {
             FileInfoView(file: file)
+        }
+        .popover(isPresented: tagsPresented) {
+            TagsMenuView(file: file)
         }
     }
 }
@@ -86,13 +91,3 @@ private extension FileView {
         }
     }
 }
-
-
-//
-//struct FileView_Previews: PreviewProvider {
-//    static var previews: some View {
-//        FileView(file: PreviewFiles.downloadsFolder)
-//    }
-//}
-
-

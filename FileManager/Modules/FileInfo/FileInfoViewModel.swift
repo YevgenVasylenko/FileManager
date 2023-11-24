@@ -7,7 +7,7 @@
 
 import Foundation
 
-class FileInfoViewModel: ObservableObject {
+final class FileInfoViewModel: ObservableObject {
     
     struct State {
         var file: File

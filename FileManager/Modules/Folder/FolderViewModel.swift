@@ -272,6 +272,8 @@ final class FolderViewModel: ObservableObject {
     }
 }
 
+// MARK: - Private
+
 private extension FolderViewModel {
     
     func moveFilesToChosen(folder: File) {

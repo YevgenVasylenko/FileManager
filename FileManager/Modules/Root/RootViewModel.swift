@@ -33,6 +33,7 @@ final class RootViewModel: ObservableObject {
         reloadLoggedState()
         updateTagsList()
         state.selectedStorage = state.storages.first
+        NotificationCenter.default.addObserver(self, selector: #selector(updateTagsList), name: DatabaseManager.tagsUpdated, object: nil)
     }
     
     func loggingToCloud() {
@@ -69,23 +70,24 @@ final class RootViewModel: ObservableObject {
     }
 
     func deleteTagFromList(tag: Tag) {
-        Database.Tables.Tags.deleteFromDB(tag: tag)
-        updateTagsList()
+        TagManager.shared.deleteTag(tag: tag)
     }
 
     func renameTag(tag: Tag, newName: String) {
-        Database.Tables.Tags.renameTag(tag: tag, newName: newName) { [weak self] result in
+        TagManager.shared.renameTag(tag: tag, newName: newName) { [weak self] result in
+            guard let self else { return }
             switch result {
             case .success:
-                state.tagForRename = nil
-                updateTagsList()
+                self.state.tagForRename = nil
             case .failure(let error):
-                state.tagForRename = nil
-                self?.state.error = error
+                self.state.tagForRename = nil
+                self.state.error = error
             }
         }
     }
 }
+
+// MARK: - Private
 
 private extension RootViewModel {
 
@@ -93,7 +95,8 @@ private extension RootViewModel {
         state.isDropboxLogged = DropboxLoginManager.isLogged
     }
 
+    @objc
     func updateTagsList() {
-        state.tags = Database.Tables.Tags.getTagsFromDB()
+        state.tags = TagManager.shared.tags
     }
 }

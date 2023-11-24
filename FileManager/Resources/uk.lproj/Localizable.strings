@@ -68,6 +68,9 @@
 "currentTrash" = "У смітті";
 "allStorages" = "Повсюду";
 
+"add_new_tag" = "Додати новий тег";
+"name_of_new_tag" = "Ім'я нового тегу";
+
 "places" = "Місця";
 "tags" = "Теги";
 

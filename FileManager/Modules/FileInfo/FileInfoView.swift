@@ -18,7 +18,12 @@ struct FileInfoView: View {
     
     var body: some View {
         VStack {
-            FileView(file: viewModel.state.file, style: .info, infoPresented: .constant(false))
+            FileView(
+                file: viewModel.state.file,
+                style: .info,
+                infoPresented: .constant(false),
+                tagsPresented: .constant(false)
+            )
             Spacer()
             Text(R.string.localizable.info())
             Spacer()
@@ -32,6 +37,8 @@ struct FileInfoView: View {
         .padding()
     }
 }
+
+// MARK: - Private
 
 private extension FileInfoView {
     func typeOfFile() -> some View {
@@ -96,9 +103,3 @@ private extension FileInfoView {
         }
     }
 }
-
-//struct FileInfoView_Previews: PreviewProvider {
-//    static var previews: some View {
-//        FileInfoView(observedPresentation: .constant(true))
-//    }
-//}

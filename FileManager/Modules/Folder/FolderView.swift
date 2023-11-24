@@ -44,6 +44,8 @@ struct FolderView: View {
     }
 }
 
+// MARK: - Private
+
 private extension FolderView {
 
     func folderView() -> some View {
@@ -285,14 +287,3 @@ private extension View {
         })
     }
 }
-
-//struct FolderView_Previews: PreviewProvider {
-//    static var previews: some View {
-//        FolderView(
-//            viewModel: FolderViewModel(
-//                file: PreviewFiles.rootFolder,
-//                state: .init(folder: PreviewFiles.rootFolder,
-//                             files: PreviewFiles.filesInTrash)), fileSelectDelegate: nil)
-//    }
-//}
-

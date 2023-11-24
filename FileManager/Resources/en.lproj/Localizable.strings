@@ -68,6 +68,9 @@
 "currentTrash" = "In trash";
 "allStorages" = "Across all";
 
+"add_new_tag" = "Add new tag";
+"name_of_new_tag" = "Name of new tag";
+
 "places" = "Places";
 "tags" = "Tags";
 

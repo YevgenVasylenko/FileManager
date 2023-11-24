@@ -52,6 +52,7 @@ extension Database.Tables {
                 completion(.success(()))
             } catch {
                 completion(.failure(.tagExist))
+                print(error)
             }
         }
 
@@ -67,7 +68,7 @@ extension Database.Tables {
         static func getTagsFromDB() -> [Tag] {
             var tags: [Tag] = []
             do {
-                let tagsFromDB = try Database.connection.prepare(table)
+                let tagsFromDB = try Database.connection.prepare(table.order(id.desc))
                 for tag in tagsFromDB {
                     let name = tag[tagName]
                     let color = tag[tagColor]
@@ -80,6 +81,8 @@ extension Database.Tables {
         }
     }
 }
+
+// MARK: - Private
 
 private extension Database.Tables.Tags {
    static func writeDefaultTagsInDB() {

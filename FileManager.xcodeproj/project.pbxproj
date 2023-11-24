@@ -77,6 +77,10 @@
 		5DC9F2072B0B4D590078D38D /* Tags.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DC9F2062B0B4D590078D38D /* Tags.swift */; };
 		5DC9F2092B0B501C0078D38D /* UIColor+hex.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DC9F2082B0B501C0078D38D /* UIColor+hex.swift */; };
 		5DC9F20C2B0B9E840078D38D /* Tag.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DC9F20B2B0B9E830078D38D /* Tag.swift */; };
+		5DC9F2132B0E42AB0078D38D /* TagsMenuView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DC9F2122B0E42AB0078D38D /* TagsMenuView.swift */; };
+		5DC9F2162B0E42BF0078D38D /* TagsMenuViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DC9F2152B0E42BF0078D38D /* TagsMenuViewModel.swift */; };
+		5DC9F21D2B0FADCD0078D38D /* DatabaseManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DC9F21C2B0FADCD0078D38D /* DatabaseManager.swift */; };
+		5DC9F2202B10BAF20078D38D /* TagManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DC9F21F2B10BAF20078D38D /* TagManager.swift */; };
 		5DD776162A544B5600F9B55D /* FileManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DD776152A544B5600F9B55D /* FileManager.swift */; };
 		5DEDB9062A5ACAC2003CC86B /* FileAction.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DEDB9052A5ACAC2003CC86B /* FileAction.swift */; };
 		5DEDB90E2A5AEDD2003CC86B /* EnvironmenttUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DEDB90D2A5AEDD2003CC86B /* EnvironmenttUtils.swift */; };
@@ -154,6 +158,10 @@
 		5DC9F2062B0B4D590078D38D /* Tags.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Tags.swift; sourceTree = "<group>"; };
 		5DC9F2082B0B501C0078D38D /* UIColor+hex.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIColor+hex.swift"; sourceTree = "<group>"; };
 		5DC9F20B2B0B9E830078D38D /* Tag.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Tag.swift; sourceTree = "<group>"; };
+		5DC9F2122B0E42AB0078D38D /* TagsMenuView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TagsMenuView.swift; sourceTree = "<group>"; };
+		5DC9F2152B0E42BF0078D38D /* TagsMenuViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TagsMenuViewModel.swift; sourceTree = "<group>"; };
+		5DC9F21C2B0FADCD0078D38D /* DatabaseManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DatabaseManager.swift; sourceTree = "<group>"; };
+		5DC9F21F2B10BAF20078D38D /* TagManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TagManager.swift; sourceTree = "<group>"; };
 		5DD776152A544B5600F9B55D /* FileManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileManager.swift; sourceTree = "<group>"; };
 		5DEDB9052A5ACAC2003CC86B /* FileAction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileAction.swift; sourceTree = "<group>"; };
 		5DEDB90D2A5AEDD2003CC86B /* EnvironmenttUtils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EnvironmenttUtils.swift; sourceTree = "<group>"; };
@@ -188,6 +196,7 @@
 			isa = PBXGroup;
 			children = (
 				5D7B59812AD597D400AFB058 /* Database.swift */,
+				5DC9F21C2B0FADCD0078D38D /* DatabaseManager.swift */,
 				0DA591952AE828690092E07B /* Tables */,
 			);
 			path = Database;
@@ -331,6 +340,7 @@
 				5D954CDC2A5AC7B400A221DB /* Folder */,
 				5D69E0042A93497B0036AE44 /* FileContent */,
 				5D954CDD2A5AC7BC00A221DB /* ContextMenu */,
+				5DC9F2112B0E425C0078D38D /* FileTagsMenu */,
 				5D30A12C2A9CCD2F0052AA95 /* FileInfo */,
 				5D0ACE4B2AA72BFD00B834E8 /* FolderShow */,
 			);
@@ -409,8 +419,18 @@
 			isa = PBXGroup;
 			children = (
 				5DC9F20B2B0B9E830078D38D /* Tag.swift */,
+				5DC9F21F2B10BAF20078D38D /* TagManager.swift */,
 			);
 			path = Tags;
+			sourceTree = "<group>";
+		};
+		5DC9F2112B0E425C0078D38D /* FileTagsMenu */ = {
+			isa = PBXGroup;
+			children = (
+				5DC9F2122B0E42AB0078D38D /* TagsMenuView.swift */,
+				5DC9F2152B0E42BF0078D38D /* TagsMenuViewModel.swift */,
+			);
+			path = FileTagsMenu;
 			sourceTree = "<group>";
 		};
 		5DEDB9032A5AC9D5003CC86B /* Services */ = {
@@ -597,6 +617,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				5D69E0062A9349C20036AE44 /* WebView.swift in Sources */,
+				5DC9F2132B0E42AB0078D38D /* TagsMenuView.swift in Sources */,
 				5DA07C982AFE69A300FF7AFC /* Searchable.swift in Sources */,
 				5D627D942A7F871C00170451 /* FileManagerCommutator.swift in Sources */,
 				5D954CB82A58062300A221DB /* FileOptionsButtonView.swift in Sources */,
@@ -617,6 +638,7 @@
 				5D954CD52A597FF800A221DB /* File+UI.swift in Sources */,
 				5D45509C2AC6C1DF00C29B1C /* ListViewItemWithoutDisclosureIndicator.swift in Sources */,
 				5DC9F2072B0B4D590078D38D /* Tags.swift in Sources */,
+				5DC9F2202B10BAF20078D38D /* TagManager.swift in Sources */,
 				5D0B9CA92A446D080099021C /* LocalFileManager.swift in Sources */,
 				0DA591912AE8274E0092E07B /* File+StorageType.swift in Sources */,
 				5D04653D2A71071900BE768E /* FileActionType.swift in Sources */,
@@ -645,11 +667,13 @@
 				5D30A12E2A9CCD5D0052AA95 /* FileInfoView.swift in Sources */,
 				5D78B1B12A4ECDAA00A76D0F /* Result+Utilities.swift in Sources */,
 				5D0B9CA32A4464530099021C /* FolderView.swift in Sources */,
+				5DC9F2162B0E42BF0078D38D /* TagsMenuViewModel.swift in Sources */,
 				5D1B5B1E2A910598004C7AA8 /* FileDisplayedName.swift in Sources */,
 				5DC9F2092B0B501C0078D38D /* UIColor+hex.swift in Sources */,
 				5D793A5D2AB87B8300A73D5C /* FolderGridListView.swift in Sources */,
 				5D793A5A2AB2162C00A73D5C /* RootViewModel.swift in Sources */,
 				0DA591A12AE82AA00092E07B /* NameConflict.swift in Sources */,
+				5DC9F21D2B0FADCD0078D38D /* DatabaseManager.swift in Sources */,
 				5D05A8612AED497400BBAC09 /* SearchingPlace.swift in Sources */,
 				5DEDB90E2A5AEDD2003CC86B /* EnvironmenttUtils.swift in Sources */,
 			);

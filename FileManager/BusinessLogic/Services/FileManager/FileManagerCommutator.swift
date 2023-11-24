@@ -193,6 +193,8 @@ extension FileManagerCommutator: FileManager {
     }
 }
 
+// MARK: - Private
+
 private extension FileManagerCommutator {
     func makeListOfActiveFileManagers(file: File, searchingPlace: SearchingPlace) -> [FileManager] {
         var storages: [FileManager] = []

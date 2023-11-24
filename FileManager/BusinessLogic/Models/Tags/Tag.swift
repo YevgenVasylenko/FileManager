@@ -19,14 +19,14 @@ extension Tag: Identifiable {
 }
 
 enum TagColor: Int, CaseIterable, Hashable {
-    case red = 0xe81416
-    case orange = 0xffa500
-    case yellow = 0xfaeb36
-    case green = 0x79c314
-    case blue = 0x487de7
-    case indigo = 0x4b369d
-    case violet = 0x70369d
     case grey = 0x808080
+    case violet = 0x70369d
+    case indigo = 0x4b369d
+    case blue = 0x487de7
+    case green = 0x79c314
+    case yellow = 0xfaeb36
+    case orange = 0xffa500
+    case red = 0xe81416
 
     static func allColorsWithNames() -> [Tag] {
         var allColors: [Tag] = []

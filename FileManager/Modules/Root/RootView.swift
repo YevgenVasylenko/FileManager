@@ -178,6 +178,8 @@ private extension RootView {
     }
 }
 
+// MARK: - Private
+
 private extension View {
     func renamePopover(viewModel: RootViewModel, newName: Binding<String>) -> some View {
         alert(

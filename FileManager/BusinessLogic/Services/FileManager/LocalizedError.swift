@@ -7,6 +7,7 @@
 
 import Foundation
 import SwiftyDropbox
+import SQLite
 
 enum Error: LocalizedError {
         case nameExist
@@ -58,3 +59,4 @@ enum Error: LocalizedError {
         }
     }
 }
+
