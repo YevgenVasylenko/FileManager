@@ -24,28 +24,19 @@ final class FolderViewModel: ObservableObject {
         var newNameForRename = ""
     }
     
-    private let file: File
     private var conflictCompletion: ((ConflictNameResult) -> Void)?
     private var fileManagerCommutator = FileManagerCommutator()
-    private lazy var folderMonitor = fileManagerCommutator.makeFolderMonitor(file: file)
+    private lazy var folderMonitor = fileManagerCommutator.makeFolderMonitor(file: state.folder)
     private let debouncer = Debouncer()
     
     @Published
     var state: State
-    
-    init(file: File, state: State) {
-        self.file = file
-        self.state = state
+
+    init(file: File) {
+        self.state = State(folder: file, fileDisplayOptions: FileDisplayOptionsManager.options)
         folderMonitor?.folderDidChange = { [weak self] in
             self?.loadContent()
         }
-    }
-    
-    convenience init(file: File) {
-        self.init(file: file, state: State(
-            folder: file,
-            fileDisplayOptions: FileDisplayOptionsManager.options)
-        )
         state.searchingInfo.searchingRequest.placeForSearch = defaultPlaceForSearch()
     }
     
@@ -80,7 +71,7 @@ final class FolderViewModel: ObservableObject {
     func loadContent() {
         folderMonitor?.startMonitoring()
         state.isLoading = true
-        fileManagerCommutator.contents(of: file) { [weak self] result in
+        fileManagerCommutator.contents(of: state.folder) { [weak self] result in
             guard let self else { return }
             switch result {
             case .success(let files):
@@ -102,7 +93,7 @@ final class FolderViewModel: ObservableObject {
             Database.Tables.SearchHistory.update(newSearchName: self.state.searchingInfo.searchingRequest.searchingName)
             self.fileManagerCommutator.contentBySearchingName(
                 searchingPlace: searchingPlace,
-                file: self.file,
+                file: self.state.folder,
                 name: self.state.searchingInfo.searchingRequest.searchingName
             ) {
                 [weak self] result in
@@ -122,7 +113,7 @@ final class FolderViewModel: ObservableObject {
     
     func startCreatingFolder() {
         fileManagerCommutator.newNameForCreationOfFolder(
-            at: file,
+            at: state.folder,
             newFolderName: R.string.localizable.newFolder()
         ) {
             [weak self] result in
@@ -137,7 +128,7 @@ final class FolderViewModel: ObservableObject {
     
     func createFolder(newName: String) {
         state.folderCreating = nil
-        let createdFile = file.makeSubfile(name: newName, isDirectory: true)
+        let createdFile = state.folder.makeSubfile(name: newName, isDirectory: true)
         state.isLoading = true
         fileManagerCommutator.createFolder(at: createdFile) { [weak self] result in
             guard let self else { return }
