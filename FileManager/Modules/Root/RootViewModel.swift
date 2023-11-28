@@ -18,6 +18,7 @@ final class RootViewModel: ObservableObject {
         var tagForRename: Tag?
         var newNameForTag: String = ""
         var error: Error?
+        var filesWithTag: [File] = []
     }
     
     @Published
@@ -71,6 +72,7 @@ final class RootViewModel: ObservableObject {
 
     func deleteTagFromList(tag: Tag) {
         TagManager.shared.deleteTag(tag: tag)
+        deleteTagFromFilesWithSuch(tag: tag)
     }
 
     func renameTag(tag: Tag, newName: String) {
@@ -84,6 +86,7 @@ final class RootViewModel: ObservableObject {
                 self.state.error = error
             }
         }
+        renameTagInFiles(tag: tag, name: newName)
     }
 }
 
@@ -98,5 +101,63 @@ private extension RootViewModel {
     @objc
     func updateTagsList() {
         state.tags = TagManager.shared.tags
+    }
+
+    func filesWithTag(tag: Tag, completion: @escaping (Result<[File], Error>) -> Void) {
+        LocalFileManager().allFilesInLocal {  result in
+            switch result {
+            case .success(let files):
+                let filteredFiles = files.filter { file in
+                    do {
+                        for tagName in try file.path.listExtendedAttributes() {
+                            return tag.name == tagName
+                        }
+                        return false
+                    } catch {
+                        return false
+                    }
+                }
+                completion(.success(filteredFiles))
+            case .failure(let failure):
+                completion(.failure(failure))
+            }
+        }
+    }
+
+    func deleteTagFromFilesWithSuch(tag: Tag) {
+        filesWithTag(tag: tag) { [weak self] result in
+            guard let self else { return }
+            switch result {
+            case .success(let files):
+                for file in files {
+                    do {
+                        try file.path.removeExtendedAttribute(forName: tag.name)
+                    } catch {
+                        print(error)
+                    }
+                }
+            case .failure(let failure):
+                self.state.error = failure
+            }
+        }
+    }
+
+    func renameTagInFiles(tag: Tag, name: String) {
+        filesWithTag(tag: tag) { [weak self] result in
+            guard let self else { return }
+            switch result {
+            case .success(let files):
+                for file in files {
+                    do {
+                        try file.path.removeExtendedAttribute(forName: tag.name)
+                        try file.path.setExtendedAttribute(data: Data(), forName: name)
+                    } catch {
+                        print(error)
+                    }
+                }
+            case .failure(let failure):
+                self.state.error = failure
+            }
+        }
     }
 }

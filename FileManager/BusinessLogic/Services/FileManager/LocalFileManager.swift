@@ -95,6 +95,38 @@ extension LocalFileManager: FileManager {
             completion(.failure(Error(error: error)))
         }
     }
+
+    func allFilesInLocal(completion: @escaping (Result<[File], Error>) -> Void) {
+        do {
+            var files: [File] = []
+            guard let enumerator = SystemFileManger.default.enumerator(at: rootFolder.path, includingPropertiesForKeys: [.isRegularFileKey, .isDirectoryKey], options: [.skipsHiddenFiles, .skipsPackageDescendants])
+            else {
+                completion(.failure(.unknown))
+                return
+            }
+            for case let fileURL as URL in enumerator {
+                do {
+                    let fileAttributes = try fileURL.resourceValues(forKeys:[.isRegularFileKey, .isDirectoryKey])
+                    guard
+                        let isRegularFile = fileAttributes.isRegularFile,
+                        let isDirectory = fileAttributes.isDirectory
+                    else {
+                        completion(.failure(.unknown))
+                        return
+                    }
+                    if isRegularFile || isDirectory {
+                        var newFile = File(path: fileURL, storageType: .local)
+                        updateFileActionsAndDeleteStatus(file: &newFile)
+                        updateFolderAffiliation(file: &newFile)
+                        files.append(newFile)
+                    }
+                }
+            }
+            completion(.success(files))
+        } catch {
+            completion(.failure(Error(error: error)))
+        }
+    }
     
     func createFolder(at file: File, completion: (Result<Void, Error>) -> Void) {
         do {

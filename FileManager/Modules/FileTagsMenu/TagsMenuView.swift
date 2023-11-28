@@ -60,7 +60,7 @@ private extension TagsMenuView {
         }
         .frame(minWidth: 250, minHeight: 300)
         .onDisappear() {
-            print("dismissed")
+            viewModel.updateActiveTagsOnFile()
         }
     }
 

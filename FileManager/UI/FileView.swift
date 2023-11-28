@@ -30,6 +30,7 @@ struct FileView: View {
         container {
             imageOfFile(imageName: file.imageName)
             nameOfFile(fileName: file.displayedName())
+            setOfTagsImage()
         }
         .frame(width: width())
         .popover(isPresented: infoPresented) {
@@ -52,16 +53,35 @@ private extension FileView {
     }
     
     func nameOfFile(fileName: String) -> some View {
-        return Text(fileName)
+            return Text(fileName)
             .font(.headline)
             .lineLimit(lineLimit())
+    }
+
+    func imageOfTags(tag: Tag) -> some View {
+        ZStack {
+            Image(systemName: "circle.fill")
+                .foregroundColor(Color(uiColor: UIColor(rgb: tag.color?.rawValue ?? 0x000000)))
+            Image(systemName: "circle")
+                .foregroundColor(.white)
+        }
+    }
+
+    @ViewBuilder
+    func setOfTagsImage() -> some View {
+        ZStack {
+            ForEach(Array(file.getTags().enumerated()), id: \.element) { index, tag in
+                imageOfTags(tag: tag)
+                    .offset(x: offsetCalculations(numberOfCircle: index, amountOfCircles: file.getTags().count))
+            }
+        }
     }
 
     @ViewBuilder
     func container(@ViewBuilder content: () -> some View) -> some View {
         switch style {
         case .grid:
-            VStack(content: content)
+            VStack(alignment: .center, content: content)
         case .list:
             HStack(content: content)
         case .info:
@@ -89,5 +109,9 @@ private extension FileView {
         case .info:
             return nil
         }
+    }
+
+    func offsetCalculations(numberOfCircle: Int, amountOfCircles: Int) -> CGFloat {
+       return CGFloat((Float(numberOfCircle) - (Float(amountOfCircles) - 1)/2) * 5)
     }
 }
