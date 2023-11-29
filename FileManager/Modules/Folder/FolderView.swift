@@ -15,10 +15,10 @@ struct FolderView: View {
     private var viewModel: FolderViewModel
 
     init(
-        file: File,
+        content: Content,
         fileSelectDelegate: FileSelectDelegate?
     ) {
-        self._viewModel = StateObject(wrappedValue: FolderViewModel(file: file))
+        self._viewModel = StateObject(wrappedValue: FolderViewModel(content: content))
         self.fileSelectDelegate = fileSelectDelegate
     }
     
@@ -114,11 +114,11 @@ private extension FolderView {
         .navigationViewStyle(.stack)
         .buttonStyle(.plain)
         .padding()
-        .navigationTitle(viewModel.state.folder.displayedName())
+        .navigationTitle(displayedNameForNavigationTitle())
         .toolbar {
             navigationBar(
                 chooseAction: {
-                    fileSelectDelegate?.selected(viewModel.state.folder)
+                    fileSelectDelegate?.selected(fileForFileSelectDelegate())
                 })
         }
     }
@@ -129,7 +129,7 @@ private extension FolderView {
             VStack {
                 Spacer()
                 HStack {
-                    if !viewModel.state.folder.hasParent(file: LocalFileManager().trashFolder) {
+                    if isFolderInTrashFolder() {
                         Spacer()
                         Button(R.string.localizable.copy_to()) {
                             viewModel.copyChosen()
@@ -146,7 +146,7 @@ private extension FolderView {
                         }
                         .buttonStyle(.automatic)
                         Spacer()
-                    } else if viewModel.state.folder.storageType.isLocal {
+                    } else if isFolderInLocal() {
                         Spacer()
                         Button(R.string.localizable.delete()) {
                             viewModel.startDeleting()
@@ -195,7 +195,7 @@ private extension FolderView {
                 Spacer()
                 ForEach(viewModel.suggestedPlacesForSearch(), id: \.self) { place in
                     Toggle(
-                        place.namesForPlaces(file: viewModel.state.folder),
+                        nameForSearchingPlaceInToggle(place: place),
                         isOn: choosePlaceBinding(choicePlace: place)
                     )
                     .toggleStyle(.button)
@@ -254,6 +254,51 @@ private extension FolderView {
     func searchSuggestingNames() -> some View {
         ForEach(viewModel.state.searchingInfo.suggestedSearchingNames, id: \.self) { name in
             Label(name, systemImage: "clock.arrow.circlepath").searchCompletion(name)
+        }
+    }
+
+    func displayedNameForNavigationTitle() -> String {
+        switch viewModel.state.content {
+        case .folder(let file):
+           return file.displayedName()
+        case .tag(let tag):
+            return tag.name
+        }
+    }
+
+    func fileForFileSelectDelegate() -> File? {
+        switch viewModel.state.content {
+        case .folder(let file):
+            return file
+        case .tag:
+            return nil
+        }
+    }
+
+    func isFolderInTrashFolder() -> Bool {
+        switch viewModel.state.content {
+        case .folder(let file):
+            return file.hasParent(file: LocalFileManager().trashFolder) == false
+        case .tag:
+            return false
+        }
+    }
+
+    func isFolderInLocal() -> Bool {
+        switch viewModel.state.content {
+        case .folder(let file):
+            return file.storageType.isLocal
+        case .tag:
+            return false
+        }
+    }
+
+    func nameForSearchingPlaceInToggle(place: SearchingPlace) -> String {
+        switch viewModel.state.content {
+        case .folder(let file):
+            return place.namesForPlaces(file: file)
+        case .tag(let tag):
+            return tag.name
         }
     }
 }

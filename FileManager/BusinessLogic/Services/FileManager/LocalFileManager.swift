@@ -96,35 +96,26 @@ extension LocalFileManager: FileManager {
         }
     }
 
-    func allFilesInLocal(completion: @escaping (Result<[File], Error>) -> Void) {
-        do {
-            var files: [File] = []
-            guard let enumerator = SystemFileManger.default.enumerator(at: rootFolder.path, includingPropertiesForKeys: [.isRegularFileKey, .isDirectoryKey], options: [.skipsHiddenFiles, .skipsPackageDescendants])
-            else {
-                completion(.failure(.unknown))
-                return
-            }
-            for case let fileURL as URL in enumerator {
-                do {
-                    let fileAttributes = try fileURL.resourceValues(forKeys:[.isRegularFileKey, .isDirectoryKey])
-                    guard
-                        let isRegularFile = fileAttributes.isRegularFile,
-                        let isDirectory = fileAttributes.isDirectory
-                    else {
-                        completion(.failure(.unknown))
-                        return
-                    }
-                    if isRegularFile || isDirectory {
-                        var newFile = File(path: fileURL, storageType: .local)
-                        updateFileActionsAndDeleteStatus(file: &newFile)
-                        updateFolderAffiliation(file: &newFile)
-                        files.append(newFile)
+    func filesWithTag(tag: Tag, completion: @escaping (Result<[File], Error>) -> Void) {
+        allFilesInLocal() { result in
+            switch result {
+            case .success(let files):
+                let filteredFiles = files.filter { file in
+                    do {
+                        for tagName in try file.path.listExtendedAttributes() {
+                            if tag.name == tagName {
+                                return true
+                            }
+                        }
+                        return false
+                    } catch {
+                        return false
                     }
                 }
+                completion(.success(filteredFiles))
+            case .failure(let failure):
+                completion(.failure(failure))
             }
-            completion(.success(files))
-        } catch {
-            completion(.failure(Error(error: error)))
         }
     }
     
@@ -609,6 +600,38 @@ private extension LocalFileManager {
     
     func enumeratorForSearching(file: File) -> SystemFileManger.DirectoryEnumerator? {
         return SystemFileManger.default.enumerator(at: file.path, includingPropertiesForKeys: [.isRegularFileKey, .isDirectoryKey], options: [.skipsHiddenFiles, .skipsPackageDescendants])
+    }
+
+    func allFilesInLocal(completion: @escaping (Result<[File], Error>) -> Void) {
+        do {
+            var files: [File] = []
+            guard let enumerator = SystemFileManger.default.enumerator(at: rootFolder.path, includingPropertiesForKeys: [.isRegularFileKey, .isDirectoryKey], options: [.skipsHiddenFiles, .skipsPackageDescendants])
+            else {
+                completion(.failure(.unknown))
+                return
+            }
+            for case let fileURL as URL in enumerator {
+                do {
+                    let fileAttributes = try fileURL.resourceValues(forKeys:[.isRegularFileKey, .isDirectoryKey])
+                    guard
+                        let isRegularFile = fileAttributes.isRegularFile,
+                        let isDirectory = fileAttributes.isDirectory
+                    else {
+                        completion(.failure(.unknown))
+                        return
+                    }
+                    if isRegularFile || isDirectory {
+                        var newFile = File(path: fileURL, storageType: .local)
+                        updateFileActionsAndDeleteStatus(file: &newFile)
+                        updateFolderAffiliation(file: &newFile)
+                        files.append(newFile)
+                    }
+                }
+            }
+            completion(.success(files))
+        } catch {
+            completion(.failure(Error(error: error)))
+        }
     }
 }
 

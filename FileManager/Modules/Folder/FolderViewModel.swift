@@ -10,7 +10,7 @@ import Foundation
 final class FolderViewModel: ObservableObject {
     
     struct State {
-        var folder: File
+        var content: Content
         var files: [File] = []
         var isLoading = true
         var error: Error?
@@ -26,14 +26,14 @@ final class FolderViewModel: ObservableObject {
     
     private var conflictCompletion: ((ConflictNameResult) -> Void)?
     private var fileManagerCommutator = FileManagerCommutator()
-    private lazy var folderMonitor = fileManagerCommutator.makeFolderMonitor(file: state.folder)
+    private lazy var folderMonitor = makeFolderMonitor()
     private let debouncer = Debouncer()
     
     @Published
     var state: State
 
-    init(file: File) {
-        self.state = State(folder: file, fileDisplayOptions: FileDisplayOptionsManager.options)
+    init(content: Content) {
+        self.state = State(content: content, fileDisplayOptions: FileDisplayOptionsManager.options)
         folderMonitor?.folderDidChange = { [weak self] in
             self?.loadContent()
         }
@@ -69,76 +69,83 @@ final class FolderViewModel: ObservableObject {
     }
     
     func loadContent() {
-        folderMonitor?.startMonitoring()
-        state.isLoading = true
-        fileManagerCommutator.contents(of: state.folder) { [weak self] result in
-            guard let self else { return }
-            switch result {
-            case .success(let files):
-                self.state.files = files
-            case .failure(let failure):
-                self.state.error = failure
-            }
-            self.sort()
-            self.state.isLoading = false
+        switch state.content {
+        case .folder(let file):
+            loadContentOfFolder(folder: file)
+        case .tag(let tag):
+            loadTagedFiles(tag: tag)
         }
         makeAtributesForFiles()
     }
     
     func loadContentSearchedByName() {
-        state.isLoading = true
-        guard let searchingPlace = state.searchingInfo.searchingRequest.placeForSearch else { return }
-        debouncer.perform(timeInterval: 1.5) { [weak self] in
-            guard let self else { return }
-            Database.Tables.SearchHistory.update(newSearchName: self.state.searchingInfo.searchingRequest.searchingName)
-            self.fileManagerCommutator.contentBySearchingName(
-                searchingPlace: searchingPlace,
-                file: self.state.folder,
-                name: self.state.searchingInfo.searchingRequest.searchingName
-            ) {
-                [weak self] result in
+        switch state.content {
+        case .folder(let file):
+            state.isLoading = true
+            guard let searchingPlace = state.searchingInfo.searchingRequest.placeForSearch else { return }
+            debouncer.perform(timeInterval: 1.5) { [weak self] in
                 guard let self else { return }
-                switch result {
-                case .success(let files):
-                    self.state.files = files
-                case .failure(let failure):
-                    self.state.error = failure
+                Database.Tables.SearchHistory.update(newSearchName: self.state.searchingInfo.searchingRequest.searchingName)
+                self.fileManagerCommutator.contentBySearchingName(
+                    searchingPlace: searchingPlace,
+                    file: file,
+                    name: self.state.searchingInfo.searchingRequest.searchingName
+                ) {
+                    [weak self] result in
+                    guard let self else { return }
+                    switch result {
+                    case .success(let files):
+                        self.state.files = files
+                    case .failure(let failure):
+                        self.state.error = failure
+                    }
+                    self.sort()
+                    self.state.isLoading = false
                 }
-                self.sort()
-                self.state.isLoading = false
             }
+        case .tag:
+            break
         }
-        
     }
     
     func startCreatingFolder() {
-        fileManagerCommutator.newNameForCreationOfFolder(
-            at: state.folder,
-            newFolderName: R.string.localizable.newFolder()
-        ) {
-            [weak self] result in
-            switch result {
-            case .success(let file):
-                self?.state.folderCreating = file.name
-            case .failure:
-                break
+        switch state.content {
+        case .folder(let file):
+            fileManagerCommutator.newNameForCreationOfFolder(
+                at: file,
+                newFolderName: R.string.localizable.newFolder()
+            ) {
+                [weak self] result in
+                switch result {
+                case .success(let file):
+                    self?.state.folderCreating = file.name
+                case .failure:
+                    break
+                }
             }
+        case .tag:
+            break
         }
     }
     
     func createFolder(newName: String) {
-        state.folderCreating = nil
-        let createdFile = state.folder.makeSubfile(name: newName, isDirectory: true)
-        state.isLoading = true
-        fileManagerCommutator.createFolder(at: createdFile) { [weak self] result in
-            guard let self else { return }
-            switch result {
-            case .success:
-                break
-            case .failure(let failure):
-                self.state.error = failure
+        switch state.content {
+        case .folder(let file):
+            state.folderCreating = nil
+            let createdFile = file.makeSubfile(name: newName, isDirectory: true)
+            state.isLoading = true
+            fileManagerCommutator.createFolder(at: createdFile) { [weak self] result in
+                guard let self else { return }
+                switch result {
+                case .success:
+                    break
+                case .failure(let failure):
+                    self.state.error = failure
+                }
+                self.state.isLoading = false
             }
-            self.state.isLoading = false
+        case .tag:
+            break
         }
     }
     
@@ -228,33 +235,48 @@ final class FolderViewModel: ObservableObject {
     }
     
     func isFolderOkForFolderCreationButton() -> Bool {
-        state.folder.hasParent(file: LocalFileManager().trashFolder) == false &&
-                state.folder.folderAffiliation != .system(.trash)
-    }
-    
-    func suggestedPlacesForSearch() -> [SearchingPlace] {
-        switch state.folder.folderAffiliation {
-        case .user:
-            return SearchingPlace.allCases
-        case .system(.root):
-            return SearchingPlace.whenInRootOrTrashFolder
-        case .system(.trash):
-            return SearchingPlace.whenInRootOrTrashFolder
-        default:
-            return SearchingPlace.allCases
+        switch state.content {
+        case .folder(let file):
+           return file.hasParent(file: LocalFileManager().trashFolder) == false &&
+            file.folderAffiliation != .system(.trash)
+        case .tag:
+            return false
         }
     }
-    
+    // TO DO remake
+    func suggestedPlacesForSearch() -> [SearchingPlace] {
+        switch state.content {
+        case .folder(let file):
+            switch file.folderAffiliation {
+            case .user:
+                return SearchingPlace.allCases
+            case .system(.root):
+                return SearchingPlace.whenInRootOrTrashFolder
+            case .system(.trash):
+                return SearchingPlace.whenInRootOrTrashFolder
+            default:
+                return SearchingPlace.allCases
+            }
+        case .tag:
+           return []
+        }
+    }
+    // TO DO remake
     func defaultPlaceForSearch() -> SearchingPlace {
-        switch state.folder.folderAffiliation {
-        case .user:
-            return .currentFolder
-        case .system(.root):
-            return .currentStorage
-        case .system(.trash):
-            return .currentTrash
-        default:
-            return .currentFolder
+        switch state.content {
+        case .folder(let file):
+            switch file.folderAffiliation {
+            case .user:
+                return .currentFolder
+            case .system(.root):
+                return .currentStorage
+            case .system(.trash):
+                return .currentTrash
+            default:
+                return .currentFolder
+            }
+        case .tag:
+            return .allStorages
         }
     }
 
@@ -331,6 +353,46 @@ private extension FolderViewModel {
                 let result = field(file1) < field(file2)
                 return result == ascending
             }
+        }
+    }
+
+    func makeFolderMonitor() -> FolderMonitor? {
+        switch state.content {
+        case .folder(let file):
+            return fileManagerCommutator.makeFolderMonitor(file: file)
+        case .tag:
+            return nil
+        }
+    }
+
+    func loadContentOfFolder(folder: File) {
+        folderMonitor?.startMonitoring()
+        state.isLoading = true
+        fileManagerCommutator.contents(of: folder) { [weak self] result in
+            guard let self else { return }
+            switch result {
+            case .success(let files):
+                self.state.files = files
+            case .failure(let failure):
+                self.state.error = failure
+            }
+            self.sort()
+            self.state.isLoading = false
+        }
+    }
+
+    func loadTagedFiles(tag: Tag) {
+        state.isLoading = true
+        LocalFileManager().filesWithTag(tag: tag) { [weak self] result in
+            guard let self else { return }
+            switch result {
+            case .success(let files):
+                self.state.files = files
+            case .failure(let failure):
+                self.state.error = failure
+            }
+            self.sort()
+            self.state.isLoading = false
         }
     }
 }

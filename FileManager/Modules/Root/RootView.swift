@@ -47,30 +47,28 @@ struct RootView: View {
 
 private extension RootView {
     
-    func folderView(file: File) -> some View {
+    func folderView(content: Content) -> some View {
         FolderView(
-            file: file,
+            content: content,
             fileSelectDelegate: fileSelectDelegate
         )
-        .id(file)
+        .id(content)
     }
     
     @ViewBuilder
     func rootDetailView() -> some View {
-        if let selectedStorage = viewModel.state.selectedStorage {
-            folderView(file: selectedStorage)
+        if let selectedContent = viewModel.state.selectedContent {
+            folderView(content: selectedContent)
                 .navigationDestination(for: File.self) { file in
                     if file.isFolder() {
-                        folderView(file: file)
+                        folderView(content: .folder(file))
                     } else {
                         FileContentView(file: file)
                     }
                 }
         }
     }
-}
 
-private extension RootView {
     func storageListItem(file: File) -> some View {
         Label(title: {
             Spacer()
@@ -128,8 +126,12 @@ private extension RootView {
     @ViewBuilder
     func sidebarStorageSection() -> some View {
         Section {
-            List(viewModel.state.storages, id: \.self, selection: $viewModel.state.selectedStorage) { file in
-                storageListItem(file: file)
+            List(
+                viewModel.state.contentStorages,
+                id: \.self,
+                selection: $viewModel.state.selectedContent
+            ) { content in
+                listItem(content: content)
             }
         } header: {
             Text(R.string.localizable.places())
@@ -140,8 +142,12 @@ private extension RootView {
     @ViewBuilder
     func sidebarTagsSection() -> some View {
         Section {
-            List(viewModel.state.tags, id: \.self, selection: $viewModel.state.selectedTag) { tag in
-                tagsListItem(tag: tag)
+            List(
+                viewModel.state.contentTags,
+                id: \.self,
+                selection: $viewModel.state.selectedContent
+            ) { content in
+                listItem(content: content)
             }
         } header: {
             Text(R.string.localizable.tags())
@@ -174,6 +180,16 @@ private extension RootView {
             viewModel.state.tagForRename = tag
         } label: {
             Label("\(R.string.localizable.rename()) «\(tag.name)»", systemImage: "pencil")
+        }
+    }
+
+    @ViewBuilder
+    func listItem(content: Content) -> some View {
+        switch content {
+        case .folder(let file):
+            storageListItem(file: file)
+        case .tag(let tag):
+            tagsListItem(tag: tag)
         }
     }
 }
