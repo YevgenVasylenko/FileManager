@@ -78,7 +78,6 @@ private extension FolderView {
     @ViewBuilder
     func completeFolderView() -> some View {
         suggestedPlaceForSearchMenuBar()
-        EmptyView()
         ZStack {
             if viewModel.state.isLoading {
                 ProgressView()
@@ -86,7 +85,7 @@ private extension FolderView {
             else {
                 folderView()
             }
-            if  viewModel.isFolderOkForFolderCreationButton() {
+            if viewModel.isFolderOkForFolderCreationButton() {
                 createFolderButton()
             }
             actionMenuBarForChosenFiles()
@@ -190,12 +189,12 @@ private extension FolderView {
 
     @ViewBuilder
     func suggestedPlaceForSearchMenuBar() -> some View {
-        if !viewModel.state.searchingInfo.searchingRequest.searchingName.isEmpty {
-            HStack {
+        if viewModel.state.searchingInfo.searchingRequest.searchingName.isEmpty == false {
+            HStack(alignment: .top) {
                 Spacer()
                 ForEach(viewModel.suggestedPlacesForSearch(), id: \.self) { place in
                     Toggle(
-                        nameForSearchingPlaceInToggle(place: place),
+                        place.namesForPlaces(content: viewModel.state.content),
                         isOn: choosePlaceBinding(choicePlace: place)
                     )
                     .toggleStyle(.button)
@@ -290,15 +289,6 @@ private extension FolderView {
             return file.storageType.isLocal
         case .tag:
             return false
-        }
-    }
-
-    func nameForSearchingPlaceInToggle(place: SearchingPlace) -> String {
-        switch viewModel.state.content {
-        case .folder(let file):
-            return place.namesForPlaces(file: file)
-        case .tag(let tag):
-            return tag.name
         }
     }
 }

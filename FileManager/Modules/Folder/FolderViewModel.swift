@@ -79,13 +79,13 @@ final class FolderViewModel: ObservableObject {
     }
     
     func loadContentSearchedByName() {
-        switch state.content {
-        case .folder(let file):
-            state.isLoading = true
-            guard let searchingPlace = state.searchingInfo.searchingRequest.placeForSearch else { return }
-            debouncer.perform(timeInterval: 1.5) { [weak self] in
-                guard let self else { return }
-                Database.Tables.SearchHistory.update(newSearchName: self.state.searchingInfo.searchingRequest.searchingName)
+        state.isLoading = true
+        guard let searchingPlace = state.searchingInfo.searchingRequest.placeForSearch else { return }
+        debouncer.perform(timeInterval: 1.5) { [weak self] in
+            guard let self else { return }
+            Database.Tables.SearchHistory.update(newSearchName: self.state.searchingInfo.searchingRequest.searchingName)
+            switch self.state.content {
+            case .folder(let file):
                 self.fileManagerCommutator.contentBySearchingName(
                     searchingPlace: searchingPlace,
                     file: file,
@@ -99,12 +99,23 @@ final class FolderViewModel: ObservableObject {
                     case .failure(let failure):
                         self.state.error = failure
                     }
-                    self.sort()
-                    self.state.isLoading = false
                 }
+            case .tag(let tag):
+                LocalFileManager().contentBySearchingNameInTag(
+                    tag: tag,
+                    name: self.state.searchingInfo.searchingRequest.searchingName) {
+                        [weak self] result in
+                        guard let self else { return }
+                        switch result {
+                        case .success(let files):
+                            self.state.files = files
+                        case .failure(let failure):
+                            self.state.error = failure
+                        }
+                    }
             }
-        case .tag:
-            break
+            self.sort()
+            self.state.isLoading = false
         }
     }
     
@@ -148,7 +159,7 @@ final class FolderViewModel: ObservableObject {
             break
         }
     }
-    
+
     func copyChosen() {
         self.state.fileActionType = .copy
     }
@@ -243,7 +254,7 @@ final class FolderViewModel: ObservableObject {
             return false
         }
     }
-    // TO DO remake
+    
     func suggestedPlacesForSearch() -> [SearchingPlace] {
         switch state.content {
         case .folder(let file):
@@ -258,10 +269,10 @@ final class FolderViewModel: ObservableObject {
                 return SearchingPlace.allCases
             }
         case .tag:
-           return []
+            return []
         }
     }
-    // TO DO remake
+
     func defaultPlaceForSearch() -> SearchingPlace {
         switch state.content {
         case .folder(let file):
@@ -276,7 +287,7 @@ final class FolderViewModel: ObservableObject {
                 return .currentFolder
             }
         case .tag:
-            return .allStorages
+            return .currentStorage
         }
     }
 

@@ -96,6 +96,24 @@ extension LocalFileManager: FileManager {
         }
     }
 
+    func contentBySearchingNameInTag(
+        tag: Tag,
+        name: String,
+        completion: @escaping (Result<[File], Error>) -> Void
+    ) {
+        filesWithTag(tag: tag) { result in
+            switch result {
+            case .success(let files):
+                let foundedFiles = files.filter { file in
+                    file.displayedName().lowercased().contains(name.lowercased())
+                }
+                completion(.success(foundedFiles))
+            case .failure(let failure):
+                completion(.failure(failure))
+            }
+        }
+    }
+
     func filesWithTag(tag: Tag, completion: @escaping (Result<[File], Error>) -> Void) {
         allFilesInLocal() { result in
             switch result {
@@ -588,7 +606,7 @@ private extension LocalFileManager {
         
         switch searchingPlace {
         case .currentStorage:
-           return  enumeratorForSearching(file: rootFolder)
+            return enumeratorForSearching(file: rootFolder)
         case .currentFolder:
             return enumeratorForSearching(file: file)
         case .currentTrash:
