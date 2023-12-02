@@ -28,12 +28,10 @@ enum TagColor: Int, CaseIterable, Hashable {
     case orange = 0xffa500
     case red = 0xe81416
 
-    static func allColorsWithNames() -> [Tag] {
-        var allColors: [Tag] = []
-        for color in Self.allCases {
-            allColors.append(Tag(name: color.name(), color: color))
+    static func allTags() -> [Tag] {
+        return Self.allCases.map {
+            Tag(name: $0.name(), color: $0)
         }
-        return allColors
     }
 
     func name() -> String {

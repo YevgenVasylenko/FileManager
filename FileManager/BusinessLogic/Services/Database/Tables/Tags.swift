@@ -44,7 +44,7 @@ extension Database.Tables {
 
             }
         }
-
+// TO DO remake to return Error and firstly make additional query to check is tag exist
         static func renameTag(tag: Tag, newName: String, completion: (Swift.Result<Void, Error>) -> Void) {
             do {
                 let renameTagQuery = table.filter(tagName == tag.name)
@@ -86,7 +86,7 @@ extension Database.Tables {
 
 private extension Database.Tables.Tags {
    static func writeDefaultTagsInDB() {
-        for tag in TagColor.allColorsWithNames() {
+        for tag in TagColor.allTags() {
             Self.insertRowToDB(tag: tag)
         }
     }

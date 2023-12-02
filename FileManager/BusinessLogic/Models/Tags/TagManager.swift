@@ -10,6 +10,8 @@ import Foundation
 final class TagManager {
 
     static let shared = TagManager()
+    static let tagsUpdated = Notification.Name("TagsUpdated")
+
     private var _tags: [Tag]?
     var tags: [Tag] {
         get {
@@ -43,6 +45,6 @@ final class TagManager {
 
     private func notifiedDbUpdated() {
         _tags = nil
-        NotificationCenter.default.post(name: DatabaseManager.tagsUpdated, object: nil)
+        NotificationCenter.default.post(name: TagManager.tagsUpdated, object: nil)
     }
 }

@@ -36,7 +36,7 @@ final class RootViewModel: ObservableObject {
         reloadLoggedState()
         updateTagsList()
         state.selectedContent = state.contentStorages.first
-        NotificationCenter.default.addObserver(self, selector: #selector(updateTagsList), name: DatabaseManager.tagsUpdated, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(updateTagsList), name: TagManager.tagsUpdated, object: nil)
     }
     
     func loggingToCloud() {
@@ -126,11 +126,7 @@ private extension RootViewModel {
             switch result {
             case .success(let files):
                 for file in files {
-                    do {
-                        try file.path.removeExtendedAttribute(forName: tag.name)
-                    } catch {
-                        print(error)
-                    }
+                    file.path.removeExtendedAttributeFromFile(forName: tag.name)
                 }
             case .failure(let failure):
                 self.state.error = failure
@@ -144,12 +140,8 @@ private extension RootViewModel {
             switch result {
             case .success(let files):
                 for file in files {
-                    do {
-                        try file.path.removeExtendedAttribute(forName: tag.name)
-                        try file.path.setExtendedAttribute(data: Data(), forName: name)
-                    } catch {
-                        print(error)
-                    }
+                    file.path.removeExtendedAttributeFromFile(forName: tag.name)
+                    file.path.setExtendedAttributeToFile(data: Data(), forName: name)
                 }
             case .failure(let failure):
                 self.state.error = failure

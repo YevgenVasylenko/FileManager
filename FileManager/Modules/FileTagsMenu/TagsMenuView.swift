@@ -100,7 +100,7 @@ private extension TagsMenuView {
             TextField(R.string.localizable.name_of_new_tag(), text: $viewModel.state.newTagName)
                 .autocorrectionDisabled(true)
             HStack {
-                ForEach(TagColor.allColorsWithNames()) { tag in
+                ForEach(TagColor.allTags()) { tag in
                     Button {
                         viewModel.state.selectedColorForNewTag = tag
                     } label: {

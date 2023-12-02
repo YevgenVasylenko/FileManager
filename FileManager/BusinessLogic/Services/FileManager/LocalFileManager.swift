@@ -119,16 +119,12 @@ extension LocalFileManager: FileManager {
             switch result {
             case .success(let files):
                 let filteredFiles = files.filter { file in
-                    do {
-                        for tagName in try file.path.listExtendedAttributes() {
-                            if tag.name == tagName {
-                                return true
-                            }
+                    for tagName in file.path.listExtendedAttributesForFile() {
+                        if tag.name == tagName {
+                            return true
                         }
-                        return false
-                    } catch {
-                        return false
                     }
+                    return false
                 }
                 completion(.success(filteredFiles))
             case .failure(let failure):

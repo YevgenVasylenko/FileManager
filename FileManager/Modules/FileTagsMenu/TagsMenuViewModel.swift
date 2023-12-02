@@ -50,7 +50,7 @@ private extension TagsMenuViewModel {
 
     func initialSetups() {
         getTagsList()
-        NotificationCenter.default.addObserver(self, selector: #selector(getTagsList), name: DatabaseManager.tagsUpdated, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(getTagsList), name: TagManager.tagsUpdated, object: nil)
         setSelectedTags()
     }
 
@@ -67,22 +67,12 @@ private extension TagsMenuViewModel {
 
     func addTagsToFile() {
         for tag in state.selectedTags {
-            do {
-                try state.file.path.setExtendedAttribute(data: Data(), forName: tag.name)
-            } catch {
-                print(error)
-            }
+            state.file.path.setExtendedAttributeToFile(data: Data(), forName: tag.name)
         }
     }
 
     func getActiveTagNamesOnFile() -> [String] {
-        do {
-            let tagsNames = try state.file.path.listExtendedAttributes()
-            return tagsNames
-        } catch {
-            print(error)
-            return []
-        }
+        return state.file.path.listExtendedAttributesForFile()
     }
 
     func fillActiveTags() {
@@ -102,11 +92,7 @@ private extension TagsMenuViewModel {
     func removeDeselectedTagsFromFile() {
         let deselectedTags = activeTagsOnFile.subtracting(state.selectedTags)
         for tag in deselectedTags {
-            do {
-                try state.file.path.removeExtendedAttribute(forName: tag.name)
-            } catch {
-                print(error)
-            }
+            state.file.path.removeExtendedAttributeFromFile(forName: tag.name)
         }
     }
 }

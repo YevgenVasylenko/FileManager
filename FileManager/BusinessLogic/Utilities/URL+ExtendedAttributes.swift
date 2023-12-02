@@ -8,9 +8,42 @@
 import Foundation
 
 extension URL {
+    func extendedAttributeOfFile(forName name: String) -> Data {
+        do {
+            return try extendedAttribute(forName: name)
+        } catch {
+            return Data()
+        }
+    }
 
+    func setExtendedAttributeToFile(data: Data, forName name: String) {
+        do {
+            try setExtendedAttribute(data: data, forName: name)
+        } catch {
+
+        }
+    }
+
+    func removeExtendedAttributeFromFile(forName name: String) {
+        do {
+            try removeExtendedAttribute(forName: name)
+        } catch {
+
+        }
+    }
+
+    func listExtendedAttributesForFile() -> [String] {
+        do {
+            return try listExtendedAttributes()
+        } catch {
+            return []
+        }
+    }
+}
+
+private extension URL {
     /// Get extended attribute.
-    func extendedAttribute(forName name: String) throws -> Data  {
+    func extendedAttribute(forName name: String) throws -> Data {
 
         let data = try self.withUnsafeFileSystemRepresentation { fileSystemPath -> Data in
 
@@ -79,8 +112,9 @@ extension URL {
     }
 
     /// Helper function to create an NSError from a Unix errno.
-    private static func posixError(_ err: Int32) -> NSError {
+    static func posixError(_ err: Int32) -> NSError {
         return NSError(domain: NSPOSIXErrorDomain, code: Int(err),
                        userInfo: [NSLocalizedDescriptionKey: String(cString: strerror(err))])
     }
 }
+

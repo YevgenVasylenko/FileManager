@@ -138,12 +138,49 @@ extension DropboxFileManager: FileManager {
         }
         let renamedFilePath = file.rename(name: newName).path.path
         let path = dropboxPath(file: file)
-        client.files.moveV2(fromPath: path, toPath: renamedFilePath).response { response, error in
-            if let error = error {
-                completion(.failure(Error(dropboxError: error)))
-                return
+//        client.files.moveV2(fromPath: path, toPath: renamedFilePath).response { response, error in
+//            if let error = error {
+//                completion(.failure(Error(dropboxError: error)))
+//                return
+//            }
+//            completion(.success(()))
+//        }
+
+        let template = FileProperties.PropertyFieldTemplate(name: "One", description_: "", type: .string_)
+
+        client.file_properties.templatesAddForUser(name: "User", description_: "", fields: [template]).response {  (templateResult, error) in
+            if let templateID = templateResult?.templateId {
+                let field = FileProperties.PropertyField(name: "One", value: "Blue")
+                let group = FileProperties.PropertyGroup(templateId: templateID, fields: [field])
+                client.file_properties.propertiesAdd(path: path, propertyGroups: [group]).response { result, error  in
+                    print(result ?? "No result from properties add")
+                    print(error ?? "no error from properties add")
+                }
+                client.files.getMetadata(path: path, includeMediaInfo: true, includePropertyGroups: FileProperties.TemplateFilterBase.filterSome([templateID])).response { (data, error) in
+                    print(data ?? "No data from getMetadata")
+                    print(error ?? "No error from getMetadata")
+                }
             }
-            completion(.success(()))
+            print(templateResult ?? "No result from templatesAddForUser")
+            print(error ?? "no error from templatesAddForUser")
+        }
+
+//        let field = FileProperties.PropertyField(name: "Tags", value: "Blue")
+//        let group = FileProperties.PropertyGroup(templateId: "ptid:IBksWnL9lHsAAAAAAAAA3A", fields: [field])
+//        client.file_properties.propertiesAdd(path: path, propertyGroups: [group]).response { result, error  in
+//            print(result ?? "No result from properties add")
+//            print(error ?? "no error from properties add")
+//        }
+        
+//        let field = FileProperties.PropertyField(name: "Tags", value: "Red")
+//        let update = FileProperties.PropertyGroupUpdate(templateId: "ptid:IBksWnL9lHsAAAAAAAAA3A", addOrUpdateFields: [field])
+//        client.file_properties.propertiesUpdate(path: path, updatePropertyGroups: [update]).response { result, error  in
+//            print(result ?? "No result from properties update")
+//            print(error ?? "no error from properties update")
+//        }
+        client.files.getMetadata(path: path, includeMediaInfo: true, includePropertyGroups: FileProperties.TemplateFilterBase.filterSome(["ptid:IBksWnL9lHsAAAAAAAAA3A"])).response { (data, error) in
+            print(data ?? "No data from getMetadata")
+            print(error ?? "No error from getMetadata")
         }
     }
     

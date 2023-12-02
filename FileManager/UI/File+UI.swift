@@ -35,18 +35,13 @@ extension File {
     }
 
     func getTags() -> [Tag] {
-        do {
-            let tags = try self.path.listExtendedAttributes().compactMap { tagName in
-               for tag in TagManager.shared.tags {
-                   if tag.name == tagName {
-                       return tag
-                   }
+        return self.path.listExtendedAttributesForFile().compactMap { tagName in
+            for tag in TagManager.shared.tags {
+                if tag.name == tagName {
+                    return tag
                 }
-                return nil
             }
-            return tags
-        } catch {
-            return []
+            return nil
         }
     }
 }
