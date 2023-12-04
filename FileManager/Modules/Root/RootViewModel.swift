@@ -22,7 +22,9 @@ final class RootViewModel: ObservableObject {
         var error: Error?
         var filesWithTag: [File] = []
     }
-    
+
+    private var fileManagerCommutator = FileManagerCommutator()
+
     @Published
     var state = State() {
         didSet {
@@ -36,9 +38,9 @@ final class RootViewModel: ObservableObject {
         reloadLoggedState()
         updateTagsList()
         state.selectedContent = state.contentStorages.first
-        NotificationCenter.default.addObserver(self, selector: #selector(updateTagsList), name: TagManager.tagsUpdated, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(updateTagsList), name: Notify.tagsUpdated, object: nil)
     }
-    
+
     func loggingToCloud() {
         switch state.selectedContent {
         case .folder(let file):
@@ -98,12 +100,12 @@ final class RootViewModel: ObservableObject {
             switch result {
             case .success:
                 self.state.tagForRename = nil
+                self.renameTagInFiles(tag: tag, name: newName)
             case .failure(let error):
                 self.state.tagForRename = nil
                 self.state.error = error
             }
         }
-        renameTagInFiles(tag: tag, name: newName)
     }
 }
 
@@ -121,13 +123,11 @@ private extension RootViewModel {
     }
 
     func deleteTagFromFilesWithSuch(tag: Tag) {
-        LocalFileManager().filesWithTag(tag: tag) { [weak self] result in
+        fileManagerCommutator.removeTagFromFiles(tag: tag) { [weak self] result in
             guard let self else { return }
             switch result {
-            case .success(let files):
-                for file in files {
-                    file.path.removeExtendedAttributeFromFile(forName: tag.name)
-                }
+            case .success:
+               break
             case .failure(let failure):
                 self.state.error = failure
             }
@@ -135,14 +135,11 @@ private extension RootViewModel {
     }
 
     func renameTagInFiles(tag: Tag, name: String) {
-        LocalFileManager().filesWithTag(tag: tag) { [weak self] result in
+        fileManagerCommutator.renameTagOnFiles(tag: tag, newName: name) { [weak self] result in
             guard let self else { return }
             switch result {
-            case .success(let files):
-                for file in files {
-                    file.path.removeExtendedAttributeFromFile(forName: tag.name)
-                    file.path.setExtendedAttributeToFile(data: Data(), forName: name)
-                }
+            case .success:
+                break
             case .failure(let failure):
                 self.state.error = failure
             }

@@ -8,36 +8,31 @@
 import SwiftUI
 
 struct FileView: View {
-    enum Style {
-        case grid
-        case list
-        case info
-    }
-    
-    private let file: File
-    private let style: Style
-    private let infoPresented: Binding<Bool>
-    private let tagsPresented: Binding<Bool>
+ 
+    @StateObject
+    private var viewModel: FileViewModel
 
-    init(file: File, style: Style, infoPresented: Binding<Bool>, tagsPresented: Binding<Bool>) {
-        self.file = file
-        self.style = style
-        self.infoPresented = infoPresented
-        self.tagsPresented = tagsPresented
+    init(file: File, style: FileViewModel.Style, infoPresented: Binding<Bool>, tagsPresented: Binding<Bool>) {
+        self._viewModel = StateObject(wrappedValue: FileViewModel(
+            file: file,
+            style: style,
+            infoPresented: infoPresented,
+            tagsPresented: tagsPresented
+        ))
     }
     
     var body: some View {
         container {
-            imageOfFile(imageName: file.imageName)
-            nameOfFile(fileName: file.displayedName())
+            imageOfFile(imageName: viewModel.file.imageName)
+            nameOfFile(fileName: viewModel.file.displayedName())
             setOfTagsImage()
         }
         .frame(width: width())
-        .popover(isPresented: infoPresented) {
-            FileInfoView(file: file)
+        .popover(isPresented: viewModel.infoPresented) {
+            FileInfoView(file: viewModel.file)
         }
-        .popover(isPresented: tagsPresented) {
-            TagsMenuView(file: file)
+        .popover(isPresented: viewModel.tagsPresented) {
+            TagsMenuView(file: viewModel.file)
         }
     }
 }
@@ -70,16 +65,16 @@ private extension FileView {
     @ViewBuilder
     func setOfTagsImage() -> some View {
         ZStack {
-            ForEach(Array(file.getTags().enumerated()), id: \.element) { index, tag in
+            ForEach(Array(viewModel.state.tags.enumerated()), id: \.element) { index, tag in
                 imageOfTags(tag: tag)
-                    .offset(x: offsetCalculations(numberOfCircle: index, amountOfCircles: file.getTags().count))
+                    .offset(x: offsetCalculations(numberOfCircle: index, amountOfCircles: viewModel.state.tags.count))
             }
         }
     }
 
     @ViewBuilder
     func container(@ViewBuilder content: () -> some View) -> some View {
-        switch style {
+        switch viewModel.style {
         case .grid:
             VStack(alignment: .center, content: content)
         case .list:
@@ -90,7 +85,7 @@ private extension FileView {
     }
     
     func width() -> CGFloat? {
-        switch style {
+        switch viewModel.style {
         case .grid:
             return 80
         case .list:
@@ -101,7 +96,7 @@ private extension FileView {
     }
     
     func lineLimit() -> Int? {
-        switch style {
+        switch viewModel.style {
         case .grid:
             return 2
         case .list:

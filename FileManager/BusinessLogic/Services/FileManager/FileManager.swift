@@ -62,6 +62,15 @@ protocol FileManager {
     func makeFolderMonitor(file: File) -> FolderMonitor?
     
     func getFileAttributes(file: File, completion: @escaping (Result<FileAttributes, Error>) -> Void)
+
+    func addTagsToFile(file: File, tagNames: [String], completion: @escaping (Result<Void, Error>) -> Void)
+
+    func getActiveTagNamesOnFile(file: File, completion: @escaping (Result<[String], Error>) -> Void)
+
+    func removeTagFromFiles(tag: Tag, completion: @escaping (Result<Void, Error>) -> Void)
+
+    func renameTagOnFiles(tag: Tag, newName: String, completion: @escaping (Result<Void, Error>) -> Void)
+
 }
 
 

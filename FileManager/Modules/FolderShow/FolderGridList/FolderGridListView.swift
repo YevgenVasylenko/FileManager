@@ -174,7 +174,7 @@ private extension FolderGridListView {
     }
     
     @ViewBuilder
-    func fileView(file: File, style: FileView.Style) -> some View {
+    func fileView(file: File, style: FileViewModel.Style) -> some View {
         switch style {
         case .grid:
             NavigationLink(value: file) {

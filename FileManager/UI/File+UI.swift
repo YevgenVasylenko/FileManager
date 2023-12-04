@@ -33,15 +33,4 @@ extension File {
             return R.image.emptyTrash.name
         }
     }
-
-    func getTags() -> [Tag] {
-        return self.path.listExtendedAttributesForFile().compactMap { tagName in
-            for tag in TagManager.shared.tags {
-                if tag.name == tagName {
-                    return tag
-                }
-            }
-            return nil
-        }
-    }
 }

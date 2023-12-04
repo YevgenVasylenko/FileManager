@@ -11,7 +11,7 @@ final class FileManagerCommutator {
 }
 
 extension FileManagerCommutator: FileManager {
-    
+
    func contents(of file: File, completion: @escaping (Result<[File], Error>) -> Void) {
         FileManagerFactory.makeFileManager(file: file).contents(of: file, completion: completion)
     }
@@ -191,6 +191,28 @@ extension FileManagerCommutator: FileManager {
         let fileManager = FileManagerFactory.makeFileManager(file: file)
         fileManager.getFileAttributes(file: file, completion: completion)
     }
+
+    func addTagsToFile(file: File, tagNames: [String], completion: @escaping (Result<Void, Error>) -> Void) {
+        let fileManager = FileManagerFactory.makeFileManager(file: file)
+        fileManager.addTagsToFile(file: file, tagNames: tagNames, completion: completion)
+        Notify.notifiedTagsUpdated()
+    }
+
+    func getActiveTagNamesOnFile(file: File, completion: @escaping (Result<[String], Error>) -> Void) {
+        let fileManager = FileManagerFactory.makeFileManager(file: file)
+        fileManager.getActiveTagNamesOnFile(file: file, completion: completion)
+    }
+
+    func removeTagFromFiles(tag: Tag, completion: @escaping (Result<Void, Error>) -> Void) {
+        LocalFileManager().removeTagFromFiles(tag: tag, completion: completion)
+        DropboxFileManager().removeTagFromFiles(tag: tag, completion: completion)
+    }
+
+    func renameTagOnFiles(tag: Tag, newName: String, completion: @escaping (Result<Void, Error>) -> Void) {
+        LocalFileManager().renameTagOnFiles(tag: tag, newName: newName, completion: completion)
+        DropboxFileManager().renameTagOnFiles(tag: tag, newName: newName, completion: completion)
+    }
+
 }
 
 // MARK: - Private
