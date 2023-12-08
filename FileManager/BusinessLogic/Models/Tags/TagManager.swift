@@ -27,7 +27,7 @@ final class TagManager {
     private init() {}
 
     func addNewTag(name: String, color: TagColor?) {
-        let newTag = Tag(name: name, color: color)
+        let newTag = Tag(id: UUID().uuidString, name: name, color: color)
         Database.Tables.Tags.insertRowToDB(tag: newTag)
         notifiedDbUpdated()
     }
@@ -44,14 +44,10 @@ final class TagManager {
 
     private func notifiedDbUpdated() {
         _tags = nil
-        Notify.notifiedTagsUpdated()
+        NotificationCenter.default.post(name: NotificationNames.tagsUpdated, object: nil)
     }
 }
 
-enum Notify {
+enum NotificationNames {
     static let tagsUpdated = Notification.Name("TagsUpdated")
-
-    static func notifiedTagsUpdated() {
-        NotificationCenter.default.post(name: Notify.tagsUpdated, object: nil)
-    }
 }

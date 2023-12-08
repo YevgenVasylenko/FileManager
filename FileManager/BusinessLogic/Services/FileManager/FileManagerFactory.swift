@@ -17,4 +17,13 @@ class FileManagerFactory {
              return DropboxFileManager()
          }
      }
+
+    static func makeFileManager(storage: File.StorageType) -> FileManager & LocalTemporaryFolderConnector {
+        switch storage {
+        case .local:
+            return LocalFileManager()
+        case .dropbox:
+            return DropboxFileManager()
+        }
+    }
 }

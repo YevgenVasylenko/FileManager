@@ -12,11 +12,14 @@ final class DropboxFileManager {
     enum Constants {
         static let root = ""
         static let trash = "trash"
+
+        static let propertyFieldName = "Tags"
+        static let templateNameForUser = "MyCompany.FileManager"
     }
     
     private(set) var rootFolder: File
     private(set) var trashFolder: File
-    
+
     init () {
         rootFolder = File(
             path: URL(fileURLWithPath: Constants.root),
@@ -138,52 +141,13 @@ extension DropboxFileManager: FileManager {
         }
         let renamedFilePath = file.rename(name: newName).path.path
         let path = dropboxPath(file: file)
-//        client.files.moveV2(fromPath: path, toPath: renamedFilePath).response { response, error in
-//            if let error = error {
-//                completion(.failure(Error(dropboxError: error)))
-//                return
-//            }
-//            completion(.success(()))
-//        }
-
-        
-
-//        let template = FileProperties.PropertyFieldTemplate(name: "One", description_: "", type: .string_)
-//
-//        client.file_properties.templatesAddForUser(name: "User", description_: "", fields: [template]).response {  (templateResult, error) in
-//            if let templateID = templateResult?.templateId {
-//                let field = FileProperties.PropertyField(name: "One", value: json)
-//                let group = FileProperties.PropertyGroup(templateId: templateID, fields: [field])
-//                client.file_properties.propertiesAdd(path: path, propertyGroups: [group]).response { result, error  in
-//                    print(result ?? "No result from properties add")
-//                    print(error ?? "no error from properties add")
-//                }
-//                client.files.getMetadata(path: path, includeMediaInfo: true, includePropertyGroups: FileProperties.TemplateFilterBase.filterSome([templateID])).response { (data, error) in
-//                    print(data ?? "No data from getMetadata")
-//                    print(error ?? "No error from getMetadata")
-//                }
-//            }
-//            print(templateResult ?? "No result from templatesAddForUser")
-//            print(error ?? "no error from templatesAddForUser")
-//        }
-//
-//        let field = FileProperties.PropertyField(name: "Tags", value: "Blue")
-//        let group = FileProperties.PropertyGroup(templateId: "ptid:IBksWnL9lHsAAAAAAAAA3A", fields: [field])
-//        client.file_properties.propertiesAdd(path: path, propertyGroups: [group]).response { result, error  in
-//            print(result ?? "No result from properties add")
-//            print(error ?? "no error from properties add")
-//        }
-
-//        let field = FileProperties.PropertyField(name: "Tags", value: "Red")
-//        let update = FileProperties.PropertyGroupUpdate(templateId: "ptid:IBksWnL9lHsAAAAAAAAA3A", addOrUpdateFields: [field])
-//        client.file_properties.propertiesUpdate(path: path, updatePropertyGroups: [update]).response { result, error  in
-//            print(result ?? "No result from properties update")
-//            print(error ?? "no error from properties update")
-//        }
-//        client.files.getMetadata(path: path, includeMediaInfo: true, includePropertyGroups: FileProperties.TemplateFilterBase.filterSome(["ptid:IBksWnL9lHsAAAAAAAAA3A"])).response { (data, error) in
-//            print(data ?? "No data from getMetadata")
-//            print(error ?? "No error from getMetadata")
-//        }
+        client.files.moveV2(fromPath: path, toPath: renamedFilePath).response { response, error in
+            if let error = error {
+                completion(.failure(Error(dropboxError: error)))
+                return
+            }
+            completion(.success(()))
+        }
     }
     
     func copy(
@@ -350,20 +314,120 @@ extension DropboxFileManager: FileManager {
         }
     }
 
-    func addTagsToFile(file: File, tagNames: [String], completion: @escaping (Result<Void, Error>) -> Void) {
+    func addTagsToFile(file: File, tagIds: [String], completion: @escaping (Result<Void, Error>) -> Void) {
+        getTemplateId { result in
+            switch result {
+            case .failure(let error):
+                completion(.failure(error))
+                return
+            case .success(let id):
+                if id.isEmpty {
+                    return
+                } else {
+                    guard let client = DropboxClientsManager.authorizedClient else {
+                        completion(.failure(.unknown))
+                        return
+                    }
+                    let path = self.dropboxPath(file: file)
+                    let encodedColors = AttributesCoding.fromArrayToString(array: tagIds)
+                    let field = FileProperties.PropertyField(name: Constants.propertyFieldName, value: encodedColors)
+                    let update = FileProperties.PropertyGroupUpdate(templateId: id, addOrUpdateFields: [field])
+                    let group = FileProperties.PropertyGroup(templateId: id, fields: [field])
 
+                    client.files.getMetadata(
+                        path: path,
+                        includeMediaInfo: true,
+                        includePropertyGroups: FileProperties
+                            .TemplateFilterBase
+                            .filterSome([id])).response { data, error in
+                            if let error = error {
+                                completion(.failure(Error(dropboxError: error)))
+                                return
+                            }
+                            if let data {
+                                self.addOrUpdateProperties(
+                                    path: path,
+                                    groupToUpdate: update,
+                                    groupToAdd: group,
+                                    fileMetadata: data,
+                                    templateId: id,
+                                    completion: completion)
+                            }
+                        }
+                }
+            }
+        }
     }
 
-    func getActiveTagNamesOnFile(file: File, completion: @escaping (Result<[String], Error>) -> Void) {
+    func getActiveTagIdsOnFile(file: File, completion: @escaping (Result<[String], Error>) -> Void) {
+        getTemplateId { result in
+            switch result {
+            case .failure(let error):
+                completion(.failure(error))
+                return
+            case .success(let id):
+                if id.isEmpty {
+                    return
+                } else {
+                    guard let client = DropboxClientsManager.authorizedClient else {
+                        completion(.failure(.unknown))
+                        return
+                    }
+                    let path = self.dropboxPath(file: file)
+                    client.files.getMetadata(path: path, includeMediaInfo: true, includePropertyGroups: FileProperties.TemplateFilterBase.filterSome([id])).response { (data, error) in
+                        if let error = error {
+                            completion(.failure(Error(dropboxError: error)))
+                            return
+                        }
+                        if let data {
+                            switch data {
+                            case let fileMetadata as Files.FileMetadata:
+                                completion(.success(AttributesCoding.fromStringToArray(string: fileMetadata.propertyGroups?.first?.fields.first?.value ?? "")))
+                            case let folderMetadata as Files.FolderMetadata:
+                                completion(.success(AttributesCoding.fromStringToArray(string: folderMetadata.propertyGroups?.first?.fields.first?.value ?? "")))
+                            default:
+                                completion(.failure(.unknown))
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 
-    func removeTagFromFiles(tag: Tag, completion: @escaping (Result<Void, Error>) -> Void) {
+    func filesWithTag(tag: Tag, completion: @escaping (Result<[File], Error>) -> Void) {
+        allFilesInside(rootFolder) { result in
+            switch result {
+            case .success(let files):
+                var filesWithTag: [File] = []
+                var error: Error?
+                let group = DispatchGroup()
+                for file in files {
+                    group.enter()
+                    self.getActiveTagIdsOnFile(file: file) { result in
+                        defer { group.leave() }
+                        switch result {
+                        case .success(let tagIds):
+                            if tagIds.contains(tag.id) {
+                                filesWithTag.append(file)
+                            }
+                        case .failure(let _error):
+                            error = _error
+                        }
+                    }
+                }
+                group.notify(queue: .main) {
+                    if let error {
+                        completion(.failure(error))
+                    } else {
+                        completion(.success(filesWithTag))
+                    }
+                }
+            case .failure(let _error):
+                completion(.failure(_error))
+            }
+        }
     }
-
-    func renameTagOnFiles(tag: Tag, newName: String, completion: @escaping (Result<Void, Error>) -> Void) {
-        
-    }
-
 }
 
 extension DropboxFileManager: LocalTemporaryFolderConnector {
@@ -463,6 +527,10 @@ extension DropboxFileManager: LocalTemporaryFolderConnector {
                 completion(.failure(error))
             }
         }
+    }
+
+    func isStorageLogged(fileManager: FileManager) -> Bool {
+        return true
     }
 }
 
@@ -706,7 +774,7 @@ private extension DropboxFileManager {
         }
     }
 
-    func contentInSearching(of file: File, completion: @escaping (Result<[File], Error>) -> Void) {
+    func allFilesInside(_ file: File, completion: @escaping (Result<[File], Error>) -> Void) {
         guard let client = DropboxClientsManager.authorizedClient else {
             completion(.failure(.unknown))
             return
@@ -742,13 +810,119 @@ private extension DropboxFileManager {
     ) {
         switch searchingPlace {
         case .currentStorage:
-            contentInSearching(of: rootFolder, completion: completion)
+            allFilesInside(rootFolder, completion: completion)
         case .currentFolder:
-            contentInSearching(of: file, completion: completion)
+            allFilesInside(file, completion: completion)
         case .currentTrash:
             contentOfTrashFolder(file: file, completion: completion)
         case .allStorages:
-            contentInSearching(of: rootFolder, completion: completion)
+            allFilesInside(rootFolder, completion: completion)
+        }
+    }
+
+    func getTemplateId(completion: @escaping (Result<String, Error>) -> Void) {
+        guard let client = DropboxClientsManager.authorizedClient else {
+            completion(.failure(.unknown))
+            return
+        }
+
+        client.file_properties.templatesListForUser().response { result, error in
+            if let error = error {
+                completion(.failure(Error(dropboxError: error)))
+                return
+            }
+            if var ids = result?.templateIds {
+                if ids.isEmpty {
+                    let template = FileProperties.PropertyFieldTemplate(name: Constants.propertyFieldName, description_: "", type: .string_)
+                    client.file_properties.templatesAddForUser(name: Constants.templateNameForUser, description_: "", fields: [template]).response { result, error in
+                        if let error = error {
+                            completion(.failure(Error(dropboxError: error)))
+                            return
+                        }
+                        if let id = result?.templateId {
+                            completion(.success(id))
+                        }
+                    }
+                } else {
+                    completion(.success(ids.removeLast()))
+                }
+            }
+        }
+    }
+
+    func addProperties(
+        path: String,
+        groupToAdd: FileProperties.PropertyGroup,
+        completion: @escaping (Result<Void, Error>) -> Void
+    ) {
+        guard let client = DropboxClientsManager.authorizedClient else {
+            completion(.failure(.unknown))
+            return
+        }
+
+        client.file_properties.propertiesAdd(
+            path: path,
+            propertyGroups: [groupToAdd]
+        ).response { result, error in
+            if result != nil {
+                completion(.success(()))
+            }
+            if let error {
+                completion(.failure(Error(dropboxError: error)))
+            }
+        }
+    }
+
+    func updateProperties(
+        path: String,
+        groupToUpdate: FileProperties.PropertyGroupUpdate,
+        completion: @escaping (Result<Void, Error>) -> Void
+    ) {
+        guard let client = DropboxClientsManager.authorizedClient else {
+            completion(.failure(.unknown))
+            return
+        }
+
+        client.file_properties.propertiesUpdate(
+            path: path,
+            updatePropertyGroups: [groupToUpdate]
+        ).response { result, error in
+            if result != nil {
+                completion(.success(()))
+            }
+            if let error {
+                completion(.failure(Error(dropboxError: error)))
+            }
+        }
+    }
+
+    func addOrUpdateProperties(
+        path: String,
+        groupToUpdate: FileProperties.PropertyGroupUpdate,
+        groupToAdd: FileProperties.PropertyGroup,
+        fileMetadata: Files.Metadata,
+        templateId: String,
+        completion: @escaping (Result<Void, Error>) -> Void
+    ) {
+        switch fileMetadata {
+        case let fileMetadata as Files.FileMetadata:
+            if fileMetadata.propertyGroups!.contains(where: { group in
+                group.templateId == templateId
+            }) {
+                updateProperties(path: path, groupToUpdate: groupToUpdate, completion: completion)
+            } else {
+                addProperties(path: path, groupToAdd: groupToAdd, completion: completion)
+            }
+        case let folderMetadata as Files.FolderMetadata:
+            if folderMetadata.propertyGroups!.contains(where: { group in
+                group.templateId == templateId
+            }) {
+                updateProperties(path: path, groupToUpdate: groupToUpdate, completion: completion)
+            } else {
+                addProperties(path: path, groupToAdd: groupToAdd, completion: completion)
+            }
+        default:
+            completion(.failure(.unknown))
         }
     }
 }

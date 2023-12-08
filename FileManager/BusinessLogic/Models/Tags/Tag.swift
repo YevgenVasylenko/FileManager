@@ -7,15 +7,10 @@
 
 import Foundation
 
-struct Tag: Hashable {
+struct Tag: Hashable, Identifiable {
+    let id: String
     let name: String
     let color: TagColor?
-}
-
-extension Tag: Identifiable {
-    var id: Self {
-        self
-    }
 }
 
 enum TagColor: Int, CaseIterable, Hashable {
@@ -30,7 +25,7 @@ enum TagColor: Int, CaseIterable, Hashable {
 
     static func allTags() -> [Tag] {
         return Self.allCases.map {
-            Tag(name: $0.name(), color: $0)
+            Tag(id: UUID().uuidString, name: $0.name(), color: $0)
         }
     }
 

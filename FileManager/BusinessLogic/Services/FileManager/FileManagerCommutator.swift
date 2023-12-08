@@ -192,27 +192,45 @@ extension FileManagerCommutator: FileManager {
         fileManager.getFileAttributes(file: file, completion: completion)
     }
 
-    func addTagsToFile(file: File, tagNames: [String], completion: @escaping (Result<Void, Error>) -> Void) {
+    func addTagsToFile(file: File, tagIds: [String], completion: @escaping (Result<Void, Error>) -> Void) {
         let fileManager = FileManagerFactory.makeFileManager(file: file)
-        fileManager.addTagsToFile(file: file, tagNames: tagNames, completion: completion)
-        Notify.notifiedTagsUpdated()
+        fileManager.addTagsToFile(file: file, tagIds: tagIds, completion: completion)
+        NotificationCenter.default.post(name: NotificationNames.tagsUpdated, object: nil)
     }
 
-    func getActiveTagNamesOnFile(file: File, completion: @escaping (Result<[String], Error>) -> Void) {
+    func getActiveTagIdsOnFile(file: File, completion: @escaping (Result<[String], Error>) -> Void) {
         let fileManager = FileManagerFactory.makeFileManager(file: file)
-        fileManager.getActiveTagNamesOnFile(file: file, completion: completion)
+        fileManager.getActiveTagIdsOnFile(file: file, completion: completion)
     }
 
-    func removeTagFromFiles(tag: Tag, completion: @escaping (Result<Void, Error>) -> Void) {
-        LocalFileManager().removeTagFromFiles(tag: tag, completion: completion)
-        DropboxFileManager().removeTagFromFiles(tag: tag, completion: completion)
+    func filesWithTag(tag: Tag, completion: @escaping (Result<[File], Error>) -> Void) {
+        var allFilesAcrossStoragesWithTag: [File] = []
+        let group = DispatchGroup()
+        var error: Error?
+        for storage in File.StorageType.activeStorages() {
+            group.enter()
+            storage.filesWithTag(tag: tag) { result in
+                defer { group.leave() }
+                switch result {
+                case .success(let files):
+                    allFilesAcrossStoragesWithTag += files
+                case .failure(let _error):
+                    error = _error
+                }
+            }
+        }
+        group.notify(queue: .main) {
+            if let error {
+                completion(.failure(error))
+            } else {
+                completion(.success(allFilesAcrossStoragesWithTag))
+            }
+        }
     }
 
-    func renameTagOnFiles(tag: Tag, newName: String, completion: @escaping (Result<Void, Error>) -> Void) {
-        LocalFileManager().renameTagOnFiles(tag: tag, newName: newName, completion: completion)
-        DropboxFileManager().renameTagOnFiles(tag: tag, newName: newName, completion: completion)
+    func isStorageLogged(fileManager: FileManager) -> Bool {
+        fileManager.isStorageLogged(fileManager: fileManager)
     }
-
 }
 
 // MARK: - Private
@@ -221,10 +239,7 @@ private extension FileManagerCommutator {
     func makeListOfActiveFileManagers(file: File, searchingPlace: SearchingPlace) -> [FileManager] {
         var storages: [FileManager] = []
         if searchingPlace == .allStorages {
-            storages.append(LocalFileManager())
-            if DropboxLoginManager.isLogged {
-                storages.append(DropboxFileManager())
-            }
+            storages = File.StorageType.activeStorages()
         } else {
             storages.append(FileManagerFactory.makeFileManager(file: file))
         }

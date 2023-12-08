@@ -14,6 +14,7 @@ extension Database.Tables {
         static let id = Expression<Int64>("id")
         static let tagName = Expression<String>("tagName")
         static let tagColor = Expression<Int>("tagColor")
+        static let operationID = Expression<String>("operationID")
 
         static func create() {
             do {
@@ -22,6 +23,7 @@ extension Database.Tables {
                         t.column(id, primaryKey: .autoincrement)
                         t.column(tagName, unique: true)
                         t.column(tagColor, unique: false)
+                        t.column(operationID, unique: true)
                     }
                 )
             } catch {
@@ -36,7 +38,8 @@ extension Database.Tables {
             do {
                 let query = table.insert(
                     tagName <- tag.name,
-                    tagColor <- tag.color?.rawValue ?? 0x000000
+                    tagColor <- tag.color?.rawValue ?? 0x000000,
+                    operationID <- tag.id
                 )
                 try Database.connection.run(query)
             } catch {
@@ -72,7 +75,8 @@ extension Database.Tables {
                 for tag in tagsFromDB {
                     let name = tag[tagName]
                     let color = tag[tagColor]
-                    tags.append(Tag(name: name, color: TagColor(rawValue: color)))
+                    let operationID = tag[operationID]
+                    tags.append(Tag(id: operationID, name: name, color: TagColor(rawValue: color)))
                 }
             } catch {
                 print(error)

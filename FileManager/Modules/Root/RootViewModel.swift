@@ -38,7 +38,7 @@ final class RootViewModel: ObservableObject {
         reloadLoggedState()
         updateTagsList()
         state.selectedContent = state.contentStorages.first
-        NotificationCenter.default.addObserver(self, selector: #selector(updateTagsList), name: Notify.tagsUpdated, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(updateTagsList), name: NotificationNames.tagsUpdated, object: nil)
     }
 
     func loggingToCloud() {
@@ -91,7 +91,6 @@ final class RootViewModel: ObservableObject {
 
     func deleteTagFromList(tag: Tag) {
         TagManager.shared.deleteTag(tag: tag)
-        deleteTagFromFilesWithSuch(tag: tag)
     }
 
     func renameTag(tag: Tag, newName: String) {
@@ -100,7 +99,6 @@ final class RootViewModel: ObservableObject {
             switch result {
             case .success:
                 self.state.tagForRename = nil
-                self.renameTagInFiles(tag: tag, name: newName)
             case .failure(let error):
                 self.state.tagForRename = nil
                 self.state.error = error
@@ -120,30 +118,6 @@ private extension RootViewModel {
     @objc
     func updateTagsList() {
         state.contentTags = TagManager.shared.tags.map { Content.tag($0) }
-    }
-
-    func deleteTagFromFilesWithSuch(tag: Tag) {
-        fileManagerCommutator.removeTagFromFiles(tag: tag) { [weak self] result in
-            guard let self else { return }
-            switch result {
-            case .success:
-               break
-            case .failure(let failure):
-                self.state.error = failure
-            }
-        }
-    }
-
-    func renameTagInFiles(tag: Tag, name: String) {
-        fileManagerCommutator.renameTagOnFiles(tag: tag, newName: name) { [weak self] result in
-            guard let self else { return }
-            switch result {
-            case .success:
-                break
-            case .failure(let failure):
-                self.state.error = failure
-            }
-        }
     }
 
     func isSelectedContentIsLocalStorage() -> Bool {

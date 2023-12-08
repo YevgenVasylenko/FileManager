@@ -27,7 +27,7 @@ enum SearchingPlace: CaseIterable, Equatable {
                     return R.string.localizable.dropboxStorage()
                 }
             case .currentFolder:
-                return "\(file.displayedName())"
+                return "«\(file.displayedName())»"
             case .currentTrash:
                 return R.string.localizable.currentTrash()
             case .allStorages:

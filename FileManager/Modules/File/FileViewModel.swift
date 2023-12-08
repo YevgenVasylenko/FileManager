@@ -41,17 +41,21 @@ final class FileViewModel: ObservableObject {
         self.infoPresented = infoPresented
         self.tagsPresented = tagsPresented
         getTags()
-        NotificationCenter.default.addObserver(self, selector: #selector(getTags), name: Notify.tagsUpdated, object: nil)
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(getTags),
+            name: NotificationNames.tagsUpdated, object: nil
+        )
     }
 
     @objc
     private func getTags() {
-        fileManagerCommutator.getActiveTagNamesOnFile(file: file) { result in
+        fileManagerCommutator.getActiveTagIdsOnFile(file: file) { result in
             switch result {
-            case .success(let tagNames):
-                self.state.tags = tagNames.compactMap { tagName in
+            case .success(let tagIds):
+                self.state.tags = tagIds.compactMap { tagId in
                     for tag in TagManager.shared.tags {
-                        if tag.name == tagName {
+                        if tag.id == tagId {
                             return tag
                         }
                     }

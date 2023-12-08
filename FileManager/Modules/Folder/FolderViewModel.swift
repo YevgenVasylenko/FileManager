@@ -394,7 +394,7 @@ private extension FolderViewModel {
 
     func loadTagedFiles(tag: Tag) {
         state.isLoading = true
-        LocalFileManager().filesWithTag(tag: tag) { [weak self] result in
+        fileManagerCommutator.filesWithTag(tag: tag) { [weak self] result in
             guard let self else { return }
             switch result {
             case .success(let files):

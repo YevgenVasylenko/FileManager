@@ -108,7 +108,7 @@ private extension TagsMenuView {
                             Image(systemName: "circle.fill")
                                 .foregroundColor(Color(uiColor: UIColor(rgb: tag.color?.rawValue ?? 0x000000)))
                                 .font(.title)
-                            if viewModel.state.selectedColorForNewTag == tag {
+                            if viewModel.state.selectedColorForNewTag?.name == tag.name {
                                 Image(systemName: "checkmark")
                                     .foregroundColor(.white)
                             }

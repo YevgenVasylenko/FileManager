@@ -120,7 +120,7 @@ extension LocalFileManager: FileManager {
             switch result {
             case .success(let files):
                 let filteredFiles = files.filter { file in
-                    self.getActiveTagNamesOnFile(file: file).contains(tag.name)
+                    self.getActiveTagNamesOnFile(file: file).contains(tag.id)
                 }
                 completion(.success(filteredFiles))
             case .failure(let failure):
@@ -333,47 +333,13 @@ extension LocalFileManager: FileManager {
         }
     }
 
-    func addTagsToFile(file: File, tagNames: [String], completion: @escaping (Result<Void, Error>) -> Void) {
-        completion(.success(addTagsToFile(file: file, tagNames: tagNames)))
+    func addTagsToFile(file: File, tagIds: [String], completion: @escaping (Result<Void, Error>) -> Void) {
+        completion(.success(addTagsToFile(file: file, tagIds: tagIds)))
     }
 
-    func getActiveTagNamesOnFile(file: File, completion: @escaping (Result<[String], Error>) -> Void) {
+    func getActiveTagIdsOnFile(file: File, completion: @escaping (Result<[String], Error>) -> Void) {
         completion(.success(getActiveTagNamesOnFile(file: file)))
     }
-
-    func removeTagFromFiles(tag: Tag, completion: @escaping (Result<Void, Error>) -> Void) {
-        filesWithTag(tag: tag) { [weak self] result in
-            guard let self else { return }
-            switch result {
-            case .success(let files):
-                for file in files {
-                    let newTags = self.getActiveTagNamesOnFile(file: file).filter { $0 != tag.name }
-                    self.addTagsToFile(file: file, tagNames: newTags)
-                    completion(.success(()))
-                }
-            case .failure(let failure):
-                completion(.failure(failure))
-            }
-        }
-    }
-
-    func renameTagOnFiles(tag: Tag, newName: String, completion: @escaping (Result<Void, Error>) -> Void) {
-        filesWithTag(tag: tag) { [weak self] result in
-            guard let self else { return }
-            switch result {
-            case .success(let files):
-                for file in files {
-                    var newTags = self.getActiveTagNamesOnFile(file: file).filter { $0 != tag.name }
-                    newTags.append(newName)
-                    self.addTagsToFile(file: file, tagNames: newTags)
-                    completion(.success(()))
-                }
-            case .failure(let failure):
-                completion(.failure(failure))
-            }
-        }
-    }
-
 }
 
 extension LocalFileManager: LocalTemporaryFolderConnector {
@@ -424,6 +390,10 @@ extension LocalFileManager: LocalTemporaryFolderConnector {
     
     func getLocalFileURL(file: File, completion: @escaping (Result<URL, Error>) -> Void) {
         completion(.success(file.path))
+    }
+
+    func isStorageLogged(fileManager: FileManager) -> Bool {
+        DropboxLoginManager.isLogged
     }
 }
 
@@ -687,13 +657,13 @@ private extension LocalFileManager {
     }
 
     func getActiveTagNamesOnFile(file: File) -> [String] {
-        let encodedTagNames = file.path.extendedAttributeOfFile(forName: "Tags")
-        return AttributesCoding.fromDataToArray(data: encodedTagNames)
+        let encodedTagIds = file.path.extendedAttributeOfFile(forName: "Tags")
+        return AttributesCoding.fromDataToArray(data: encodedTagIds)
     }
 
-    func addTagsToFile(file: File, tagNames: [String]) {
-        let encodedTagNames = AttributesCoding.fromArrayToData(array: tagNames)
-        file.path.setExtendedAttributeToFile(data: encodedTagNames, forName: "Tags")
+    func addTagsToFile(file: File, tagIds: [String]) {
+        let encodedTagIds = AttributesCoding.fromArrayToData(array: tagIds)
+        file.path.setExtendedAttributeToFile(data: encodedTagIds, forName: "Tags")
     }
 }
 

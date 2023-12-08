@@ -41,7 +41,6 @@ final class TagsMenuViewModel: ObservableObject {
 
     func updateActiveTagsOnFile() {
         addTagsToFile()
-//        removeDeselectedTagsFromFile()
     }
 }
 
@@ -51,8 +50,12 @@ private extension TagsMenuViewModel {
 
     func initialSetups() {
         getTagsList()
-        NotificationCenter.default.addObserver(self, selector: #selector(getTagsList), name: Notify.tagsUpdated, object: nil)
-        setSelectedTags()
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(getTagsList),
+            name: NotificationNames.tagsUpdated, object: nil
+        )
+        fillActiveTags()
     }
 
     func isNameOfNewTagAlreadyExist() -> Bool {
@@ -67,10 +70,10 @@ private extension TagsMenuViewModel {
     }
 
     func addTagsToFile() {
-        let tagNames = state.selectedTags.map { $0.name }
+        let tagIds = state.selectedTags.map { $0.id }
         fileManagerCommutator.addTagsToFile(
             file: state.file,
-            tagNames: tagNames) { result in
+            tagIds: tagIds) { result in
                 switch result {
                 case .success:
                     break
@@ -81,12 +84,13 @@ private extension TagsMenuViewModel {
     }
 
     func fillActiveTags() {
-        fileManagerCommutator.getActiveTagNamesOnFile(file: state.file) { result in
+        fileManagerCommutator.getActiveTagIdsOnFile(file: state.file) { result in
             switch result {
-            case .success(let tagNames):
+            case .success(let tagIds):
                 for tag in self.state.tags {
-                    if tagNames.contains(tag.name) {
+                    if tagIds.contains(tag.id) {
                         self.activeTagsOnFile.insert(tag)
+                        self.state.selectedTags = self.activeTagsOnFile
                     }
                 }
             case .failure:
@@ -94,16 +98,4 @@ private extension TagsMenuViewModel {
             }
         }
     }
-
-    func setSelectedTags() {
-        fillActiveTags()
-        state.selectedTags = activeTagsOnFile
-    }
-
-//    func removeDeselectedTagsFromFile() {
-//        let deselectedTags = activeTagsOnFile.subtracting(state.selectedTags)
-//        for tag in deselectedTags {
-//            state.file.path.removeExtendedAttributeFromFile(forName: tag.name)
-//        }
-//    }
 }

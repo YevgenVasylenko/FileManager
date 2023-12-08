@@ -8,7 +8,7 @@
 import Foundation
 
 extension File {
-    enum StorageType: Equatable {
+    enum StorageType: Equatable, CaseIterable {
         case local
         case dropbox
 
@@ -27,6 +27,17 @@ extension File {
                 return false
             case .dropbox:
                 return true
+            }
+        }
+
+        static func activeStorages() -> [FileManager] {
+            return File.StorageType.allCases.compactMap {
+                let fileManager = FileManagerFactory.makeFileManager(storage: $0)
+                if fileManager.isStorageLogged(fileManager: fileManager) {
+                    return fileManager
+                } else {
+                    return nil
+                }
             }
         }
     }

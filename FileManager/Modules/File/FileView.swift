@@ -42,13 +42,13 @@ struct FileView: View {
 private extension FileView {
     
     func imageOfFile(imageName: String) -> some View {
-        return Image(imageName)
+        Image(imageName)
             .resizable()
             .frame(width: 65, height: 65)
     }
     
     func nameOfFile(fileName: String) -> some View {
-            return Text(fileName)
+        Text(fileName)
             .font(.headline)
             .lineLimit(lineLimit())
     }
@@ -67,7 +67,7 @@ private extension FileView {
         ZStack {
             ForEach(Array(viewModel.state.tags.enumerated()), id: \.element) { index, tag in
                 imageOfTags(tag: tag)
-                    .offset(x: offsetCalculations(numberOfCircle: index, amountOfCircles: viewModel.state.tags.count))
+                    .offset(x: circleOffset(numberOfCircle: index, amountOfCircles: viewModel.state.tags.count))
             }
         }
     }
@@ -106,7 +106,7 @@ private extension FileView {
         }
     }
 
-    func offsetCalculations(numberOfCircle: Int, amountOfCircles: Int) -> CGFloat {
-       return CGFloat((Float(numberOfCircle) - (Float(amountOfCircles) - 1)/2) * 5)
+    func circleOffset(numberOfCircle: Int, amountOfCircles: Int) -> CGFloat {
+        CGFloat((CGFloat(numberOfCircle) - (CGFloat(amountOfCircles) - 1)/2) * 5)
     }
 }
