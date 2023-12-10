@@ -44,25 +44,26 @@ final class FileViewModel: ObservableObject {
         NotificationCenter.default.addObserver(
             self,
             selector: #selector(getTags),
-            name: NotificationNames.tagsUpdated, object: nil
+            name: TagManager.tagsUpdated,
+            object: nil
         )
     }
 
     @objc
     private func getTags() {
-        fileManagerCommutator.getActiveTagIdsOnFile(file: file) { result in
+        fileManagerCommutator.getActiveTagIds(on: file) { result in
             switch result {
+            case .failure:
+                break
             case .success(let tagIds):
                 self.state.tags = tagIds.compactMap { tagId in
                     for tag in TagManager.shared.tags {
-                        if tag.id == tagId {
+                        if tag.id.uuidString == tagId {
                             return tag
                         }
                     }
                     return nil
                 }
-            case .failure:
-                break
             }
         }
     }

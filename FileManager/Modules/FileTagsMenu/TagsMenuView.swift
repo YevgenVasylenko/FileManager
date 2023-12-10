@@ -78,7 +78,7 @@ private extension TagsMenuView {
             Text(tag.name)
         } icon: {
             Image(systemName: "circle.fill")
-                .foregroundColor(Color(uiColor: UIColor(rgb: tag.color?.rawValue ?? 0x000000)))
+                .foregroundColor(Color(uiColor: UIColor(rgb: tag.color.rawValue)))
         }
     }
 
@@ -106,7 +106,7 @@ private extension TagsMenuView {
                     } label: {
                         ZStack {
                             Image(systemName: "circle.fill")
-                                .foregroundColor(Color(uiColor: UIColor(rgb: tag.color?.rawValue ?? 0x000000)))
+                                .foregroundColor(Color(uiColor: UIColor(rgb: tag.color.rawValue)))
                                 .font(.title)
                             if viewModel.state.selectedColorForNewTag?.name == tag.name {
                                 Image(systemName: "checkmark")

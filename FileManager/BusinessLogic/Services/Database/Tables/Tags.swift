@@ -14,23 +14,28 @@ extension Database.Tables {
         static let id = Expression<Int64>("id")
         static let tagName = Expression<String>("tagName")
         static let tagColor = Expression<Int>("tagColor")
-        static let operationID = Expression<String>("operationID")
+        static let tagID = Expression<String>("operationID")
 
         static func create() {
             do {
-                try Database.connection.run(
-                    table.create() { t in
-                        t.column(id, primaryKey: .autoincrement)
-                        t.column(tagName, unique: true)
-                        t.column(tagColor, unique: false)
-                        t.column(operationID, unique: true)
+                try Database.connection.transaction {
+                    if try Database.connection.scalar("SELECT EXISTS (SELECT * FROM sqlite_master WHERE type = 'table' AND name = ?)", "tags") as! Int64 > 0 {
+                        return
+                    } else {
+                        try Database.connection.run(
+                            table.create() { t in
+                                t.column(id, primaryKey: .autoincrement)
+                                t.column(tagName, unique: true)
+                                t.column(tagColor, unique: false)
+                                t.column(tagID, unique: true)
+                            }
+                        )
+                        writeDefaultTagsInDB()
                     }
-                )
+                }
             } catch {
                 print(error)
-                return
             }
-            writeDefaultTagsInDB()
         }
 
         static func insertRowToDB(tag: Tag) {
@@ -38,25 +43,31 @@ extension Database.Tables {
             do {
                 let query = table.insert(
                     tagName <- tag.name,
-                    tagColor <- tag.color?.rawValue ?? 0x000000,
-                    operationID <- tag.id
+                    tagColor <- tag.color.rawValue,
+                    tagID <- tag.id.uuidString
                 )
                 try Database.connection.run(query)
             } catch {
                 print(error)
-
             }
         }
-// TO DO remake to return Error and firstly make additional query to check is tag exist
-        static func renameTag(tag: Tag, newName: String, completion: (Swift.Result<Void, Error>) -> Void) {
+
+        static func renameTag(tag: Tag, newName: String) -> Error? {
+            var _error: Error? = nil
             do {
-                let renameTagQuery = table.filter(tagName == tag.name)
-                try Database.connection.run(renameTagQuery.update(tagName <- newName))
-                completion(.success(()))
+                try Database.connection.transaction {
+                    let query = table.select(tagName).filter(tagName == newName)
+                    if try Database.connection.scalar(query.count) > 0 || newName.isEmpty {
+                        _error = .tagExist
+                    } else {
+                        let renameTagQuery = table.filter(tagName == tag.name)
+                        try Database.connection.run(renameTagQuery.update(tagName <- newName))
+                    }
+                }
             } catch {
-                completion(.failure(.tagExist))
-                print(error)
+                _error = Error(error: error)
             }
+            return _error
         }
 
         static func deleteFromDB(tag: Tag) {
@@ -75,8 +86,8 @@ extension Database.Tables {
                 for tag in tagsFromDB {
                     let name = tag[tagName]
                     let color = tag[tagColor]
-                    let operationID = tag[operationID]
-                    tags.append(Tag(id: operationID, name: name, color: TagColor(rawValue: color)))
+                    let operationID = UUID(uuidString: tag[tagID]) ?? UUID()
+                    tags.append(Tag(id: operationID, name: name, color: TagColor(rawValue: color) ?? .grey))
                 }
             } catch {
                 print(error)

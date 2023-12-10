@@ -38,7 +38,11 @@ final class RootViewModel: ObservableObject {
         reloadLoggedState()
         updateTagsList()
         state.selectedContent = state.contentStorages.first
-        NotificationCenter.default.addObserver(self, selector: #selector(updateTagsList), name: NotificationNames.tagsUpdated, object: nil)
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(updateTagsList),
+            name: TagManager.tagsUpdated, object: nil
+        )
     }
 
     func loggingToCloud() {
@@ -94,15 +98,9 @@ final class RootViewModel: ObservableObject {
     }
 
     func renameTag(tag: Tag, newName: String) {
-        TagManager.shared.renameTag(tag: tag, newName: newName) { [weak self] result in
-            guard let self else { return }
-            switch result {
-            case .success:
-                self.state.tagForRename = nil
-            case .failure(let error):
-                self.state.tagForRename = nil
-                self.state.error = error
-            }
+        self.state.tagForRename = nil
+        if let error = TagManager.shared.renameTag(tag: tag, newName: newName) {
+            self.state.error = error
         }
     }
 }

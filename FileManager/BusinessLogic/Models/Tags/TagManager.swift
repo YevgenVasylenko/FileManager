@@ -10,6 +10,7 @@ import Foundation
 final class TagManager {
 
     static let shared = TagManager()
+    static let tagsUpdated = Notification.Name("TagsUpdated")
 
     private var _tags: [Tag]?
     var tags: [Tag] {
@@ -26,8 +27,8 @@ final class TagManager {
 
     private init() {}
 
-    func addNewTag(name: String, color: TagColor?) {
-        let newTag = Tag(id: UUID().uuidString, name: name, color: color)
+    func addNewTag(name: String, color: TagColor) {
+        let newTag = Tag(id: UUID(), name: name, color: color)
         Database.Tables.Tags.insertRowToDB(tag: newTag)
         notifiedDbUpdated()
     }
@@ -37,17 +38,14 @@ final class TagManager {
         notifiedDbUpdated()
     }
 
-    func renameTag(tag: Tag, newName: String, completion: @escaping (Result<Void, Error>) -> ()) {
-        Database.Tables.Tags.renameTag(tag: tag, newName: newName, completion: completion)
+    func renameTag(tag: Tag, newName: String) -> Error? {
+        let error = Database.Tables.Tags.renameTag(tag: tag, newName: newName)
         notifiedDbUpdated()
+        return error
     }
 
     private func notifiedDbUpdated() {
         _tags = nil
-        NotificationCenter.default.post(name: NotificationNames.tagsUpdated, object: nil)
+        NotificationCenter.default.post(name: Self.tagsUpdated, object: nil)
     }
-}
-
-enum NotificationNames {
-    static let tagsUpdated = Notification.Name("TagsUpdated")
 }

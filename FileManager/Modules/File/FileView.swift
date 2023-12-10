@@ -56,7 +56,7 @@ private extension FileView {
     func imageOfTags(tag: Tag) -> some View {
         ZStack {
             Image(systemName: "circle.fill")
-                .foregroundColor(Color(uiColor: UIColor(rgb: tag.color?.rawValue ?? 0x000000)))
+                .foregroundColor(Color(uiColor: UIColor(rgb: tag.color.rawValue)))
             Image(systemName: "circle")
                 .foregroundColor(.white)
         }

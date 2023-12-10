@@ -30,11 +30,19 @@ extension File {
             }
         }
 
+        var isStorageLogged: Bool {
+            switch self {
+            case .local:
+                return LocalFileManager().isStorageLogged()
+            case .dropbox:
+                return DropboxFileManager().isStorageLogged()
+            }
+        }
+
         static func activeStorages() -> [FileManager] {
             return File.StorageType.allCases.compactMap {
-                let fileManager = FileManagerFactory.makeFileManager(storage: $0)
-                if fileManager.isStorageLogged(fileManager: fileManager) {
-                    return fileManager
+                if $0.isStorageLogged {
+                    return FileManagerFactory.makeFileManager(storage: $0)
                 } else {
                     return nil
                 }

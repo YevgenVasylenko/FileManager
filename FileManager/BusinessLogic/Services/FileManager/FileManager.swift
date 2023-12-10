@@ -63,13 +63,11 @@ protocol FileManager {
     
     func getFileAttributes(file: File, completion: @escaping (Result<FileAttributes, Error>) -> Void)
 
-    func addTagsToFile(file: File, tagIds: [String], completion: @escaping (Result<Void, Error>) -> Void)
+    func addTags(to file: File, tags: [Tag], completion: @escaping (Result<Void, Error>) -> Void)
 
-    func getActiveTagIdsOnFile(file: File, completion: @escaping (Result<[String], Error>) -> Void)
+    func getActiveTagIds(on file: File, completion: @escaping (Result<[String], Error>) -> Void)
 
     func filesWithTag(tag: Tag, completion: @escaping (Result<[File], Error>) -> Void)
-
-    func isStorageLogged(fileManager: FileManager) -> Bool
 }
 
 

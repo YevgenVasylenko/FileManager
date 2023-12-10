@@ -161,7 +161,7 @@ private extension RootView {
             Text(tag.name)
         } icon: {
             Image(systemName: "circle.fill")
-                .foregroundColor(Color(uiColor: UIColor(rgb: tag.color?.rawValue ?? 0x000000)))
+                .foregroundColor(Color(uiColor: UIColor(rgb: tag.color.rawValue)))
         }
         .contextMenu {
             tagsListItemContextMenu(tag: tag)

@@ -8,9 +8,9 @@
 import Foundation
 
 struct Tag: Hashable, Identifiable {
-    let id: String
+    let id: UUID
     let name: String
-    let color: TagColor?
+    let color: TagColor
 }
 
 enum TagColor: Int, CaseIterable, Hashable {
@@ -25,7 +25,7 @@ enum TagColor: Int, CaseIterable, Hashable {
 
     static func allTags() -> [Tag] {
         return Self.allCases.map {
-            Tag(id: UUID().uuidString, name: $0.name(), color: $0)
+            Tag(id: UUID(), name: $0.name(), color: $0)
         }
     }
 

@@ -8,41 +8,18 @@
 import Foundation
 
 extension URL {
-    func extendedAttributeOfFile(forName name: String) -> Data {
-        do {
-            return try extendedAttribute(forName: name)
-        } catch {
-            return Data()
-        }
+    func extendedAttribute(forName name: String) -> Data {
+        let data = try? extendedAttributeWithError(forName: name)
+        return data ?? Data()
     }
 
-    func setExtendedAttributeToFile(data: Data, forName name: String) {
-        do {
-            try setExtendedAttribute(data: data, forName: name)
-        } catch {
-
-        }
-    }
-
-    func removeExtendedAttributeFromFile(forName name: String) {
-        do {
-            try removeExtendedAttribute(forName: name)
-        } catch {
-
-        }
-    }
-
-    func listExtendedAttributesForFile() -> [String] {
-        do {
-            return try listExtendedAttributes()
-        } catch {
-            return []
-        }
+    func setExtendedAttribute(data: Data, forName name: String) {
+        try? setExtendedAttributeWithError(data: data, forName: name)
     }
 }
 
 private extension URL {
-    func extendedAttribute(forName name: String) throws -> Data {
+    func extendedAttributeWithError(forName name: String) throws -> Data {
 
         let data = try self.withUnsafeFileSystemRepresentation { fileSystemPath -> Data in
 
@@ -60,7 +37,7 @@ private extension URL {
         return data
     }
 
-    func setExtendedAttribute(data: Data, forName name: String) throws {
+    func setExtendedAttributeWithError(data: Data, forName name: String) throws {
 
         try self.withUnsafeFileSystemRepresentation { fileSystemPath in
             let result = data.withUnsafeBytes {
@@ -70,7 +47,7 @@ private extension URL {
         }
     }
 
-    func removeExtendedAttribute(forName name: String) throws {
+    func removeExtendedAttributeWithError(forName name: String) throws {
 
         try self.withUnsafeFileSystemRepresentation { fileSystemPath in
             let result = removexattr(fileSystemPath, name, 0)
@@ -78,7 +55,7 @@ private extension URL {
         }
     }
 
-    func listExtendedAttributes() throws -> [String] {
+    func listExtendedAttributesWithError() throws -> [String] {
 
         let list = try self.withUnsafeFileSystemRepresentation { fileSystemPath -> [String] in
             let length = listxattr(fileSystemPath, nil, 0, 0)

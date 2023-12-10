@@ -30,7 +30,10 @@ final class TagsMenuViewModel: ObservableObject {
     }
 
     func addNewTag() {
-        TagManager.shared.addNewTag(name: state.newTagName, color: state.selectedColorForNewTag?.color)
+        TagManager.shared.addNewTag(
+            name: state.newTagName,
+            color: state.selectedColorForNewTag?.color ?? .grey
+        )
     }
 
     func isCreationNewTagButtonDisabled() -> Bool {
@@ -53,7 +56,8 @@ private extension TagsMenuViewModel {
         NotificationCenter.default.addObserver(
             self,
             selector: #selector(getTagsList),
-            name: NotificationNames.tagsUpdated, object: nil
+            name: TagManager.tagsUpdated,
+            object: nil
         )
         fillActiveTags()
     }
@@ -70,13 +74,12 @@ private extension TagsMenuViewModel {
     }
 
     func addTagsToFile() {
-        let tagIds = state.selectedTags.map { $0.id }
-        fileManagerCommutator.addTagsToFile(
-            file: state.file,
-            tagIds: tagIds) { result in
+        fileManagerCommutator.addTags(
+            to: state.file,
+            tags: Array(state.selectedTags)) { result in
                 switch result {
                 case .success:
-                    break
+                    NotificationCenter.default.post(name: TagManager.tagsUpdated, object: nil)
                 case .failure:
                     break
                 }
@@ -84,11 +87,11 @@ private extension TagsMenuViewModel {
     }
 
     func fillActiveTags() {
-        fileManagerCommutator.getActiveTagIdsOnFile(file: state.file) { result in
+        fileManagerCommutator.getActiveTagIds(on: state.file) { result in
             switch result {
             case .success(let tagIds):
                 for tag in self.state.tags {
-                    if tagIds.contains(tag.id) {
+                    if tagIds.contains(tag.id.uuidString) {
                         self.activeTagsOnFile.insert(tag)
                         self.state.selectedTags = self.activeTagsOnFile
                     }

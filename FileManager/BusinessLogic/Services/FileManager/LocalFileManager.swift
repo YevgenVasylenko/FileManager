@@ -65,7 +65,7 @@ extension LocalFileManager: FileManager {
     ) {
         do {
             var files: [File] = []
-            guard let enumerator = enumeratorDependOnSearchingPlace(searchingPlace: searchingPlace, file: file)
+            guard let enumerator = enumeratorDependOnSearchingPlace(searchingPlace: searchingPlace, currentFolder: file)
             else {
                 completion(.failure(.unknown))
                 return
@@ -82,8 +82,7 @@ extension LocalFileManager: FileManager {
                     }
                     if isRegularFile || isDirectory {
                         var newFile = File(path: fileURL, storageType: .local)
-                        updateFileActionsAndDeleteStatus(file: &newFile)
-                        updateFolderAffiliation(file: &newFile)
+                        newFile = updatedFile(file: newFile)
                         if newFile.displayedName().lowercased().contains(name.lowercased()) {
                             files.append(newFile)
                         }
@@ -120,7 +119,7 @@ extension LocalFileManager: FileManager {
             switch result {
             case .success(let files):
                 let filteredFiles = files.filter { file in
-                    self.getActiveTagNamesOnFile(file: file).contains(tag.id)
+                    self.getActiveTagNamesOnFile(file: file).contains(tag.id.uuidString)
                 }
                 completion(.success(filteredFiles))
             case .failure(let failure):
@@ -333,11 +332,12 @@ extension LocalFileManager: FileManager {
         }
     }
 
-    func addTagsToFile(file: File, tagIds: [String], completion: @escaping (Result<Void, Error>) -> Void) {
-        completion(.success(addTagsToFile(file: file, tagIds: tagIds)))
+    func addTags(to file: File, tags: [Tag], completion: @escaping (Result<Void, Error>) -> Void) {
+        addTagsToFile(file: file, tags: tags)
+        completion(.success(()))
     }
 
-    func getActiveTagIdsOnFile(file: File, completion: @escaping (Result<[String], Error>) -> Void) {
+    func getActiveTagIds(on file: File, completion: @escaping (Result<[String], Error>) -> Void) {
         completion(.success(getActiveTagNamesOnFile(file: file)))
     }
 }
@@ -392,8 +392,8 @@ extension LocalFileManager: LocalTemporaryFolderConnector {
         completion(.success(file.path))
     }
 
-    func isStorageLogged(fileManager: FileManager) -> Bool {
-        DropboxLoginManager.isLogged
+    func isStorageLogged() -> Bool {
+        true
     }
 }
 
@@ -423,15 +423,15 @@ private extension LocalFileManager {
     
     func updateFileActionsAndDeleteStatus(file: inout File) {
         if file == trashFolder {
-            file.actions = FileAction.trashFolderActions
+            file.actions = FileAction.trashFolder
         } else if file == downloadsFolder {
-            file.actions = FileAction.downloadsFolderActions
+            file.actions = FileAction.downloadsFolder
         } else if file.isFileIsSub(file: trashFolder) ||
                     file.isFileIsSub(file: trashFolder, isDirectory: true) || file.isDeleted {
             file.actions = [FileAction.delete, FileAction.restoreFromTrash]
             file.isDeleted = true
         } else {
-            file.actions = FileAction.regularFolder
+            file.actions = FileAction.regularFile
         }
     }
     
@@ -605,14 +605,14 @@ private extension LocalFileManager {
     
     func enumeratorDependOnSearchingPlace(
         searchingPlace: SearchingPlace,
-        file: File
+        currentFolder: File
     ) -> SystemFileManger.DirectoryEnumerator? {
         
         switch searchingPlace {
         case .currentStorage:
             return enumeratorForSearching(file: rootFolder)
         case .currentFolder:
-            return enumeratorForSearching(file: file)
+            return enumeratorForSearching(file: currentFolder)
         case .currentTrash:
             return enumeratorForSearching(file: trashFolder)
         case .allStorages:
@@ -644,8 +644,7 @@ private extension LocalFileManager {
                     }
                     if isRegularFile || isDirectory {
                         var newFile = File(path: fileURL, storageType: .local)
-                        updateFileActionsAndDeleteStatus(file: &newFile)
-                        updateFolderAffiliation(file: &newFile)
+                        newFile = updatedFile(file: newFile)
                         files.append(newFile)
                     }
                 }
@@ -657,13 +656,14 @@ private extension LocalFileManager {
     }
 
     func getActiveTagNamesOnFile(file: File) -> [String] {
-        let encodedTagIds = file.path.extendedAttributeOfFile(forName: "Tags")
+        let encodedTagIds = file.path.extendedAttribute(forName: "Tags")
         return AttributesCoding.fromDataToArray(data: encodedTagIds)
     }
 
-    func addTagsToFile(file: File, tagIds: [String]) {
+    func addTagsToFile(file: File, tags: [Tag]) {
+        let tagIds = tags.map { $0.id.uuidString }
         let encodedTagIds = AttributesCoding.fromArrayToData(array: tagIds)
-        file.path.setExtendedAttributeToFile(data: encodedTagIds, forName: "Tags")
+        file.path.setExtendedAttribute(data: encodedTagIds, forName: "Tags")
     }
 }
 
