@@ -45,9 +45,6 @@ extension LocalFileManager: FileManager {
             var files: [File] = []
             for path in try SystemFileManger.default.contentsOfDirectory(at: file.path, includingPropertiesForKeys: nil) {
                 var newFile = File(path: path, storageType: .local)
-                if file.isDeleted {
-                    newFile.isDeleted = true
-                }
                 newFile = updatedFile(file: newFile)
                 files.append(newFile)
             }
@@ -426,10 +423,8 @@ private extension LocalFileManager {
             file.actions = FileAction.trashFolder
         } else if file == downloadsFolder {
             file.actions = FileAction.downloadsFolder
-        } else if file.isFileIsSub(file: trashFolder) ||
-                    file.isFileIsSub(file: trashFolder, isDirectory: true) || file.isDeleted {
+        } else if file.hasParent(file: trashFolder) {
             file.actions = [FileAction.delete, FileAction.restoreFromTrash]
-            file.isDeleted = true
         } else {
             file.actions = FileAction.regularFile
         }

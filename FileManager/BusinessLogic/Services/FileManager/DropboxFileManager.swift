@@ -11,7 +11,6 @@ import SwiftyDropbox
 final class DropboxFileManager {
     enum Constants {
         static let root = ""
-        static let trash = "trash"
 
         static let propertyFieldName = "Tags"
         static var templateNameForUser: String {
@@ -21,21 +20,14 @@ final class DropboxFileManager {
     }
     
     private(set) var rootFolder: File
-    private(set) var trashFolder: File
 
     init () {
         rootFolder = File(
             path: URL(fileURLWithPath: Constants.root),
             storageType: .dropbox
         )
-        
-        trashFolder = File(
-            path: URL(fileURLWithPath: "/\(Constants.trash)"),
-            storageType: .dropbox
-        )
-        
+
         rootFolder = updatedFile(file: rootFolder)
-        trashFolder = updatedFile(file: trashFolder)
     }
 }
 
@@ -47,19 +39,14 @@ extension DropboxFileManager: FileManager {
             return
         }
         let path = dropboxPath(file: file)
-        
-        if file.isDeleted || path == self.trashFolder.path.path {
-            contentOfTrashFolder(file: file, completion: completion)
-            return
-        }
+
         client.files.listFolder(path: path).response { response, error in
             if let error = error {
                 completion(.failure(Error(dropboxError: error)))
                 return
             }
             var files: [File] = []
-            self.addTrashFolderToRoot(file: file, files: &files)
-            
+
             if let result = response {
                 for fileInResult in result.entries {
                     var fileInFolder = File(
@@ -203,35 +190,7 @@ extension DropboxFileManager: FileManager {
         conflictResolver: NameConflictResolver,
         completion: @escaping (Result<OperationResult, Error>) -> Void
     ) {
-        guard let client = DropboxClientsManager.authorizedClient else {
-            completion(.failure(.unknown))
-            return
-        }
-        let group = DispatchGroup()
-        for file in filesToRestore {
-            group.enter()
-            let path = dropboxPath(file: file)
-            client.files.listRevisions(path: path).response { response, error in
-                if let error = error {
-                    completion(.failure(Error(dropboxError: error)))
-                    return
-                }
-                guard let lastRevision = response?.entries.last else {
-                    print("No revisons")
-                    return
-                }
-                client.files.restore(path: path, rev: lastRevision.rev).response { response, error in
-                    defer { group.leave() }
-                    if let error = error {
-                        completion(.failure(Error(dropboxError: error)))
-                        return
-                    }
-                }
-            }
-        }
-        group.notify(queue: DispatchQueue.main) {
-            completion(.success(.finished))
-        }
+        // Not supported
     }
     
     func deleteFile(files: [File], completion: @escaping (Result<Void, Error>) -> Void) {
@@ -253,14 +212,7 @@ extension DropboxFileManager: FileManager {
     }
     
     func cleanTrashFolder(fileForFileManager: File, completion: @escaping (Result<Void, Error>) -> Void) {
-        contents(of: trashFolder) { result in
-            switch result {
-            case .success(let files):
-                self.deleteFile(files: files, completion: completion)
-            case .failure(let error):
-                completion(.failure(Error(error: error)))
-            }
-        }
+        // Not supported
     }
     
     func makeFolderMonitor(file: File) -> FolderMonitor? {
@@ -549,23 +501,12 @@ private extension DropboxFileManager {
     }
     
     func updateFileActionsAndDeleteStatus(file: inout File) {
-        if file == trashFolder {
-            file.actions = FileAction.trashFolder
-        } else if file.isFileIsSub(file: trashFolder) ||
-                    file.isFileIsSub(file: trashFolder, isDirectory: true) ||
-                    file.isDeleted {
-            file.actions = [FileAction.restoreFromTrash]
-            file.isDeleted = true
-        } else {
-            file.actions = FileAction.regularFile
-        }
+        file.actions = FileAction.regularFile
     }
     
     func updateFolderAffiliation(file: inout File) {
         if file == rootFolder {
             file.folderAffiliation = .system(.root)
-        } else if file == trashFolder {
-            file.folderAffiliation = .system(.trash)
         } else {
             file.folderAffiliation = .user
         }
@@ -664,64 +605,7 @@ private extension DropboxFileManager {
     func dropboxPath(file: File) -> String {
         return file == rootFolder ? "" : file.path.path
     }
-    
-    func contentOfTrashFolder(file: File, completion: @escaping (Result<[File], Error>) -> Void) {
-        guard let client = DropboxClientsManager.authorizedClient else {
-            completion(.failure(.unknown))
-            return
-        }
-        var path = ""
-        if dropboxPath(file: file) != trashFolder.path.path {
-            path = dropboxPath(file: file)
-        }
-        client.files.listFolder(
-            path: path,
-            recursive: true,
-            includeDeleted: true
-        ).response { response, error in
-            if let error = error {
-                print(path)
-                completion(.failure(Error(dropboxError: error)))
-                return
-            }
-            var files: [File] = []
-            if let result = response {
-                for fileInResult in result.entries.reversed() {
-                    switch fileInResult {
-                    case let deletedMetadata as Files.DeletedMetadata:
-                        var fileInFolder = File(
-                            path: URL(fileURLWithPath: deletedMetadata.pathDisplay!),
-                            storageType: .dropbox
-                        )
-                        self.correctFolderPath(file: &fileInFolder)
-                        if fileInFolder.isFolder() {
-                            let isFileInOtherTrashedFolder = files.contains {
-                                fileInFolder.hasParent(file: $0)
-                           }
-                            if isFileInOtherTrashedFolder {
-                                continue
-                            }
-                        }
-                        fileInFolder.isDeleted = true
-                        fileInFolder = self.updatedFile(file: fileInFolder)
-                        files.append(fileInFolder)
-                    default:
-                        continue
-                    }
-                }
-            }
-            completion(.success(files))
-        }
-    }
-    
-    func addTrashFolderToRoot(file: File, files: inout [File]) {
-        if file == self.rootFolder {
-            trashFolder.folderAffiliation = .system(.trash)
-            self.correctFolderPath(file: &trashFolder)
-            files.append(self.trashFolder)
-        }
-    }
-    
+
     func getSizeOfFile(file: File, completion: @escaping (Result<Double, Error>) -> Void) {
         guard let client = DropboxClientsManager.authorizedClient else {
             completion(.failure(.unknown))
@@ -814,7 +698,8 @@ private extension DropboxFileManager {
         case .currentFolder:
             allFilesInside(currentFolder, completion: completion)
         case .currentTrash:
-            contentOfTrashFolder(file: currentFolder, completion: completion)
+            //TO DO make smth
+            break
         case .allStorages:
             allFilesInside(rootFolder, completion: completion)
         }
