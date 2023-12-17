@@ -215,19 +215,31 @@ extension LocalFileManager: FileManager {
     
     func moveToTrash(filesToTrash: [File], completion: (Result<Void, Error>) -> Void) {
         for file in filesToTrash {
+            var isNeedToRepeatTry = true
             var fileToTrashTemp = file
             var trashedFilePath: URL {
                 trashFolder.path.appendingPathComponent(fileToTrashTemp.name)
             }
-            do {
-                if SystemFileManger.default.fileExists(atPath: trashedFilePath.path) {
-                    fileToTrashTemp.addTimeToName()
+            while isNeedToRepeatTry {
+                do {
+                    if SystemFileManger.default.fileExists(atPath: trashedFilePath.path) {
+                        fileToTrashTemp.addTimeToName()
+                        continue
+                    }
+                    try SystemFileManger.default.moveItem(at: file.path, to: trashedFilePath)
+                    Database.Tables.FilesInTrash.insertRowToFilesInTrashDB(fileToTrash: file, fileInTrashPath: trashedFilePath)
+                    isNeedToRepeatTry = false
+                } catch {
+                    let error = error as NSError
+                    switch error.code {
+                    case NSFileWriteFileExistsError:
+                        fileToTrashTemp.addTimeToName()
+                    default:
+                        isNeedToRepeatTry = false
+                        completion(.failure(Error(error: error)))
+                        return
+                    }
                 }
-                try SystemFileManger.default.moveItem(at: file.path, to: trashedFilePath)
-                Database.Tables.FilesInTrash.insertRowToFilesInTrashDB(fileToTrash: file, fileInTrashPath: trashedFilePath)
-            } catch {
-                completion(.failure(Error(error: error)))
-                return
             }
         }
         completion(.success(()))
@@ -449,6 +461,7 @@ private extension LocalFileManager {
         completion: @escaping (Result<OperationResult, Error>) -> Void)
     {
         let destination = destination.makeSubfile(name: file.name)
+
         if SystemFileManger.default.fileExists(atPath: destination.path.path) {
             conflictResolve(fileToCopy: file, destination: destination, conflictResolver: conflictResolver) { conflictResolveResult in
                 switch conflictResolveResult {
@@ -463,7 +476,20 @@ private extension LocalFileManager {
                 try SystemFileManger.default.copyItem(at: file.path, to: destination.path)
                 completion(.success(.finished))
             } catch {
-                completion(.failure(Error(error: error)))
+                let error = error as NSError
+                switch error.code {
+                case NSFileWriteFileExistsError:
+                    conflictResolve(fileToCopy: file, destination: destination, conflictResolver: conflictResolver) { conflictResolveResult in
+                        switch conflictResolveResult {
+                        case .success(let choice):
+                            completion(.success(choice))
+                        case .failure(let error):
+                            completion(.failure(Error(error: error)))
+                        }
+                    }
+                default:
+                    completion(.failure(Error(error: error)))
+                }
             }
         }
     }
@@ -498,17 +524,24 @@ private extension LocalFileManager {
     func copyFileWithNewName(file: File, destination: File) -> Result<Void, Error> {
         var finalFile = destination
         var numberOfCopy = 1
-        repeat {
-            let newName = destination.nameWithoutExtension + " (\(numberOfCopy))"
-            finalFile = finalFile.rename(name: newName)
-            numberOfCopy += 1
-        } while SystemFileManger.default.fileExists(atPath: finalFile.path.path)
-        
-        do {
-            try SystemFileManger.default.copyItem(at: file.path, to: finalFile.path)
-            return .success(())
-        } catch {
-            return .failure(Error(error: error))
+        var isNeedToTryAgain = true
+        while isNeedToTryAgain {
+            do {
+                try SystemFileManger.default.copyItem(at: file.path, to: finalFile.path)
+                isNeedToTryAgain = false
+                return .success(())
+            } catch {
+                let error = error as NSError
+                switch error.code {
+                case NSFileWriteFileExistsError:
+                    let newName = destination.nameWithoutExtension + " (\(numberOfCopy))"
+                    finalFile = finalFile.rename(name: newName)
+                    numberOfCopy += 1
+                default:
+                    isNeedToTryAgain = false
+                    return .failure(Error(error: error))
+                }
+            }
         }
     }
     
