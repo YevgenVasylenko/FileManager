@@ -24,6 +24,12 @@ protocol FileManager {
         completion: @escaping (Result<[File], Error>) -> Void
     )
     
+    func contentBySearchingNameAcrossTagged(
+        tag: Tag,
+        name: String,
+        completion: @escaping (Result<[File], Error>) -> Void
+    )
+
     func createFolder(at file: File, completion: @escaping (Result<Void, Error>) -> Void)
     
     func newNameForCreationOfFolder(

@@ -80,6 +80,24 @@ extension DropboxFileManager: FileManager {
             }
         }
     }
+
+    func contentBySearchingNameAcrossTagged(
+        tag: Tag,
+        name: String,
+        completion: @escaping (Result<[File], Error>) -> Void
+    ) {
+        filesWithTag(tag: tag) { result in
+            switch result {
+            case .success(let files):
+                let foundedFiles = files.filter { file in
+                    file.displayedName().lowercased().contains(name.lowercased())
+                }
+                completion(.success(foundedFiles))
+            case .failure(let failure):
+                completion(.failure(failure))
+            }
+        }
+    }
     
     func createFolder(at file: File, completion: @escaping (Result<Void, Error>) -> Void) {
         guard let client = DropboxClientsManager.authorizedClient else { return }

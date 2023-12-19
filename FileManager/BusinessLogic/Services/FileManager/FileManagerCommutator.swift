@@ -48,6 +48,38 @@ extension FileManagerCommutator: FileManager {
             }
         }
     }
+
+    func contentBySearchingNameAcrossTagged(
+        tag: Tag,
+        name: String,
+        completion: @escaping (Result<[File], Error>) -> Void
+    ) {
+        var foundedFilesAcrossAll: [File] = []
+        let group = DispatchGroup()
+        var error: Error?
+        for storage in File.StorageType.activeStorages() {
+            group.enter()
+            storage.contentBySearchingNameAcrossTagged(
+                tag: tag,
+                name: name)
+                 { result in
+                    defer { group.leave() }
+                    switch result {
+                    case .success(let files):
+                        foundedFilesAcrossAll += files
+                    case .failure(let _error):
+                        error = _error
+                    }
+                }
+        }
+        group.notify(queue: .main) {
+            if let error {
+                completion(.failure(error))
+            } else {
+                completion(.success(foundedFilesAcrossAll))
+            }
+        }
+    }
     
     func createFolder(at file: File, completion: @escaping (Result<Void, Error>) -> Void) {
         FileManagerFactory.makeFileManager(storage: file.storageType).createFolder(at: file, completion: completion)

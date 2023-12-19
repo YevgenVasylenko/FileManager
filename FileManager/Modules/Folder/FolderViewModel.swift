@@ -101,7 +101,7 @@ final class FolderViewModel: ObservableObject {
                     }
                 }
             case .tag(let tag):
-                LocalFileManager().contentBySearchingNameInTag(
+                self.fileManagerCommutator.contentBySearchingNameAcrossTagged(
                     tag: tag,
                     name: self.state.searchingInfo.searchingRequest.searchingName) {
                         [weak self] result in

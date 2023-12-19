@@ -92,7 +92,7 @@ extension LocalFileManager: FileManager {
         }
     }
 
-    func contentBySearchingNameInTag(
+    func contentBySearchingNameAcrossTagged(
         tag: Tag,
         name: String,
         completion: @escaping (Result<[File], Error>) -> Void
