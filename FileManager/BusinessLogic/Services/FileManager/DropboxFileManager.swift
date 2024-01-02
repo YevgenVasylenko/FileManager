@@ -11,7 +11,6 @@ import SwiftyDropbox
 final class DropboxFileManager {
     enum Constants {
         static let root = ""
-
         static let propertyFieldName = "Tags"
         static var templateNameForUser: String {
             guard let name = Bundle.main.bundleIdentifier else { return "" }
@@ -495,7 +494,7 @@ extension DropboxFileManager: LocalTemporaryFolderConnector {
         }
     }
 
-    func isStorageLogged() -> Bool {
+    static func isStorageLogged() -> Bool {
         DropboxLoginManager.isLogged
     }
 }

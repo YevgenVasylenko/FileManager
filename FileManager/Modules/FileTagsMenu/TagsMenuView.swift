@@ -31,7 +31,6 @@ struct TagsMenuView: View {
 
 private extension TagsMenuView {
 
-    @ViewBuilder
     func tagsList() -> some View {
         VStack {
             Button(R.string.localizable.add_new_tag()) {
@@ -46,7 +45,7 @@ private extension TagsMenuView {
                             tagsListItem(tag: tag)
                                 .foregroundColor(.black)
                             Spacer()
-                            if viewModel.state.selectedTags.contains { $0.id == tag.id } {
+                            if viewModel.state.selectedTags.contains(tag) {
                                 Image(systemName: "checkmark")
                                     .foregroundColor(.black)
                             }
@@ -65,14 +64,13 @@ private extension TagsMenuView {
     }
 
     func toggleSelection(tag: Tag) {
-            if let existingIndex = viewModel.state.selectedTags.firstIndex(where: { $0.id == tag.id }) {
-                viewModel.state.selectedTags.remove(at: existingIndex)
+            if viewModel.state.selectedTags.contains(tag) {
+                viewModel.state.selectedTags.remove(tag)
             } else {
                 viewModel.state.selectedTags.insert(tag)
             }
         }
 
-    @ViewBuilder
     func tagsListItem(tag: Tag) -> some View {
         Label {
             Text(tag.name)

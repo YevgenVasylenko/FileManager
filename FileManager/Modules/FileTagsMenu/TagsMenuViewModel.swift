@@ -18,8 +18,7 @@ final class TagsMenuViewModel: ObservableObject {
         var selectedColorForNewTag: Tag?
     }
 
-    private var activeTagsOnFile: Set<Tag> = []
-    private var fileManagerCommutator = FileManagerCommutator()
+    private let fileManagerCommutator = FileManagerCommutator()
 
     @Published
     var state: State
@@ -59,7 +58,7 @@ private extension TagsMenuViewModel {
             name: TagManager.tagsUpdated,
             object: nil
         )
-        fillActiveTags()
+        fillSelectedTags()
     }
 
     func isNameOfNewTagAlreadyExist() -> Bool {
@@ -86,18 +85,18 @@ private extension TagsMenuViewModel {
             }
     }
 
-    func fillActiveTags() {
-        fileManagerCommutator.getActiveTagIds(on: state.file) { result in
+    func fillSelectedTags() {
+        fileManagerCommutator.getActiveTagIds(on: state.file) { [weak self] result in
+            guard let self else { return }
             switch result {
-            case .success(let tagIds):
-                for tag in self.state.tags {
-                    if tagIds.contains(tag.id.uuidString) {
-                        self.activeTagsOnFile.insert(tag)
-                        self.state.selectedTags = self.activeTagsOnFile
-                    }
-                }
             case .failure:
                 break
+            case .success(let tagIds):
+                let tagIDs = Set(tagIds)
+                let selectedTags = self.state.tags.filter { tag in
+                    tagIDs.contains(tag.id.uuidString)
+                }
+                self.state.selectedTags = Set(selectedTags)
             }
         }
     }

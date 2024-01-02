@@ -33,9 +33,9 @@ extension File {
         var isStorageLogged: Bool {
             switch self {
             case .local:
-                return LocalFileManager().isStorageLogged()
+                return true
             case .dropbox:
-                return DropboxFileManager().isStorageLogged()
+                return DropboxFileManager.isStorageLogged()
             }
         }
 

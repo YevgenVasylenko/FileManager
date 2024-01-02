@@ -12,7 +12,12 @@ struct FileView: View {
     @StateObject
     private var viewModel: FileViewModel
 
-    init(file: File, style: FileViewModel.Style, infoPresented: Binding<Bool>, tagsPresented: Binding<Bool>) {
+    init(
+        file: File,
+        style: FileViewModel.Style,
+        infoPresented: Binding<Bool>,
+        tagsPresented: Binding<Bool>
+    ) {
         self._viewModel = StateObject(wrappedValue: FileViewModel(
             file: file,
             style: style,
@@ -62,7 +67,6 @@ private extension FileView {
         }
     }
 
-    @ViewBuilder
     func setOfTagsImage() -> some View {
         ZStack {
             ForEach(Array(viewModel.state.tags.enumerated()), id: \.element) { index, tag in

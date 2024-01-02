@@ -30,21 +30,21 @@ final class TagManager {
     func addNewTag(name: String, color: TagColor) {
         let newTag = Tag(id: UUID(), name: name, color: color)
         Database.Tables.Tags.insertRowToDB(tag: newTag)
-        notifiedDbUpdated()
+        notifyDbUpdated()
     }
 
     func deleteTag(tag: Tag) {
         Database.Tables.Tags.deleteFromDB(tag: tag)
-        notifiedDbUpdated()
+        notifyDbUpdated()
     }
 
     func renameTag(tag: Tag, newName: String) -> Error? {
         let error = Database.Tables.Tags.renameTag(tag: tag, newName: newName)
-        notifiedDbUpdated()
+        notifyDbUpdated()
         return error
     }
 
-    private func notifiedDbUpdated() {
+    private func notifyDbUpdated() {
         _tags = nil
         NotificationCenter.default.post(name: Self.tagsUpdated, object: nil)
     }

@@ -92,6 +92,9 @@ private extension RootView {
                     fileSelectDelegate?.selected(nil)
                 })
             )
+            .onAppear {
+                viewModel.reloadLoggedState()
+            }
     }
     
     func connectionButton() -> some View {
@@ -123,7 +126,6 @@ private extension RootView {
         }
     }
 
-    @ViewBuilder
     func sidebarStorageSection() -> some View {
         Section {
             List(
@@ -139,7 +141,6 @@ private extension RootView {
         .scaledToFit()
     }
 
-    @ViewBuilder
     func sidebarTagsSection() -> some View {
         Section {
             List(
@@ -155,7 +156,6 @@ private extension RootView {
         .scaledToFit()
     }
 
-    @ViewBuilder
     func tagsListItem(tag: Tag) -> some View {
         Label {
             Text(tag.name)

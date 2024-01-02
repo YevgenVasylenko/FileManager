@@ -51,20 +51,29 @@ final class FileViewModel: ObservableObject {
 
     @objc
     private func getTags() {
-        fileManagerCommutator.getActiveTagIds(on: file) { result in
+        fileManagerCommutator.getActiveTagIds(on: file) { [weak self] result in
+            guard let self else { return }
             switch result {
             case .failure:
                 break
             case .success(let tagIds):
-                self.state.tags = tagIds.compactMap { tagId in
-                    for tag in TagManager.shared.tags {
-                        if tag.id.uuidString == tagId {
-                            return tag
-                        }
-                    }
-                    return nil
-                }
+                self.state.tags = self.makeTags(ids: tagIds)
             }
         }
     }
+
+    private func makeTags(ids: [String]) -> [Tag] {
+            if ids.isEmpty {
+                return []
+            }
+
+            var tags = [String: Tag]()
+            for tag in TagManager.shared.tags {
+                tags[tag.id.uuidString] = tag
+            }
+
+            return ids.compactMap { tagId in
+                tags[tagId]
+            }
+        }
 }

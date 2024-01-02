@@ -19,9 +19,7 @@ extension Database.Tables {
         static func create() {
             do {
                 try Database.connection.transaction {
-                    if try Database.connection.scalar("SELECT EXISTS (SELECT * FROM sqlite_master WHERE type = 'table' AND name = ?)", "tags") as! Int64 > 0 {
-                        return
-                    } else {
+                    if Database.isTableExists(name: "tags") == false {
                         try Database.connection.run(
                             table.create() { t in
                                 t.column(id, primaryKey: .autoincrement)

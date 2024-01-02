@@ -25,7 +25,7 @@ final class FolderViewModel: ObservableObject {
     }
     
     private var conflictCompletion: ((ConflictNameResult) -> Void)?
-    private var fileManagerCommutator = FileManagerCommutator()
+    private let fileManagerCommutator = FileManagerCommutator()
     private lazy var folderMonitor = makeFolderMonitor()
     private let debouncer = Debouncer()
     
@@ -121,6 +121,8 @@ final class FolderViewModel: ObservableObject {
     
     func startCreatingFolder() {
         switch state.content {
+        case .tag:
+            break
         case .folder(let file):
             fileManagerCommutator.newNameForCreationOfFolder(
                 at: file,
@@ -134,13 +136,13 @@ final class FolderViewModel: ObservableObject {
                     break
                 }
             }
-        case .tag:
-            break
         }
     }
     
     func createFolder(newName: String) {
         switch state.content {
+        case .tag:
+            break
         case .folder(let file):
             state.folderCreating = nil
             let createdFile = file.makeSubfile(name: newName, isDirectory: true)
@@ -155,8 +157,6 @@ final class FolderViewModel: ObservableObject {
                 }
                 self.state.isLoading = false
             }
-        case .tag:
-            break
         }
     }
 
@@ -247,16 +247,18 @@ final class FolderViewModel: ObservableObject {
     
     func isFolderOkForFolderCreationButton() -> Bool {
         switch state.content {
+        case .tag:
+            return false
         case .folder(let file):
            return file.hasParent(file: LocalFileManager().trashFolder) == false &&
             file.folderAffiliation != .system(.trash)
-        case .tag:
-            return false
         }
     }
     
     func suggestedPlacesForSearch() -> [SearchingPlace] {
         switch state.content {
+        case .tag:
+            return []
         case .folder(let file):
             switch file.folderAffiliation {
             case .user:
@@ -268,13 +270,13 @@ final class FolderViewModel: ObservableObject {
             default:
                 return SearchingPlace.allCases
             }
-        case .tag:
-            return []
         }
     }
 
     func defaultPlaceForSearch() -> SearchingPlace {
         switch state.content {
+        case .tag:
+            return .currentStorage
         case .folder(let file):
             switch file.folderAffiliation {
             case .user:
@@ -286,8 +288,6 @@ final class FolderViewModel: ObservableObject {
             default:
                 return .currentFolder
             }
-        case .tag:
-            return .currentStorage
         }
     }
 

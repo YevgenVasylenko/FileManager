@@ -20,7 +20,6 @@ final class RootViewModel: ObservableObject {
         var tagForRename: Tag?
         var newNameForTag: String = ""
         var error: Error?
-        var filesWithTag: [File] = []
     }
 
     private var fileManagerCommutator = FileManagerCommutator()
@@ -57,7 +56,6 @@ final class RootViewModel: ObservableObject {
         case .tag, .none:
             break
         }
-        reloadLoggedState()
     }
     
     func logoutFromCloud() {
@@ -103,15 +101,15 @@ final class RootViewModel: ObservableObject {
             self.state.error = error
         }
     }
+
+    func reloadLoggedState() {
+        state.isDropboxLogged = DropboxLoginManager.isLogged
+    }
 }
 
 // MARK: - Private
 
 private extension RootViewModel {
-
-    func reloadLoggedState() {
-        state.isDropboxLogged = DropboxLoginManager.isLogged
-    }
 
     @objc
     func updateTagsList() {
