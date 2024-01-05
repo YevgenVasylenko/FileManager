@@ -12,7 +12,7 @@ final class LocalFileManager {
         static let root = "root"
         static let trash = "trash"
         static let downloads = "downloads"
-        static let attributeName = "Tags"
+        static let tagAttributeName = "Tags"
     }
 
     private(set) var rootFolder: File
@@ -676,14 +676,14 @@ private extension LocalFileManager {
     }
 
     func getActiveTagNamesOnFile(file: File) -> [String] {
-        let encodedTagIds = file.path.extendedAttribute(forName: Constants.attributeName)
+        let encodedTagIds = file.path.extendedAttribute(forName: Constants.tagAttributeName)
         return AttributesCoding.fromDataToArray(data: encodedTagIds)
     }
 
     func addTagsToFile(file: File, tags: [Tag]) {
         let tagIds = tags.map { $0.id.uuidString }
         let encodedTagIds = AttributesCoding.fromArrayToData(array: tagIds)
-        file.path.setExtendedAttribute(data: encodedTagIds, forName: Constants.attributeName)
+        file.path.setExtendedAttribute(data: encodedTagIds, forName: Constants.tagAttributeName)
     }
 }
 

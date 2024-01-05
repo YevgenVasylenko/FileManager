@@ -7,7 +7,7 @@
 
 import Foundation
 
-class FileManagerFactory {
+enum FileManagerFactory {
 
     static func makeFileManager(file: File) -> FileManager & LocalTemporaryFolderConnector {
         makeFileManager(storage: file.storageType)

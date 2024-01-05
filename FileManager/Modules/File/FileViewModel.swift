@@ -63,17 +63,17 @@ final class FileViewModel: ObservableObject {
     }
 
     private func makeTags(ids: [String]) -> [Tag] {
-            if ids.isEmpty {
-                return []
-            }
-
-            var tags = [String: Tag]()
-            for tag in TagManager.shared.tags {
-                tags[tag.id.uuidString] = tag
-            }
-
-            return ids.compactMap { tagId in
-                tags[tagId]
-            }
+        if ids.isEmpty {
+            return []
         }
+
+        var tags = [String: Tag]()
+        for tag in TagManager.shared.tags {
+            tags[tag.id.uuidString] = tag
+        }
+
+        return ids.compactMap { tagId in
+            tags[tagId]
+        }
+    }
 }

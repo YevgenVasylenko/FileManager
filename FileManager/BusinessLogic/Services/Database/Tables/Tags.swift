@@ -10,7 +10,8 @@ import SQLite
 
 extension Database.Tables {
     enum Tags {
-        static let table = Table("tags")
+        private static let tagsTableName = "tags"
+        static let table = Table(tagsTableName)
         static let id = Expression<Int64>("id")
         static let tagName = Expression<String>("tagName")
         static let tagColor = Expression<Int>("tagColor")
@@ -19,7 +20,7 @@ extension Database.Tables {
         static func create() {
             do {
                 try Database.connection.transaction {
-                    if Database.isTableExists(name: "tags") == false {
+                    if Database.isTableExists(name: tagsTableName) == false {
                         try Database.connection.run(
                             table.create() { t in
                                 t.column(id, primaryKey: .autoincrement)
