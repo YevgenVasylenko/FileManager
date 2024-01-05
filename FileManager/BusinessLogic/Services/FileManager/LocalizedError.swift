@@ -14,19 +14,6 @@ enum Error: LocalizedError {
         case unknown
         case dropbox(String)
     
-        var errorDescription: String? {
-            switch self {
-            case .nameExist:
-                return R.string.localizable.name_is_exist()
-            case .tagExist:
-                return R.string.localizable.tag_name_is_exist()
-            case .unknown:
-                return R.string.localizable.unknown_error()
-            case .dropbox(let description):
-                return description
-            }
-        }
-  
     init(error: Swift.Error) {
         let error = error as NSError
         switch error.code {

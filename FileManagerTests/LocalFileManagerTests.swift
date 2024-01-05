@@ -443,12 +443,72 @@ final class LocalFileManagerTests: XCTestCase {
             XCTAssertTrue(result.isFailure)
         }
     }
-}
 
-extension File {
-    func makeStubFile() -> File{
-        self.makeSubfile(name: UUID().uuidString)
+    func testRestoreFromTrash() {
+        let fileToTrash = fileManager.rootFolder.makeStubFile()
+        fileManager.createFolder(at: fileToTrash) { contentResult in
+            XCTAssertTrue(contentResult.isSuccess)
+        }
+        let fileInTrash = fileManager.trashFolder.makeSubfile(name: fileToTrash.name)
+        fileManager.moveToTrash(filesToTrash: [fileToTrash]) { moveToTrashResult in
+            switch moveToTrashResult {
+            case .success:
+                XCTAssertFalse(SystemFileManger.default.fileExists(atPath: fileToTrash.path.path))
+                XCTAssertTrue(SystemFileManger.default.fileExists(atPath: fileInTrash.path.path))
+            case .failure:
+                XCTFail()
+            }
+        }
+
+        fileManager.restoreFromTrash(
+            filesToRestore: [fileInTrash],
+            conflictResolver: conflictResolver
+        ) { restoreFromTrashResult in
+            switch restoreFromTrashResult {
+            case .success:
+                XCTAssertFalse(SystemFileManger.default.fileExists(atPath: fileInTrash.path.path))
+                XCTAssertTrue(SystemFileManger.default.fileExists(atPath: fileToTrash.path.path))
+            case .failure:
+                XCTFail()
+            }
+        }
+    }
+
+    func testRestoreFromTrashNonEmptyFolder() {
+        let fileToTrash = fileManager.rootFolder.makeStubFile()
+        fileManager.createFolder(at: fileToTrash) { contentResult in
+            XCTAssertTrue(contentResult.isSuccess)
+        }
+        let fileInsideFileToTrash = fileToTrash.makeStubFile()
+        fileManager.createFolder(at: fileInsideFileToTrash) { contentResult in
+            XCTAssertTrue(contentResult.isSuccess)
+        }
+
+        let fileInTrash = fileManager.trashFolder.makeSubfile(name: fileToTrash.name)
+        fileManager.moveToTrash(filesToTrash: [fileToTrash]) { moveToTrashResult in
+            switch moveToTrashResult {
+            case .success:
+                XCTAssertFalse(SystemFileManger.default.fileExists(atPath: fileToTrash.path.path))
+                XCTAssertFalse(SystemFileManger.default.fileExists(atPath: fileInsideFileToTrash.path.path))
+                XCTAssertTrue(SystemFileManger.default.fileExists(atPath: fileInTrash.path.path))
+            case .failure:
+                XCTFail()
+            }
+        }
+
+        fileManager.restoreFromTrash(
+            filesToRestore: [fileInTrash],
+            conflictResolver: conflictResolver
+        ) { restoreFromTrashResult in
+            switch restoreFromTrashResult {
+            case .success:
+                XCTAssertFalse(SystemFileManger.default.fileExists(atPath: fileInTrash.path.path))
+                XCTAssertTrue(SystemFileManger.default.fileExists(atPath: fileToTrash.path.path))
+                XCTAssertTrue(SystemFileManger.default.fileExists(atPath: fileInsideFileToTrash.path.path))
+            case .failure:
+                XCTFail()
+            }
+        }
     }
 }
-// move to create file
-// yes, move)
+

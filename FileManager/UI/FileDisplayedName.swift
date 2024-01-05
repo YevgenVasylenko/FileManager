@@ -8,8 +8,25 @@
 import Foundation
 
 extension File {
-    
     func displayedName() -> String {
+#if TESTS
+        switch self.folderAffiliation {
+        case .user:
+            return self.name
+        case .system(.root):
+            if self.storageType == .dropbox {
+                return DropboxFileManager.Constants.root
+            }
+            if self.storageType == .local {
+                return LocalFileManager.Constants.root
+            }
+            return self.name
+        case .system(.trash):
+            return LocalFileManager.Constants.trash
+        case .system(.download):
+            return LocalFileManager.Constants.downloads
+        }
+#else
         switch self.folderAffiliation {
         case .user:
             return self.name
@@ -26,5 +43,6 @@ extension File {
         case .system(.download):
             return R.string.localizable.downloads()
         }
+#endif
     }
 }

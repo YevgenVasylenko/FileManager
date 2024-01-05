@@ -89,3 +89,9 @@ struct FileAttributes {
     let createdDate: Date?
     let modifiedDate: Date?
 }
+
+extension File {
+    func makeStubFile() -> File{
+        self.makeSubfile(name: UUID().uuidString)
+    }
+}

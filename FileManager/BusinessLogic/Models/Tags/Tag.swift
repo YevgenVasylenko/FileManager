@@ -29,25 +29,46 @@ enum TagColor: Int, CaseIterable, Hashable {
         }
     }
 
-    func name() -> String {
+    private func name() -> String {
+#if TESTS
         switch self {
-       case .red:
+        case .red:
+            return "red"
+        case .orange:
+            return "orange"
+        case .yellow:
+            return "yellow"
+        case .green:
+            return "green"
+        case .blue:
+            return "blue"
+        case .indigo:
+            return "indigo"
+        case .violet:
+            return "violet"
+        case .grey:
+            return "grey"
+        }
+#else
+        switch self {
+        case .red:
             return R.string.localizable.red()
-       case .orange:
-           return R.string.localizable.orange()
-       case .yellow:
-           return R.string.localizable.yellow()
-       case .green:
-           return R.string.localizable.green()
-       case .blue:
-           return R.string.localizable.blue()
-       case .indigo:
-           return R.string.localizable.indigo()
-       case .violet:
-           return R.string.localizable.violet()
-       case .grey:
-           return R.string.localizable.grey()
-       }
+        case .orange:
+            return R.string.localizable.orange()
+        case .yellow:
+            return R.string.localizable.yellow()
+        case .green:
+            return R.string.localizable.green()
+        case .blue:
+            return R.string.localizable.blue()
+        case .indigo:
+            return R.string.localizable.indigo()
+        case .violet:
+            return R.string.localizable.violet()
+        case .grey:
+            return R.string.localizable.grey()
+        }
+#endif
     }
 }
 

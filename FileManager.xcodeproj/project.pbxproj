@@ -20,6 +20,25 @@
 		5D02F5732B1CA635006BB064 /* FileViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D02F5722B1CA635006BB064 /* FileViewModel.swift */; };
 		5D04653D2A71071900BE768E /* FileActionType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D04653C2A71071900BE768E /* FileActionType.swift */; };
 		5D05A8612AED497400BBAC09 /* SearchingPlace.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D05A8602AED497400BBAC09 /* SearchingPlace.swift */; };
+		5D0674242B48217500E283FF /* SearchingPlace.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D05A8602AED497400BBAC09 /* SearchingPlace.swift */; };
+		5D0674262B48218400E283FF /* Tag.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DC9F20B2B0B9E830078D38D /* Tag.swift */; };
+		5D0674272B48220500E283FF /* Content.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DC9F2272B165FF70078D38D /* Content.swift */; };
+		5D0674292B48223000E283FF /* File+FolderAffiliation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0DA5918E2AE827230092E07B /* File+FolderAffiliation.swift */; };
+		5D06742F2B48256800E283FF /* SearchingPlace+Names.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D06742E2B48256800E283FF /* SearchingPlace+Names.swift */; };
+		5D0674372B4827A500E283FF /* LocalizedError+ErrorDescription.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D0674362B4827A500E283FF /* LocalizedError+ErrorDescription.swift */; };
+		5D06743B2B48288700E283FF /* File+StorageType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0DA591902AE8274E0092E07B /* File+StorageType.swift */; };
+		5D06743C2B48289100E283FF /* DropboxFileManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DF870D22A77ADAA00F9E5D5 /* DropboxFileManager.swift */; };
+		5D06743D2B48289A00E283FF /* FileManagerFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D627D902A7E73CA00170451 /* FileManagerFactory.swift */; };
+		5D06743E2B482CB100E283FF /* Database.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D7B59812AD597D400AFB058 /* Database.swift */; };
+		5D0674402B482CD100E283FF /* URL+ExtendedAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DC9F1FF2B0A2CB20078D38D /* URL+ExtendedAttributes.swift */; };
+		5D0674412B482CE800E283FF /* AttributesCoding.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D02F56D2B1C7EB4006BB064 /* AttributesCoding.swift */; };
+		5D0674422B485A7800E283FF /* FilesInTrash.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0DA591962AE8289A0092E07B /* FilesInTrash.swift */; };
+		5D0674442B485A8200E283FF /* SearchHistory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DA07C9C2AFFB0E200FF7AFC /* SearchHistory.swift */; };
+		5D0674452B485A8900E283FF /* Tags.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DC9F2062B0B4D590078D38D /* Tags.swift */; };
+		5D0674462B485AC100E283FF /* FileManagerCommutator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D627D932A7F871C00170451 /* FileManagerCommutator.swift */; };
+		5D0674482B485AC900E283FF /* DropboxLoginManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D627D8D2A7C31CE00170451 /* DropboxLoginManager.swift */; };
+		5D06744A2B485CE900E283FF /* FileDisplayedName.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D1B5B1D2A910598004C7AA8 /* FileDisplayedName.swift */; };
+		5D06744F2B48640700E283FF /* UIApplication+Utilities.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0DA5918A2AE826100092E07B /* UIApplication+Utilities.swift */; };
 		5D0ACE492AA72BE900B834E8 /* FolderShowOptionsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D0ACE482AA72BE900B834E8 /* FolderShowOptionsView.swift */; };
 		5D0AFC152A7685AF000AA28F /* SwiftyDropbox in Frameworks */ = {isa = PBXBuildFile; productRef = 5D0AFC142A7685AF000AA28F /* SwiftyDropbox */; };
 		5D0B9CA32A4464530099021C /* FolderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D0B9CA22A4464530099021C /* FolderView.swift */; };
@@ -115,6 +134,8 @@
 		5D02F5722B1CA635006BB064 /* FileViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileViewModel.swift; sourceTree = "<group>"; };
 		5D04653C2A71071900BE768E /* FileActionType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileActionType.swift; sourceTree = "<group>"; };
 		5D05A8602AED497400BBAC09 /* SearchingPlace.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchingPlace.swift; sourceTree = "<group>"; };
+		5D06742E2B48256800E283FF /* SearchingPlace+Names.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SearchingPlace+Names.swift"; sourceTree = "<group>"; };
+		5D0674362B4827A500E283FF /* LocalizedError+ErrorDescription.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "LocalizedError+ErrorDescription.swift"; sourceTree = "<group>"; };
 		5D0ACE482AA72BE900B834E8 /* FolderShowOptionsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FolderShowOptionsView.swift; sourceTree = "<group>"; };
 		5D0B9CA22A4464530099021C /* FolderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FolderView.swift; sourceTree = "<group>"; };
 		5D0B9CA42A4466460099021C /* FileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileView.swift; sourceTree = "<group>"; };
@@ -329,6 +350,7 @@
 				5D78B1B42A4ECEDC00A76D0F /* ConflictResolver.swift */,
 				5D1B5B122A8E7B56004C7AA8 /* LocalTemporaryFolderConnector.swift */,
 				5D221D5B2A5DA1170072AA35 /* LocalizedError.swift */,
+				5D0674362B4827A500E283FF /* LocalizedError+ErrorDescription.swift */,
 				0DA5919A2AE829810092E07B /* Login */,
 				0DA591992AE829680092E07B /* FolderMonitor */,
 			);
@@ -478,6 +500,7 @@
 				5D78B1B02A4ECDAA00A76D0F /* Result+Utilities.swift */,
 				0DA5918A2AE826100092E07B /* UIApplication+Utilities.swift */,
 				5D05A8602AED497400BBAC09 /* SearchingPlace.swift */,
+				5D06742E2B48256800E283FF /* SearchingPlace+Names.swift */,
 				5DA07C922AFCFA5E00FF7AFC /* Debouncer.swift */,
 				5DC9F1FF2B0A2CB20078D38D /* URL+ExtendedAttributes.swift */,
 				5D02F56D2B1C7EB4006BB064 /* AttributesCoding.swift */,
@@ -618,18 +641,35 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				5D0674412B482CE800E283FF /* AttributesCoding.swift in Sources */,
+				5D0674422B485A7800E283FF /* FilesInTrash.swift in Sources */,
 				5D1B5B212A91F8ED004C7AA8 /* LocalizedError.swift in Sources */,
+				5D0674402B482CD100E283FF /* URL+ExtendedAttributes.swift in Sources */,
 				5D616B672A4AE58300E1360A /* FileManagerTests.swift in Sources */,
 				5D78B1B62A4ECEDF00A76D0F /* ConflictResolver.swift in Sources */,
+				5D0674272B48220500E283FF /* Content.swift in Sources */,
+				5D0674442B485A8200E283FF /* SearchHistory.swift in Sources */,
 				5D1B5B232A920016004C7AA8 /* LocalFolderMonitor.swift in Sources */,
+				5D06743B2B48288700E283FF /* File+StorageType.swift in Sources */,
+				5D0674482B485AC900E283FF /* DropboxLoginManager.swift in Sources */,
 				5D78B1B32A4ECDD000A76D0F /* Result+Utilities.swift in Sources */,
 				5D616B702A4AE64800E1360A /* LocalFileManager.swift in Sources */,
+				5D0674462B485AC100E283FF /* FileManagerCommutator.swift in Sources */,
+				5D0674292B48223000E283FF /* File+FolderAffiliation.swift in Sources */,
 				5D2499762A4D7DA8003D66F3 /* FIleManagerRootPath.swift in Sources */,
 				5D221D5E2A5EDB720072AA35 /* File.swift in Sources */,
+				5D06744F2B48640700E283FF /* UIApplication+Utilities.swift in Sources */,
 				5D1B5B172A90E106004C7AA8 /* FolderMonitor.swift in Sources */,
+				5D06743E2B482CB100E283FF /* Database.swift in Sources */,
 				5D616B6F2A4AE5B000E1360A /* LocalFileManagerTests.swift in Sources */,
+				5D0674452B485A8900E283FF /* Tags.swift in Sources */,
+				5D06744A2B485CE900E283FF /* FileDisplayedName.swift in Sources */,
+				5D06743C2B48289100E283FF /* DropboxFileManager.swift in Sources */,
 				5D1B5B152A90E08B004C7AA8 /* FileAction.swift in Sources */,
 				5D1B5B192A90E126004C7AA8 /* LocalTemporaryFolderConnector.swift in Sources */,
+				5D0674262B48218400E283FF /* Tag.swift in Sources */,
+				5D0674242B48217500E283FF /* SearchingPlace.swift in Sources */,
+				5D06743D2B48289A00E283FF /* FileManagerFactory.swift in Sources */,
 				5D32C0152A54687900578958 /* FileManager.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -683,9 +723,11 @@
 				5D69E0092A934A050036AE44 /* FileContentView.swift in Sources */,
 				5D1B5B132A8E7B56004C7AA8 /* LocalTemporaryFolderConnector.swift in Sources */,
 				5D627D8B2A79875100170451 /* FolderMonitor.swift in Sources */,
+				5D0674372B4827A500E283FF /* LocalizedError+ErrorDescription.swift in Sources */,
 				5DF5DBA42A9610B500F91A46 /* FileContentViewModel.swift in Sources */,
 				5DC9F2002B0A2CB20078D38D /* URL+ExtendedAttributes.swift in Sources */,
 				5D7B59822AD597D400AFB058 /* Database.swift in Sources */,
+				5D06742F2B48256800E283FF /* SearchingPlace+Names.swift in Sources */,
 				5DACCB4E2A445689000A0CA9 /* RootView.swift in Sources */,
 				5DACCB4C2A445689000A0CA9 /* FileManagerApp.swift in Sources */,
 				5DA07C9D2AFFB0E200FF7AFC /* SearchHistory.swift in Sources */,
@@ -736,6 +778,7 @@
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				GCC_PREPROCESSOR_DEFINITIONS = "$(inherited)";
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 16.2;
 				MACOSX_DEPLOYMENT_TARGET = 12.6;
@@ -744,6 +787,7 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = auto;
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx";
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG TESTS";
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -758,6 +802,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEAD_CODE_STRIPPING = YES;
+				GCC_PREPROCESSOR_DEFINITIONS = "";
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 16.2;
 				MACOSX_DEPLOYMENT_TARGET = 12.6;
@@ -766,6 +811,7 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = auto;
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx";
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = TESTS;
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
