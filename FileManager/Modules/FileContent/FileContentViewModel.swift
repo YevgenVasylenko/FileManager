@@ -10,7 +10,7 @@ import Foundation
 final class FileContentViewModel: ObservableObject {
     
     struct State {
-        let file: File
+        var file: File?
         var error: Error?
         var isLoading = true
         var localFileURL: URL?
@@ -27,7 +27,8 @@ final class FileContentViewModel: ObservableObject {
     
     func getLocalFileURL() {
         state.isLoading = true
-        fileManagerCommutator.getLocalFileURL(file: state.file) { [self] result in
+        guard let file = state.file else { return }
+        fileManagerCommutator.getLocalFileURL(file: file) { [self] result in
             switch result {
             case .success(let linkInLocal):
                 self.state.localFileURL = linkInLocal

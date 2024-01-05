@@ -90,10 +90,12 @@ extension View {
         }
     }
     
-    func unreadableFileAlert(isShowing: Binding<Bool>, presentation: Binding<PresentationMode>) -> some View {
-        return alert(R.string.localizable.unreadableFile(), isPresented: isShowing) {
+    func unreadableFileAlert(file: Binding<File?>, dismiss: DismissAction) -> some View {
+        let isShowing = file.wrappedValue?.fileType() == .unknown
+        return alert(R.string.localizable.unreadableFile(), isPresented: .constant(isShowing)) {
             Button(R.string.localizable.ok()) {
-                presentation.wrappedValue.dismiss()
+                dismiss()
+                file.wrappedValue = nil
             }
         }
     }
