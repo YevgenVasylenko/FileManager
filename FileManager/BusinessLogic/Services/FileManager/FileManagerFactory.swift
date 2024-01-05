@@ -7,14 +7,18 @@
 
 import Foundation
 
-class FileManagerFactory {
-    
+enum FileManagerFactory {
+
     static func makeFileManager(file: File) -> FileManager & LocalTemporaryFolderConnector {
-         switch file.storageType {
-         case .local:
-             return LocalFileManager()
-         case .dropbox:
-             return DropboxFileManager()
-         }
-     }
+        makeFileManager(storage: file.storageType)
+    }
+
+    static func makeFileManager(storage: File.StorageType) -> FileManager & LocalTemporaryFolderConnector {
+        switch storage {
+        case .local:
+            return LocalFileManager()
+        case .dropbox:
+            return DropboxFileManager()
+        }
+    }
 }

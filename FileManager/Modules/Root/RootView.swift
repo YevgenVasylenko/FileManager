@@ -20,9 +20,11 @@ struct RootView: View {
     
     var body: some View {
         NavigationSplitView {
-            List(viewModel.state.storages, id: \.self, selection: $viewModel.state.selectedStorage) { file in
-                storageListItem(file: file)
+            List {
+                sidebarStorageSection()
+                sidebarTagsSection()
             }
+            .listStyle(.sidebar)
         } detail: {
             if viewModel.isShouldConnectSelectedStorage() {
                 NavigationStack(path: $viewModel.state.detailNavigationStack) {
@@ -36,6 +38,8 @@ struct RootView: View {
         .onOpenURL { url in
             DropboxLoginManager.openUrl(url: url)
         }
+        .renamePopover(viewModel: viewModel, newName: $viewModel.state.newNameForTag)
+        .errorAlert(error: $viewModel.state.error)
     }
 }
 
@@ -43,30 +47,28 @@ struct RootView: View {
 
 private extension RootView {
     
-    func folderView(file: File) -> some View {
+    func folderView(content: Content) -> some View {
         FolderView(
-            file: file,
+            content: content,
             fileSelectDelegate: fileSelectDelegate
         )
-        .id(file)
+        .id(content)
     }
     
     @ViewBuilder
     func rootDetailView() -> some View {
-        if let selectedStorage = viewModel.state.selectedStorage {
-            folderView(file: selectedStorage)
+        if let selectedContent = viewModel.state.selectedContent {
+            folderView(content: selectedContent)
                 .navigationDestination(for: File.self) { file in
                     if file.isFolder() {
-                        folderView(file: file)
+                        folderView(content: .folder(file))
                     } else {
                         FileContentView(file: file)
                     }
                 }
         }
     }
-}
 
-private extension RootView {
     func storageListItem(file: File) -> some View {
         Label(title: {
             Spacer()
@@ -90,6 +92,9 @@ private extension RootView {
                     fileSelectDelegate?.selected(nil)
                 })
             )
+            .onAppear {
+                viewModel.reloadLoggedState()
+            }
     }
     
     func connectionButton() -> some View {
@@ -120,6 +125,104 @@ private extension RootView {
             return R.image.folder.name
         }
     }
+
+    func sidebarStorageSection() -> some View {
+        Section {
+            List(
+                viewModel.state.contentStorages,
+                id: \.self,
+                selection: $viewModel.state.selectedContent
+            ) { content in
+                listItem(content: content)
+            }
+        } header: {
+            Text(R.string.localizable.places())
+        }
+        .scaledToFit()
+    }
+
+    func sidebarTagsSection() -> some View {
+        Section {
+            List(
+                viewModel.state.contentTags,
+                id: \.self,
+                selection: $viewModel.state.selectedContent
+            ) { content in
+                listItem(content: content)
+            }
+        } header: {
+            Text(R.string.localizable.tags())
+        }
+        .scaledToFit()
+    }
+
+    func tagsListItem(tag: Tag) -> some View {
+        Label {
+            Text(tag.name)
+        } icon: {
+            Image(systemName: "circle.fill")
+                .foregroundColor(Color(uiColor: UIColor(rgb: tag.color.rawValue)))
+        }
+        .contextMenu {
+            tagsListItemContextMenu(tag: tag)
+        }
+    }
+
+    @ViewBuilder
+    func tagsListItemContextMenu(tag: Tag) -> some View {
+        Button(role: .destructive) {
+            viewModel.deleteTagFromList(tag: tag)
+        } label: {
+            Label("\(R.string.localizable.delete()) «\(tag.name)»", systemImage: "xmark")
+        }
+
+        Button {
+            viewModel.state.tagForRename = tag
+        } label: {
+            Label("\(R.string.localizable.rename()) «\(tag.name)»", systemImage: "pencil")
+        }
+    }
+
+    @ViewBuilder
+    func listItem(content: Content) -> some View {
+        switch content {
+        case .folder(let file):
+            storageListItem(file: file)
+        case .tag(let tag):
+            tagsListItem(tag: tag)
+        }
+    }
+}
+
+// MARK: - Private
+
+private extension View {
+    func renamePopover(viewModel: RootViewModel, newName: Binding<String>) -> some View {
+        alert(
+            R.string.localizable.renamePopupTitle()
+            + (viewModel.state.tagForRename?.name ?? ""),
+                     isPresented: .constant(viewModel.state.tagForRename != nil),
+                     actions: {
+            TextField(R.string.localizable.new_name(),
+                      text: newName)
+                .padding()
+                .interactiveDismissDisabled()
+                .autocorrectionDisabled()
+            HStack {
+                Button(R.string.localizable.rename()) {
+                    guard let tag = viewModel.state.tagForRename else { return }
+                    viewModel.renameTag(tag: tag, newName: newName.wrappedValue)
+                    newName.wrappedValue = ""
+                }
+                Spacer()
+                Button(R.string.localizable.cancel()) {
+                    viewModel.state.tagForRename = nil
+                    newName.wrappedValue = ""
+                }
+            }
+            .padding()
+        })
+    }
 }
 
 struct RootView_Previews: PreviewProvider {
@@ -127,3 +230,4 @@ struct RootView_Previews: PreviewProvider {
         RootView()
     }
 }
+

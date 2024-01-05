@@ -11,9 +11,9 @@ final class FileManagerCommutator {
 }
 
 extension FileManagerCommutator: FileManager {
-    
+
    func contents(of file: File, completion: @escaping (Result<[File], Error>) -> Void) {
-        FileManagerFactory.makeFileManager(file: file).contents(of: file, completion: completion)
+       FileManagerFactory.makeFileManager(file: file).contents(of: file, completion: completion)
     }
     
     func contentBySearchingName(
@@ -48,6 +48,38 @@ extension FileManagerCommutator: FileManager {
             }
         }
     }
+
+    func contentBySearchingNameAcrossTagged(
+        tag: Tag,
+        name: String,
+        completion: @escaping (Result<[File], Error>) -> Void
+    ) {
+        var foundedFilesAcrossAll: [File] = []
+        let group = DispatchGroup()
+        var error: Error?
+        for storage in File.StorageType.activeStorages() {
+            group.enter()
+            storage.contentBySearchingNameAcrossTagged(
+                tag: tag,
+                name: name)
+                 { result in
+                    defer { group.leave() }
+                    switch result {
+                    case .success(let files):
+                        foundedFilesAcrossAll += files
+                    case .failure(let _error):
+                        error = _error
+                    }
+                }
+        }
+        group.notify(queue: .main) {
+            if let error {
+                completion(.failure(error))
+            } else {
+                completion(.success(foundedFilesAcrossAll))
+            }
+        }
+    }
     
     func createFolder(at file: File, completion: @escaping (Result<Void, Error>) -> Void) {
         FileManagerFactory.makeFileManager(file: file).createFolder(at: file, completion: completion)
@@ -70,7 +102,9 @@ extension FileManagerCommutator: FileManager {
         newName: String,
         completion: @escaping (Result<Void, Error>) -> Void
     ) {
-        FileManagerFactory.makeFileManager(file: file).rename(file: file, newName: newName, completion: completion)
+        FileManagerFactory
+            .makeFileManager(file: file)
+            .rename(file: file, newName: newName, completion: completion)
     }
     
     func copy(
@@ -191,19 +225,52 @@ extension FileManagerCommutator: FileManager {
         let fileManager = FileManagerFactory.makeFileManager(file: file)
         fileManager.getFileAttributes(file: file, completion: completion)
     }
+
+    func addTags(to file: File, tags: [Tag], completion: @escaping (Result<Void, Error>) -> Void) {
+        let fileManager = FileManagerFactory.makeFileManager(file: file)
+        fileManager.addTags(to: file, tags: tags, completion: completion)
+    }
+
+    func getActiveTagIds(on file: File, completion: @escaping (Result<[String], Error>) -> Void) {
+        let fileManager = FileManagerFactory.makeFileManager(file: file)
+        fileManager.getActiveTagIds(on: file, completion: completion)
+    }
+
+    func filesWithTag(tag: Tag, completion: @escaping (Result<[File], Error>) -> Void) {
+        var allFilesAcrossStoragesWithTag: [File] = []
+        let group = DispatchGroup()
+        var error: Error?
+        for storage in File.StorageType.activeStorages() {
+            group.enter()
+            storage.filesWithTag(tag: tag) { result in
+                defer { group.leave() }
+                switch result {
+                case .success(let files):
+                    allFilesAcrossStoragesWithTag += files
+                case .failure(let _error):
+                    error = _error
+                }
+            }
+        }
+        group.notify(queue: .main) {
+            if let error {
+                completion(.failure(error))
+            } else {
+                completion(.success(allFilesAcrossStoragesWithTag))
+            }
+        }
+    }
 }
+
+// MARK: - Private
 
 private extension FileManagerCommutator {
     func makeListOfActiveFileManagers(file: File, searchingPlace: SearchingPlace) -> [FileManager] {
-        var storages: [FileManager] = []
-        if searchingPlace == .allStorages {
-            storages.append(LocalFileManager())
-            if DropboxLoginManager.isLogged {
-                storages.append(DropboxFileManager())
-            }
-        } else {
-            storages.append(FileManagerFactory.makeFileManager(file: file))
+        switch searchingPlace {
+        case .currentStorage, .currentFolder, .currentTrash:
+            return [FileManagerFactory.makeFileManager(file: file)]
+        case .allStorages:
+            return File.StorageType.activeStorages()
         }
-        return storages
     }
 }

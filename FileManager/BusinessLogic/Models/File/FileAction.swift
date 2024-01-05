@@ -16,9 +16,11 @@ enum FileAction {
     case restoreFromTrash
     case delete
     case clean
+    case tags
     case info
     
-    static let trashFolderActions: [Self] = [.clean]
-    static let downloadsFolderActions: [Self] = []
-    static let regularFolder: [Self] = [.rename, .move, .copy, .moveToTrash, .info]
+    static let trashFolder: [Self] = [.clean]
+    static let downloadsFolder: [Self] = []
+    static let regularFile: [Self] = [.rename, .move, .copy, .moveToTrash, .tags, .info]
+    static let trashedFiles: [Self] = [.delete, .restoreFromTrash]
 }

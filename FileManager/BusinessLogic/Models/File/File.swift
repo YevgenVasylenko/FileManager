@@ -12,7 +12,6 @@ struct File {
     var actions: [FileAction] = []
     let storageType: StorageType
     var path: URL
-    var isDeleted = false
     var attributes: FileAttributes?
     
     init(path: URL, storageType: StorageType) {

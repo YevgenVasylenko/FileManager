@@ -86,6 +86,8 @@ extension Database.Tables {
     }
 }
 
+// MARK: - Private
+
 private extension Database.Tables.FilesInTrash {
     static func pathWithOutHomeDirectory(path: URL) -> String {
         return path.path.replacingOccurrences(of: NSHomeDirectory(), with: "")

@@ -37,6 +37,8 @@ struct FileOptionsButtonView: View {
                         deleteButton()
                     case .clean:
                         cleanButton()
+                    case .tags:
+                        tagsButton()
                     case .info:
                         infoButton()
                     }
@@ -51,6 +53,8 @@ struct FileOptionsButtonView: View {
         }
     }
 }
+
+// MARK: - Private
 
 private extension FileOptionsButtonView {
     func renameButton() -> some View {
@@ -109,6 +113,14 @@ private extension FileOptionsButtonView {
             Label(R.string.localizable.clean(), systemImage: "paintbrush.pointed")
         }
     }
+
+    func tagsButton() -> some View {
+        Button {
+            delegate(.tags)
+        } label: {
+            Label(R.string.localizable.tags(), systemImage: "tag")
+        }
+    }
     
     func infoButton() -> some View {
         Button {
@@ -136,6 +148,8 @@ struct FileOptionsButtonView_Previews: PreviewProvider {
             case .delete:
                 break
             case .clean:
+                break
+            case .tags:
                 break
             case .info:
                 break

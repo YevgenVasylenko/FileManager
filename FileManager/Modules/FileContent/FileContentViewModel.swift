@@ -7,7 +7,7 @@
 
 import Foundation
 
-class FileContentViewModel: ObservableObject {
+final class FileContentViewModel: ObservableObject {
     
     struct State {
         let file: File

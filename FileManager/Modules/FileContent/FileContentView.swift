@@ -40,11 +40,3 @@ struct FileContentView: View {
         )
     }
 }
-//
-//struct WebView_Previews: PreviewProvider {
-//    let file = File(path: SystemFileManger.default.temporaryDirectory.appendingPathComponent("word.docx"), storageType: .local)
-//    SystemFileManger.default.createFile(atPath: file.path , contents: nil)
-//    static var previews: some View {
-//        WebContentView(file: self.file)
-//    }
-//}

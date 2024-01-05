@@ -6,9 +6,9 @@
 //
 
 import Foundation
-import SwiftUI
 
-class FolderGridListViewModel: ObservableObject {
+final class FolderGridListViewModel: ObservableObject {
+
     struct State {
         var file: File?
         var files: [File]
@@ -19,6 +19,7 @@ class FolderGridListViewModel: ObservableObject {
         var error: Error?
         var nameConflict: NameConflict?
         var deletingFromTrash = false
+        var tagsPopover: File?
     }
     
     private var fileManagerCommutator = FileManagerCommutator()
@@ -133,6 +134,8 @@ class FolderGridListViewModel: ObservableObject {
         conflictCompletion?(nameResult)
     }
 }
+
+// MARK: - Private
 
 private extension FolderGridListViewModel {
     

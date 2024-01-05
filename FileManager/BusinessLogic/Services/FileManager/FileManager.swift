@@ -24,6 +24,12 @@ protocol FileManager {
         completion: @escaping (Result<[File], Error>) -> Void
     )
     
+    func contentBySearchingNameAcrossTagged(
+        tag: Tag,
+        name: String,
+        completion: @escaping (Result<[File], Error>) -> Void
+    )
+
     func createFolder(at file: File, completion: @escaping (Result<Void, Error>) -> Void)
     
     func newNameForCreationOfFolder(
@@ -62,6 +68,12 @@ protocol FileManager {
     func makeFolderMonitor(file: File) -> FolderMonitor?
     
     func getFileAttributes(file: File, completion: @escaping (Result<FileAttributes, Error>) -> Void)
+
+    func addTags(to file: File, tags: [Tag], completion: @escaping (Result<Void, Error>) -> Void)
+
+    func getActiveTagIds(on file: File, completion: @escaping (Result<[String], Error>) -> Void)
+
+    func filesWithTag(tag: Tag, completion: @escaping (Result<[File], Error>) -> Void)
 }
 
 

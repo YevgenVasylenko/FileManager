@@ -49,8 +49,11 @@ struct FolderGridListView: View {
             isShowing: $viewModel.state.deletingFromTrash,
             deletingConfirmed: viewModel.delete
         )
+        .errorAlert(error: $viewModel.state.error)
     }
 }
+
+// MARK: - Private
 
 private extension FolderGridListView {
     
@@ -68,6 +71,17 @@ private extension FolderGridListView {
             },
             set: { isPresented in
                 viewModel.state.fileInfoPopover = isPresented ? file : nil
+            }
+        )
+    }
+
+    func tagsPopoverBinding(for file: File) -> Binding<Bool> {
+        .init(
+            get: {
+                viewModel.state.tagsPopover == file
+            },
+            set: { isPresented in
+                viewModel.state.tagsPopover = isPresented ? file : nil
             }
         )
     }
@@ -89,6 +103,8 @@ private extension FolderGridListView {
                 viewModel.deleteOne(file: file)
             case .clean:
                 viewModel.clear(file: file)
+            case .tags:
+                viewModel.state.tagsPopover = file
             case .info:
                 viewModel.state.fileInfoPopover = file
             }
@@ -158,15 +174,25 @@ private extension FolderGridListView {
     }
     
     @ViewBuilder
-    func fileView(file: File, style: FileView.Style) -> some View {
+    func fileView(file: File, style: FileViewModel.Style) -> some View {
         switch style {
         case .grid:
             NavigationLink(value: file) {
-                FileView(file: file, style: style, infoPresented: fileInfoPopoverBinding(for: file))
+                FileView(
+                    file: file,
+                    style: style,
+                    infoPresented: fileInfoPopoverBinding(for: file),
+                    tagsPresented: tagsPopoverBinding(for: file)
+                )
             }
         case .list:
             ListViewItemWithoutDisclosureIndicator(value: file) {
-                FileView(file: file, style: style, infoPresented: fileInfoPopoverBinding(for: file))
+                FileView(
+                    file: file,
+                    style: style,
+                    infoPresented: fileInfoPopoverBinding(for: file),
+                    tagsPresented: tagsPopoverBinding(for: file)
+                )
             }
         case .info:
             EmptyView()
@@ -212,9 +238,3 @@ private extension View {
         })
     }
 }
-
-//struct SwiftUIView_Previews: PreviewProvider {
-//    static var previews: some View {
-//        SwiftUIView()
-//    }
-//}

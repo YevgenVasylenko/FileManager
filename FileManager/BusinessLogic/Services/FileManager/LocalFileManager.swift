@@ -12,6 +12,7 @@ final class LocalFileManager {
         static let root = "root"
         static let trash = "trash"
         static let downloads = "downloads"
+        static let tagAttributeName = "Tags"
     }
 
     private(set) var rootFolder: File
@@ -45,9 +46,6 @@ extension LocalFileManager: FileManager {
             var files: [File] = []
             for path in try SystemFileManger.default.contentsOfDirectory(at: file.path, includingPropertiesForKeys: nil) {
                 var newFile = File(path: path, storageType: .local)
-                if file.isDeleted {
-                    newFile.isDeleted = true
-                }
                 newFile = updatedFile(file: newFile)
                 files.append(newFile)
             }
@@ -65,7 +63,7 @@ extension LocalFileManager: FileManager {
     ) {
         do {
             var files: [File] = []
-            guard let enumerator = enumeratorDependOnSearchingPlace(searchingPlace: searchingPlace, file: file)
+            guard let enumerator = enumeratorDependOnSearchingPlace(searchingPlace: searchingPlace, currentFolder: file)
             else {
                 completion(.failure(.unknown))
                 return
@@ -82,8 +80,7 @@ extension LocalFileManager: FileManager {
                     }
                     if isRegularFile || isDirectory {
                         var newFile = File(path: fileURL, storageType: .local)
-                        updateFileActionsAndDeleteStatus(file: &newFile)
-                        updateFolderAffiliation(file: &newFile)
+                        newFile = updatedFile(file: newFile)
                         if newFile.displayedName().lowercased().contains(name.lowercased()) {
                             files.append(newFile)
                         }
@@ -93,6 +90,39 @@ extension LocalFileManager: FileManager {
             completion(.success(files))
         } catch {
             completion(.failure(Error(error: error)))
+        }
+    }
+
+    func contentBySearchingNameAcrossTagged(
+        tag: Tag,
+        name: String,
+        completion: @escaping (Result<[File], Error>) -> Void
+    ) {
+        filesWithTag(tag: tag) { result in
+            switch result {
+            case .success(let files):
+                let foundedFiles = files.filter { file in
+                    file.displayedName().lowercased().contains(name.lowercased())
+                }
+                completion(.success(foundedFiles))
+            case .failure(let failure):
+                completion(.failure(failure))
+            }
+        }
+    }
+
+    func filesWithTag(tag: Tag, completion: @escaping (Result<[File], Error>) -> Void) {
+        allFilesInLocal() { [weak self] result in
+            guard let self else { return }
+            switch result {
+            case .success(let files):
+                let filteredFiles = files.filter { file in
+                    self.getActiveTagNamesOnFile(file: file).contains(tag.id.uuidString)
+                }
+                completion(.success(filteredFiles))
+            case .failure(let failure):
+                completion(.failure(failure))
+            }
         }
     }
     
@@ -190,18 +220,28 @@ extension LocalFileManager: FileManager {
             var trashedFilePath: URL {
                 trashFolder.path.appendingPathComponent(fileToTrashTemp.name)
             }
-            do {
-                if SystemFileManger.default.fileExists(atPath: trashedFilePath.path) {
-                    fileToTrashTemp.addTimeToName()
+            while true {
+                do {
+                    if SystemFileManger.default.fileExists(atPath: trashedFilePath.path) {
+                        fileToTrashTemp.addTimeToName()
+                        continue
+                    }
+                    try SystemFileManger.default.moveItem(at: file.path, to: trashedFilePath)
+                    Database.Tables.FilesInTrash.insertRowToFilesInTrashDB(fileToTrash: file, fileInTrashPath: trashedFilePath)
+                    completion(.success(()))
+                    break
+                } catch {
+                    let error = error as NSError
+                    switch error.code {
+                    case NSFileWriteFileExistsError:
+                        fileToTrashTemp.addTimeToName()
+                    default:
+                        completion(.failure(Error(error: error)))
+                        return
+                    }
                 }
-                try SystemFileManger.default.moveItem(at: file.path, to: trashedFilePath)
-                Database.Tables.FilesInTrash.insertRowToFilesInTrashDB(fileToTrash: file, fileInTrashPath: trashedFilePath)
-            } catch {
-                completion(.failure(Error(error: error)))
-                return
             }
         }
-        completion(.success(()))
     }
     
     func restoreFromTrash(
@@ -299,6 +339,15 @@ extension LocalFileManager: FileManager {
             completion(.failure(Error(error: error)))
         }
     }
+
+    func addTags(to file: File, tags: [Tag], completion: @escaping (Result<Void, Error>) -> Void) {
+        addTagsToFile(file: file, tags: tags)
+        completion(.success(()))
+    }
+
+    func getActiveTagIds(on file: File, completion: @escaping (Result<[String], Error>) -> Void) {
+        completion(.success(getActiveTagNamesOnFile(file: file)))
+    }
 }
 
 extension LocalFileManager: LocalTemporaryFolderConnector {
@@ -378,15 +427,13 @@ private extension LocalFileManager {
     
     func updateFileActionsAndDeleteStatus(file: inout File) {
         if file == trashFolder {
-            file.actions = FileAction.trashFolderActions
+            file.actions = FileAction.trashFolder
         } else if file == downloadsFolder {
-            file.actions = FileAction.downloadsFolderActions
-        } else if file.isFileIsSub(file: trashFolder) ||
-                    file.isFileIsSub(file: trashFolder, isDirectory: true) || file.isDeleted {
+            file.actions = FileAction.downloadsFolder
+        } else if file.hasParent(file: trashFolder) {
             file.actions = [FileAction.delete, FileAction.restoreFromTrash]
-            file.isDeleted = true
         } else {
-            file.actions = FileAction.regularFolder
+            file.actions = FileAction.regularFile
         }
     }
     
@@ -409,6 +456,7 @@ private extension LocalFileManager {
         completion: @escaping (Result<OperationResult, Error>) -> Void)
     {
         let destination = destination.makeSubfile(name: file.name)
+
         if SystemFileManger.default.fileExists(atPath: destination.path.path) {
             conflictResolve(fileToCopy: file, destination: destination, conflictResolver: conflictResolver) { conflictResolveResult in
                 switch conflictResolveResult {
@@ -423,7 +471,20 @@ private extension LocalFileManager {
                 try SystemFileManger.default.copyItem(at: file.path, to: destination.path)
                 completion(.success(.finished))
             } catch {
-                completion(.failure(Error(error: error)))
+                let error = error as NSError
+                switch error.code {
+                case NSFileWriteFileExistsError:
+                    conflictResolve(fileToCopy: file, destination: destination, conflictResolver: conflictResolver) { conflictResolveResult in
+                        switch conflictResolveResult {
+                        case .success(let choice):
+                            completion(.success(choice))
+                        case .failure(let error):
+                            completion(.failure(Error(error: error)))
+                        }
+                    }
+                default:
+                    completion(.failure(Error(error: error)))
+                }
             }
         }
     }
@@ -458,17 +519,21 @@ private extension LocalFileManager {
     func copyFileWithNewName(file: File, destination: File) -> Result<Void, Error> {
         var finalFile = destination
         var numberOfCopy = 1
-        repeat {
-            let newName = destination.nameWithoutExtension + " (\(numberOfCopy))"
-            finalFile = finalFile.rename(name: newName)
-            numberOfCopy += 1
-        } while SystemFileManger.default.fileExists(atPath: finalFile.path.path)
-        
-        do {
-            try SystemFileManger.default.copyItem(at: file.path, to: finalFile.path)
-            return .success(())
-        } catch {
-            return .failure(Error(error: error))
+        while true {
+            do {
+                try SystemFileManger.default.copyItem(at: file.path, to: finalFile.path)
+                return .success(())
+            } catch {
+                let error = error as NSError
+                switch error.code {
+                case NSFileWriteFileExistsError:
+                    let newName = destination.nameWithoutExtension + " (\(numberOfCopy))"
+                    finalFile = finalFile.rename(name: newName)
+                    numberOfCopy += 1
+                default:
+                    return .failure(Error(error: error))
+                }
+            }
         }
     }
     
@@ -560,14 +625,14 @@ private extension LocalFileManager {
     
     func enumeratorDependOnSearchingPlace(
         searchingPlace: SearchingPlace,
-        file: File
+        currentFolder: File
     ) -> SystemFileManger.DirectoryEnumerator? {
         
         switch searchingPlace {
         case .currentStorage:
-           return  enumeratorForSearching(file: rootFolder)
+            return enumeratorForSearching(file: rootFolder)
         case .currentFolder:
-            return enumeratorForSearching(file: file)
+            return enumeratorForSearching(file: currentFolder)
         case .currentTrash:
             return enumeratorForSearching(file: trashFolder)
         case .allStorages:
@@ -577,6 +642,48 @@ private extension LocalFileManager {
     
     func enumeratorForSearching(file: File) -> SystemFileManger.DirectoryEnumerator? {
         return SystemFileManger.default.enumerator(at: file.path, includingPropertiesForKeys: [.isRegularFileKey, .isDirectoryKey], options: [.skipsHiddenFiles, .skipsPackageDescendants])
+    }
+
+    func allFilesInLocal(completion: @escaping (Result<[File], Error>) -> Void) {
+        do {
+            var files: [File] = []
+            guard let enumerator = SystemFileManger.default.enumerator(at: rootFolder.path, includingPropertiesForKeys: [.isRegularFileKey, .isDirectoryKey], options: [.skipsHiddenFiles, .skipsPackageDescendants])
+            else {
+                completion(.failure(.unknown))
+                return
+            }
+            for case let fileURL as URL in enumerator {
+                do {
+                    let fileAttributes = try fileURL.resourceValues(forKeys:[.isRegularFileKey, .isDirectoryKey])
+                    guard
+                        let isRegularFile = fileAttributes.isRegularFile,
+                        let isDirectory = fileAttributes.isDirectory
+                    else {
+                        completion(.failure(.unknown))
+                        return
+                    }
+                    if isRegularFile || isDirectory {
+                        var newFile = File(path: fileURL, storageType: .local)
+                        newFile = updatedFile(file: newFile)
+                        files.append(newFile)
+                    }
+                }
+            }
+            completion(.success(files))
+        } catch {
+            completion(.failure(Error(error: error)))
+        }
+    }
+
+    func getActiveTagNamesOnFile(file: File) -> [String] {
+        let encodedTagIds = file.path.extendedAttribute(forName: Constants.tagAttributeName)
+        return AttributesCoding.fromDataToArray(data: encodedTagIds)
+    }
+
+    func addTagsToFile(file: File, tags: [Tag]) {
+        let tagIds = tags.map { $0.id.uuidString }
+        let encodedTagIds = AttributesCoding.fromArrayToData(array: tagIds)
+        file.path.setExtendedAttribute(data: encodedTagIds, forName: Constants.tagAttributeName)
     }
 }
 

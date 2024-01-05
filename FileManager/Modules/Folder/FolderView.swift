@@ -15,10 +15,10 @@ struct FolderView: View {
     private var viewModel: FolderViewModel
 
     init(
-        file: File,
+        content: Content,
         fileSelectDelegate: FileSelectDelegate?
     ) {
-        self._viewModel = StateObject(wrappedValue: FolderViewModel(file: file))
+        self._viewModel = StateObject(wrappedValue: FolderViewModel(content: content))
         self.fileSelectDelegate = fileSelectDelegate
     }
     
@@ -44,16 +44,23 @@ struct FolderView: View {
     }
 }
 
+// MARK: - Private
+
 private extension FolderView {
 
+    @ViewBuilder
     func folderView() -> some View {
         let files = viewModel.state.files
-        return FolderGridListView(
-            files: files,
-            fileSelectDelegate: fileSelectDelegate,
-            selectedFiles: $viewModel.state.chosenFiles
-        )
-        .id(files)
+        if files.isEmpty {
+            Image(R.image.noFiles.name)
+        } else {
+            FolderGridListView(
+                files: files,
+                fileSelectDelegate: fileSelectDelegate,
+                selectedFiles: $viewModel.state.chosenFiles
+            )
+            .id(files)
+        }
     }
     
     func createFolderButton() -> some View {
@@ -76,7 +83,6 @@ private extension FolderView {
     @ViewBuilder
     func completeFolderView() -> some View {
         suggestedPlaceForSearchMenuBar()
-        EmptyView()
         ZStack {
             if viewModel.state.isLoading {
                 ProgressView()
@@ -84,7 +90,7 @@ private extension FolderView {
             else {
                 folderView()
             }
-            if  viewModel.isFolderOkForFolderCreationButton() {
+            if viewModel.isFolderOkForFolderCreationButton() {
                 createFolderButton()
             }
             actionMenuBarForChosenFiles()
@@ -112,11 +118,11 @@ private extension FolderView {
         .navigationViewStyle(.stack)
         .buttonStyle(.plain)
         .padding()
-        .navigationTitle(viewModel.state.folder.displayedName())
+        .navigationTitle(displayedNameForNavigationTitle())
         .toolbar {
             navigationBar(
                 chooseAction: {
-                    fileSelectDelegate?.selected(viewModel.state.folder)
+                    fileSelectDelegate?.selected(fileForFileSelectDelegate())
                 })
         }
     }
@@ -127,7 +133,7 @@ private extension FolderView {
             VStack {
                 Spacer()
                 HStack {
-                    if !viewModel.state.folder.hasParent(file: LocalFileManager().trashFolder) {
+                    if isFolderInTrashFolder() {
                         Spacer()
                         Button(R.string.localizable.copy_to()) {
                             viewModel.copyChosen()
@@ -144,7 +150,7 @@ private extension FolderView {
                         }
                         .buttonStyle(.automatic)
                         Spacer()
-                    } else if viewModel.state.folder.storageType.isLocal {
+                    } else if isFolderInLocal() {
                         Spacer()
                         Button(R.string.localizable.delete()) {
                             viewModel.startDeleting()
@@ -188,12 +194,12 @@ private extension FolderView {
 
     @ViewBuilder
     func suggestedPlaceForSearchMenuBar() -> some View {
-        if !viewModel.state.searchingInfo.searchingRequest.searchingName.isEmpty {
-            HStack {
+        if viewModel.state.searchingInfo.searchingRequest.searchingName.isEmpty == false {
+            HStack(alignment: .top) {
                 Spacer()
                 ForEach(viewModel.suggestedPlacesForSearch(), id: \.self) { place in
                     Toggle(
-                        place.namesForPlaces(file: viewModel.state.folder),
+                        place.namesForPlaces(content: viewModel.state.content),
                         isOn: choosePlaceBinding(choicePlace: place)
                     )
                     .toggleStyle(.button)
@@ -254,6 +260,42 @@ private extension FolderView {
             Label(name, systemImage: "clock.arrow.circlepath").searchCompletion(name)
         }
     }
+
+    func displayedNameForNavigationTitle() -> String {
+        switch viewModel.state.content {
+        case .folder(let file):
+           return file.displayedName()
+        case .tag(let tag):
+            return tag.name
+        }
+    }
+
+    func fileForFileSelectDelegate() -> File? {
+        switch viewModel.state.content {
+        case .folder(let file):
+            return file
+        case .tag:
+            return nil
+        }
+    }
+
+    func isFolderInTrashFolder() -> Bool {
+        switch viewModel.state.content {
+        case .folder(let file):
+            return file.hasParent(file: LocalFileManager().trashFolder) == false
+        case .tag:
+            return false
+        }
+    }
+
+    func isFolderInLocal() -> Bool {
+        switch viewModel.state.content {
+        case .folder(let file):
+            return file.storageType.isLocal
+        case .tag:
+            return false
+        }
+    }
 }
 
 private extension View {
@@ -285,14 +327,3 @@ private extension View {
         })
     }
 }
-
-//struct FolderView_Previews: PreviewProvider {
-//    static var previews: some View {
-//        FolderView(
-//            viewModel: FolderViewModel(
-//                file: PreviewFiles.rootFolder,
-//                state: .init(folder: PreviewFiles.rootFolder,
-//                             files: PreviewFiles.filesInTrash)), fileSelectDelegate: nil)
-//    }
-//}
-

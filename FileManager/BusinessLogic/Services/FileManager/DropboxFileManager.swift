@@ -11,25 +11,22 @@ import SwiftyDropbox
 final class DropboxFileManager {
     enum Constants {
         static let root = ""
-        static let trash = "trash"
+        static let propertyFieldName = "Tags"
+        static var templateNameForUser: String {
+            guard let name = Bundle.main.bundleIdentifier else { return "" }
+            return name
+        }
     }
     
     private(set) var rootFolder: File
-    private(set) var trashFolder: File
-    
+
     init () {
         rootFolder = File(
             path: URL(fileURLWithPath: Constants.root),
             storageType: .dropbox
         )
-        
-        trashFolder = File(
-            path: URL(fileURLWithPath: "/\(Constants.trash)"),
-            storageType: .dropbox
-        )
-        
+
         rootFolder = updatedFile(file: rootFolder)
-        trashFolder = updatedFile(file: trashFolder)
     }
 }
 
@@ -41,19 +38,14 @@ extension DropboxFileManager: FileManager {
             return
         }
         let path = dropboxPath(file: file)
-        
-        if file.isDeleted || path == self.trashFolder.path.path {
-            contentOfTrashFolder(file: file, completion: completion)
-            return
-        }
+
         client.files.listFolder(path: path).response { response, error in
             if let error = error {
                 completion(.failure(Error(dropboxError: error)))
                 return
             }
             var files: [File] = []
-            self.addTrashFolderToRoot(file: file, files: &files)
-            
+
             if let result = response {
                 for fileInResult in result.entries {
                     var fileInFolder = File(
@@ -75,13 +67,31 @@ extension DropboxFileManager: FileManager {
         name: String,
         completion: @escaping (Result<[File], Error>) -> Void
     ) {
-        getFilesDependOnSearchPlace(file: file, searchingPlace: searchingPlace) { result in
+        getFilesDependOnSearchPlace(currentFolder: file, searchingPlace: searchingPlace) { result in
             switch result {
             case .success(let files):
                 let filteredFiles = files.filter { file in
                     file.displayedName().lowercased().contains(name.lowercased())
                 }
                 completion(.success(filteredFiles))
+            case .failure(let failure):
+                completion(.failure(failure))
+            }
+        }
+    }
+
+    func contentBySearchingNameAcrossTagged(
+        tag: Tag,
+        name: String,
+        completion: @escaping (Result<[File], Error>) -> Void
+    ) {
+        filesWithTag(tag: tag) { result in
+            switch result {
+            case .success(let files):
+                let foundedFiles = files.filter { file in
+                    file.displayedName().lowercased().contains(name.lowercased())
+                }
+                completion(.success(foundedFiles))
             case .failure(let failure):
                 completion(.failure(failure))
             }
@@ -197,35 +207,7 @@ extension DropboxFileManager: FileManager {
         conflictResolver: NameConflictResolver,
         completion: @escaping (Result<OperationResult, Error>) -> Void
     ) {
-        guard let client = DropboxClientsManager.authorizedClient else {
-            completion(.failure(.unknown))
-            return
-        }
-        let group = DispatchGroup()
-        for file in filesToRestore {
-            group.enter()
-            let path = dropboxPath(file: file)
-            client.files.listRevisions(path: path).response { response, error in
-                if let error = error {
-                    completion(.failure(Error(dropboxError: error)))
-                    return
-                }
-                guard let lastRevision = response?.entries.last else {
-                    print("No revisons")
-                    return
-                }
-                client.files.restore(path: path, rev: lastRevision.rev).response { response, error in
-                    defer { group.leave() }
-                    if let error = error {
-                        completion(.failure(Error(dropboxError: error)))
-                        return
-                    }
-                }
-            }
-        }
-        group.notify(queue: DispatchQueue.main) {
-            completion(.success(.finished))
-        }
+        // Not supported
     }
     
     func deleteFile(files: [File], completion: @escaping (Result<Void, Error>) -> Void) {
@@ -247,14 +229,7 @@ extension DropboxFileManager: FileManager {
     }
     
     func cleanTrashFolder(fileForFileManager: File, completion: @escaping (Result<Void, Error>) -> Void) {
-        contents(of: trashFolder) { result in
-            switch result {
-            case .success(let files):
-                self.deleteFile(files: files, completion: completion)
-            case .failure(let error):
-                completion(.failure(Error(error: error)))
-            }
-        }
+        // Not supported
     }
     
     func makeFolderMonitor(file: File) -> FolderMonitor? {
@@ -307,6 +282,114 @@ extension DropboxFileManager: FileManager {
                 default:
                     break
                 }
+            }
+        }
+    }
+
+    func addTags(to file: File, tags: [Tag], completion: @escaping (Result<Void, Error>) -> Void) {
+        getTemplateId { result in
+            switch result {
+            case .failure(let error):
+                completion(.failure(error))
+                return
+            case .success(let id):
+                guard let client = DropboxClientsManager.authorizedClient else {
+                    completion(.failure(.unknown))
+                    return
+                }
+                let path = self.dropboxPath(file: file)
+                let tagIds = tags.map { $0.id.uuidString }
+                let encodedTagIds = AttributesCoding.fromArrayToString(array: tagIds)
+                let field = FileProperties.PropertyField(name: Constants.propertyFieldName, value: encodedTagIds)
+                let update = FileProperties.PropertyGroupUpdate(templateId: id, addOrUpdateFields: [field])
+                let group = FileProperties.PropertyGroup(templateId: id, fields: [field])
+
+                client.files.getMetadata(
+                    path: path,
+                    includeMediaInfo: true,
+                    includePropertyGroups: FileProperties
+                        .TemplateFilterBase
+                        .filterSome([id])).response { response, error in
+                            if let error = error {
+                                completion(.failure(Error(dropboxError: error)))
+                                return
+                            }
+                            if let response {
+                                self.addOrUpdateProperties(
+                                    path: path,
+                                    groupToUpdate: update,
+                                    groupToAdd: group,
+                                    fileMetadata: response,
+                                    templateId: id,
+                                    completion: completion)
+                            }
+                        }
+            }
+        }
+    }
+
+    func getActiveTagIds(on file: File, completion: @escaping (Result<[String], Error>) -> Void) {
+        getTemplateId { result in
+            switch result {
+            case .failure(let error):
+                completion(.failure(error))
+                return
+            case .success(let id):
+                guard let client = DropboxClientsManager.authorizedClient else {
+                    completion(.failure(.unknown))
+                    return
+                }
+                let path = self.dropboxPath(file: file)
+                client.files.getMetadata(path: path, includeMediaInfo: true, includePropertyGroups: FileProperties.TemplateFilterBase.filterSome([id])).response { data, error in
+                    if let error = error {
+                        completion(.failure(Error(dropboxError: error)))
+                        return
+                    }
+                    if let data {
+                        switch data {
+                        case let fileMetadata as Files.FileMetadata:
+                            completion(.success(AttributesCoding.fromStringToArray(string: fileMetadata.propertyGroups?.first?.fields.first?.value ?? "")))
+                        case let folderMetadata as Files.FolderMetadata:
+                            completion(.success(AttributesCoding.fromStringToArray(string: folderMetadata.propertyGroups?.first?.fields.first?.value ?? "")))
+                        default:
+                            completion(.failure(.unknown))
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    func filesWithTag(tag: Tag, completion: @escaping (Result<[File], Error>) -> Void) {
+        allFilesInside(rootFolder) { result in
+            switch result {
+            case .success(let files):
+                var filesWithTag: [File] = []
+                var error: Error?
+                let group = DispatchGroup()
+                for file in files {
+                    group.enter()
+                    self.getActiveTagIds(on: file) { result in
+                        defer { group.leave() }
+                        switch result {
+                        case .success(let tagIds):
+                            if tagIds.contains(tag.id.uuidString) {
+                                filesWithTag.append(file)
+                            }
+                        case .failure(let _error):
+                            error = _error
+                        }
+                    }
+                }
+                group.notify(queue: .main) {
+                    if let error {
+                        completion(.failure(error))
+                    } else {
+                        completion(.success(filesWithTag))
+                    }
+                }
+            case .failure(let _error):
+                completion(.failure(_error))
             }
         }
     }
@@ -410,6 +493,10 @@ extension DropboxFileManager: LocalTemporaryFolderConnector {
             }
         }
     }
+
+    static func isStorageLogged() -> Bool {
+        DropboxLoginManager.isLogged
+    }
 }
 
 // MARK: - Private
@@ -431,23 +518,12 @@ private extension DropboxFileManager {
     }
     
     func updateFileActionsAndDeleteStatus(file: inout File) {
-        if file == trashFolder {
-            file.actions = FileAction.trashFolderActions
-        } else if file.isFileIsSub(file: trashFolder) ||
-                    file.isFileIsSub(file: trashFolder, isDirectory: true) ||
-                    file.isDeleted {
-            file.actions = [FileAction.restoreFromTrash]
-            file.isDeleted = true
-        } else {
-            file.actions = FileAction.regularFolder
-        }
+        file.actions = FileAction.regularFile
     }
     
     func updateFolderAffiliation(file: inout File) {
         if file == rootFolder {
             file.folderAffiliation = .system(.root)
-        } else if file == trashFolder {
-            file.folderAffiliation = .system(.trash)
         } else {
             file.folderAffiliation = .user
         }
@@ -546,60 +622,7 @@ private extension DropboxFileManager {
     func dropboxPath(file: File) -> String {
         return file == rootFolder ? "" : file.path.path
     }
-    
-    func contentOfTrashFolder(file: File, completion: @escaping (Result<[File], Error>) -> Void) {
-        guard let client = DropboxClientsManager.authorizedClient else {
-            completion(.failure(.unknown))
-            return
-        }
-        var path = ""
-        if dropboxPath(file: file) != trashFolder.path.path {
-            path = dropboxPath(file: file)
-        }
-        client.files.listFolder(path: path, recursive: true, includeDeleted: true).response { response, error in
-            if let error = error {
-                print(path)
-                completion(.failure(Error(dropboxError: error)))
-                return
-            }
-            var files: [File] = []
-            if let result = response {
-                for fileInResult in result.entries.reversed() {
-                    switch fileInResult {
-                    case let deletedMetadata as Files.DeletedMetadata:
-                        var fileInFolder = File(
-                            path: URL(fileURLWithPath: deletedMetadata.pathDisplay!),
-                            storageType: .dropbox
-                        )
-                        self.correctFolderPath(file: &fileInFolder)
-                        if fileInFolder.isFolder() {
-                            let isFileInOtherTrashedFolder = files.contains {
-                                fileInFolder.hasParent(file: $0)
-                           }
-                            if isFileInOtherTrashedFolder {
-                                continue
-                            }
-                        }
-                        fileInFolder.isDeleted = true
-                        fileInFolder = self.updatedFile(file: fileInFolder)
-                        files.append(fileInFolder)
-                    default:
-                        continue
-                    }
-                }
-            }
-            completion(.success(files))
-        }
-    }
-    
-    func addTrashFolderToRoot(file: File, files: inout [File]) {
-        if file == self.rootFolder {
-            trashFolder.folderAffiliation = .system(.trash)
-            self.correctFolderPath(file: &trashFolder)
-            files.append(self.trashFolder)
-        }
-    }
-    
+
     func getSizeOfFile(file: File, completion: @escaping (Result<Double, Error>) -> Void) {
         guard let client = DropboxClientsManager.authorizedClient else {
             completion(.failure(.unknown))
@@ -652,7 +675,7 @@ private extension DropboxFileManager {
         }
     }
 
-    func contentInSearching(of file: File, completion: @escaping (Result<[File], Error>) -> Void) {
+    func allFilesInside(_ file: File, completion: @escaping (Result<[File], Error>) -> Void) {
         guard let client = DropboxClientsManager.authorizedClient else {
             completion(.failure(.unknown))
             return
@@ -682,19 +705,128 @@ private extension DropboxFileManager {
     }
     
     func getFilesDependOnSearchPlace(
-        file: File,
+        currentFolder: File,
         searchingPlace: SearchingPlace,
         completion: @escaping (Result<[File], Error>) -> Void
     ) {
         switch searchingPlace {
         case .currentStorage:
-            contentInSearching(of: rootFolder, completion: completion)
+            allFilesInside(rootFolder, completion: completion)
         case .currentFolder:
-            contentInSearching(of: file, completion: completion)
+            allFilesInside(currentFolder, completion: completion)
         case .currentTrash:
-            contentOfTrashFolder(file: file, completion: completion)
+            //TO DO make smth
+            break
         case .allStorages:
-            contentInSearching(of: rootFolder, completion: completion)
+            allFilesInside(rootFolder, completion: completion)
+        }
+    }
+
+    func getTemplateId(completion: @escaping (Result<String, Error>) -> Void) {
+        guard let client = DropboxClientsManager.authorizedClient else {
+            completion(.failure(.unknown))
+            return
+        }
+
+        client.file_properties.templatesListForUser().response { result, error in
+            if let error = error {
+                completion(.failure(Error(dropboxError: error)))
+                return
+            }
+            if let ids = result?.templateIds {
+                if ids.isEmpty {
+                    let template = FileProperties.PropertyFieldTemplate(name: Constants.propertyFieldName, description_: "", type: .string_)
+                    client.file_properties.templatesAddForUser(name: Constants.templateNameForUser, description_: "", fields: [template]).response { result, error in
+                        if let error = error {
+                            completion(.failure(Error(dropboxError: error)))
+                            return
+                        }
+                        if let id = result?.templateId {
+                            completion(.success(id))
+                        }
+                    }
+                } else {
+                    completion(.success(ids.last ?? ""))
+                }
+            }
+        }
+    }
+
+    func addProperties(
+        path: String,
+        groupToAdd: FileProperties.PropertyGroup,
+        completion: @escaping (Result<Void, Error>) -> Void
+    ) {
+        guard let client = DropboxClientsManager.authorizedClient else {
+            completion(.failure(.unknown))
+            return
+        }
+
+        client.file_properties.propertiesAdd(
+            path: path,
+            propertyGroups: [groupToAdd]
+        ).response { result, error in
+            if result != nil {
+                completion(.success(()))
+                return
+            }
+            if let error {
+                completion(.failure(Error(dropboxError: error)))
+            }
+        }
+    }
+
+    func updateProperties(
+        path: String,
+        groupToUpdate: FileProperties.PropertyGroupUpdate,
+        completion: @escaping (Result<Void, Error>) -> Void
+    ) {
+        guard let client = DropboxClientsManager.authorizedClient else {
+            completion(.failure(.unknown))
+            return
+        }
+
+        client.file_properties.propertiesUpdate(
+            path: path,
+            updatePropertyGroups: [groupToUpdate]
+        ).response { result, error in
+            if result != nil {
+                completion(.success(()))
+                return
+            }
+            if let error {
+                completion(.failure(Error(dropboxError: error)))
+            }
+        }
+    }
+
+    func addOrUpdateProperties(
+        path: String,
+        groupToUpdate: FileProperties.PropertyGroupUpdate,
+        groupToAdd: FileProperties.PropertyGroup,
+        fileMetadata: Files.Metadata,
+        templateId: String,
+        completion: @escaping (Result<Void, Error>) -> Void
+    ) {
+        switch fileMetadata {
+        case let fileMetadata as Files.FileMetadata:
+            if (fileMetadata.propertyGroups ?? []).contains(where: { group in
+                group.templateId == templateId
+            }) {
+                updateProperties(path: path, groupToUpdate: groupToUpdate, completion: completion)
+            } else {
+                addProperties(path: path, groupToAdd: groupToAdd, completion: completion)
+            }
+        case let folderMetadata as Files.FolderMetadata:
+            if folderMetadata.propertyGroups!.contains(where: { group in
+                group.templateId == templateId
+            }) {
+                updateProperties(path: path, groupToUpdate: groupToUpdate, completion: completion)
+            } else {
+                addProperties(path: path, groupToAdd: groupToAdd, completion: completion)
+            }
+        default:
+            completion(.failure(.unknown))
         }
     }
 }
