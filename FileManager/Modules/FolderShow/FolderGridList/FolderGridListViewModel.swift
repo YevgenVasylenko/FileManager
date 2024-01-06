@@ -66,7 +66,6 @@ final class FolderGridListViewModel: ObservableObject {
         restoreFromTrash()
     }
     
-   
     func deleteOne(file: File) {
         state.file = file
         state.deletingFromTrash = true

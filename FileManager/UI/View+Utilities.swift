@@ -89,16 +89,6 @@ extension View {
             Text(error.recoverySuggestion ?? "")
         }
     }
-    
-    func unreadableFileAlert(file: Binding<File?>, dismiss: DismissAction) -> some View {
-        let isShowing = file.wrappedValue?.fileType() == .unknown
-        return alert(R.string.localizable.unreadableFile(), isPresented: .constant(isShowing)) {
-            Button(R.string.localizable.ok()) {
-                dismiss()
-                file.wrappedValue = nil
-            }
-        }
-    }
 }
 
 extension Error {
@@ -106,10 +96,12 @@ extension Error {
         switch self {
         case .nameExist:
             return R.string.localizable.file_with_same_name_is_already_exist()
-        case .unknown, .dropbox:
-            return R.string.localizable.unknown_error()
         case .tagExist:
             return R.string.localizable.tag_with_same_name_is_already_exist()
+        case .fileNotSupported:
+            return nil
+        case .dropbox, .unknown:
+            return R.string.localizable.unknown_error()
         }
     }
 }

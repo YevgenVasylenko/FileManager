@@ -80,7 +80,7 @@ private extension RootView {
         }).buttonStyle(.plain)
             .padding()
             .contextMenu {
-                if !file.storageType.isLocal {
+                if file.storageType.isLocal == false {
                     Button(R.string.localizable.disconnect(), role: .destructive) {
                         viewModel.logoutFromCloud()
                     }

@@ -9,10 +9,11 @@ import Foundation
 import SwiftyDropbox
 
 enum Error: LocalizedError {
-        case nameExist
-        case tagExist
-        case unknown
-        case dropbox(String)
+    case nameExist
+    case tagExist
+    case fileNotSupported
+    case dropbox(String)
+    case unknown
     
     init(error: Swift.Error) {
         let error = error as NSError

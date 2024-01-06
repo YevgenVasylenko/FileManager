@@ -137,7 +137,7 @@ private extension FolderGridListView {
                 redraw = .now
             })
     }
-    
+
     func folderListView() -> some View {
         List(viewModel.state.files) { file in
             HStack {
@@ -172,30 +172,40 @@ private extension FolderGridListView {
             }
         }
     }
-    
-    @ViewBuilder
+
     func fileView(file: File, style: FileViewModel.Style) -> some View {
-        switch style {
-        case .grid:
-            NavigationLink(value: file) {
-                FileView(
-                    file: file,
-                    style: style,
-                    infoPresented: fileInfoPopoverBinding(for: file),
-                    tagsPresented: tagsPopoverBinding(for: file)
+
+        func makeFileView() -> some View {
+            FileView(
+                file: file,
+                style: style,
+                infoPresented: fileInfoPopoverBinding(for: file),
+                tagsPresented: tagsPopoverBinding(for: file)
+            )
+        }
+
+        return Group {
+            if file.fileType() == .unknown {
+                Button(
+                    action: {
+                        viewModel.state.error = .fileNotSupported
+                    },
+                    label: makeFileView
                 )
+            } else {
+                switch style {
+                case .grid:
+                    NavigationLink(value: file) {
+                        makeFileView()
+                    }
+                case .list:
+                    ListViewItemWithoutDisclosureIndicator(value: file) {
+                        makeFileView()
+                    }
+                case .info:
+                    EmptyView()
+                }
             }
-        case .list:
-            ListViewItemWithoutDisclosureIndicator(value: file) {
-                FileView(
-                    file: file,
-                    style: style,
-                    infoPresented: fileInfoPopoverBinding(for: file),
-                    tagsPresented: tagsPopoverBinding(for: file)
-                )
-            }
-        case .info:
-            EmptyView()
         }
     }
     

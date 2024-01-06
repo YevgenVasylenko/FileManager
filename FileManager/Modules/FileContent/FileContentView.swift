@@ -34,9 +34,5 @@ struct FileContentView: View {
             viewModel.getLocalFileURL()
         }
         .errorAlert(error: $viewModel.state.error)
-        .unreadableFileAlert(
-            file: $viewModel.state.file,
-            dismiss: dismiss
-        )
     }
 }
