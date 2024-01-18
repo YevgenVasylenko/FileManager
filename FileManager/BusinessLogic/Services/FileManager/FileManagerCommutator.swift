@@ -124,25 +124,26 @@ extension FileManagerCommutator: FileManager {
                 files: files,
                 destination: destination,
                 conflictResolver: conflictResolver,
-                completion: completion)
+                completion: completion
+            )
             return
         }
-        fileManager.copyToLocalTemporary(files: files) { result in
+        fileManager.copyBatchOfFilesToLocalTemporary(files: files) { result in
             switch result {
+            case .failure(let error):
+                completion(.failure(Error(error: error)))
             case .success(let sentFileURLs):
                 var downloadedFiles: [File] = []
                 for addressURL in sentFileURLs {
                     downloadedFiles.append(File(path: addressURL, storageType: destination.storageType))
                 }
                 let destinationFileManager = FileManagerFactory.makeFileManager(file: destination)
-                destinationFileManager.saveFromLocalTemporary(
+                destinationFileManager.saveFilesFromLocalTemporary(
                     files: downloadedFiles,
                     destination: destination,
                     conflictResolver: conflictResolver,
                     completion: completion
                 )
-            case .failure(let error):
-                completion(.failure(Error(error: error)))
             }
         }
     }
@@ -166,6 +167,25 @@ extension FileManagerCommutator: FileManager {
                 conflictResolver: conflictResolver,
                 completion: completion
             )
+            return
+        }
+        fileManager.moveBatchOfFilesToLocalTemporary(files: files) { result in
+            switch result {
+            case .failure(let error):
+                completion(.failure(Error(error: error)))
+            case .success(let sentFileURLs):
+                var downloadedFiles: [File] = []
+                for addressURL in sentFileURLs {
+                    downloadedFiles.append(File(path: addressURL, storageType: destination.storageType))
+                }
+                let destinationFileManager = FileManagerFactory.makeFileManager(file: destination)
+                destinationFileManager.saveFilesFromLocalTemporary(
+                    files: downloadedFiles,
+                    destination: destination,
+                    conflictResolver: conflictResolver,
+                    completion: completion
+                )
+            }
         }
     }
 

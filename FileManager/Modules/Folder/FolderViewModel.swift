@@ -215,6 +215,16 @@ final class FolderViewModel: ObservableObject {
             return state.files.contains(files)
         }
     }
+
+    func isFilesForMovingFromDropbox(fileSelectDelegate: FileSelectDelegate) -> Bool {
+        switch fileSelectDelegate.type {
+        case .copy:
+            return false
+        case .move:
+            return fileSelectDelegate.selectedFiles.first?.storageType == .dropbox
+            && state.content.storageTypeOfFolder() != .dropbox
+        }
+    }
     
     func update(fileDisplayOptions: FileDisplayOptions) {
         FileDisplayOptionsManager.options = fileDisplayOptions

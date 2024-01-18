@@ -9,12 +9,17 @@ import Foundation
 
 protocol LocalTemporaryFolderConnector {
     
-    func copyToLocalTemporary(
+    func copyBatchOfFilesToLocalTemporary(
+        files: [File],
+        completion: @escaping (Result<[URL], Error>) -> Void
+    )
+
+    func moveBatchOfFilesToLocalTemporary(
         files: [File],
         completion: @escaping (Result<[URL], Error>) -> Void
     )
     
-    func saveFromLocalTemporary(
+    func saveFilesFromLocalTemporary(
         files: [File],
         destination: File,
         conflictResolver: NameConflictResolver,

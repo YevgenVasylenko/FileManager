@@ -188,6 +188,7 @@ private extension FolderView {
                     chooseAction()
                 }
                 .disabled(viewModel.isFilesInCurrentFolder(files: fileSelectDelegate.selectedFiles) ?? true)
+                .disabled(viewModel.isFilesForMovingFromDropbox(fileSelectDelegate: fileSelectDelegate))
             }
         }
     }
