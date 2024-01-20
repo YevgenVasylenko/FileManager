@@ -358,33 +358,34 @@ extension DropboxFileManager: FileManager {
     func filesWithTag(tag: Tag, completion: @escaping (Result<[File], Error>) -> Void) {
         allFilesInside(rootFolder) { result in
             switch result {
+            case .failure(let _error):
+                completion(.failure(_error))
             case .success(let files):
                 var filesWithTag: [File] = []
                 var error: Error?
-                let group = DispatchGroup()
-                for file in files {
-                    group.enter()
-                    self.getActiveTagIds(on: file) { result in
-                        defer { group.leave() }
-                        switch result {
-                        case .success(let tagIds):
-                            if tagIds.contains(tag.id.uuidString) {
-                                filesWithTag.append(file)
+
+                DispatchGroup.perform(
+                    value: files,
+                    action: { file, completion in
+                        self.getActiveTagIds(on: file) { result in
+                            switch result {
+                            case .success(let tagIds):
+                                if tagIds.contains(tag.id.uuidString) {
+                                    filesWithTag.append(file)
+                                }
+                            case .failure(let _error):
+                                error = _error
                             }
-                        case .failure(let _error):
-                            error = _error
                         }
-                    }
-                }
-                group.notify(queue: .main) {
-                    if let error {
-                        completion(.failure(error))
-                    } else {
-                        completion(.success(filesWithTag))
-                    }
-                }
-            case .failure(let _error):
-                completion(.failure(_error))
+                        completion()
+                    },
+                    completion: {
+                        if let error {
+                            completion(.failure(error))
+                        } else {
+                            completion(.success(filesWithTag))
+                        }
+                    })
             }
         }
     }

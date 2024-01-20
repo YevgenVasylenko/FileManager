@@ -65,6 +65,14 @@ struct File {
     func hasParent(file: File) -> Bool {
         path.path.hasPrefix(file.path.path)
     }
+
+    static func localUUIDTemporaryFolder() -> File {
+        return File(
+            path: SystemFileManger.default.temporaryDirectory.appendingPathComponent(
+                UUID().uuidString, isDirectory: true),
+            storageType: .local
+        )
+    }
 }
 
 extension File: Hashable {

@@ -23,30 +23,33 @@ extension FileManagerCommutator: FileManager {
         completion: @escaping (Result<[File], Error>) -> Void
     ) {
         var searchedFilesAcrossAll: [File] = []
-        let group = DispatchGroup()
         var error: Error?
-        for storage in makeListOfActiveFileManagers(file: file, searchingPlace: searchingPlace) {
-            group.enter()
-            storage.contentBySearchingName(
-                searchingPlace: searchingPlace,
-                file: file,
-                name: name) { result in
-                    defer { group.leave() }
+        let fileManagers = makeListOfActiveFileManagers(file: file, searchingPlace: searchingPlace)
+
+        DispatchGroup.perform(
+            value: fileManagers,
+            action: { fileManager, completion in
+                fileManager.contentBySearchingName(
+                    searchingPlace: searchingPlace,
+                    file: file,
+                    name: name
+                ) { result in
                     switch result {
                     case .success(let files):
                         searchedFilesAcrossAll += files
                     case .failure(let _error):
                         error = _error
                     }
+                    completion()
                 }
-        }
-        group.notify(queue: .main) {
-            if let error {
-                completion(.failure(error))
-            } else {
-                completion(.success(searchedFilesAcrossAll))
-            }
-        }
+            },
+            completion: {
+                if let error {
+                    completion(.failure(error))
+                } else {
+                    completion(.success(searchedFilesAcrossAll))
+                }
+            })
     }
 
     func contentBySearchingNameAcrossTagged(
@@ -55,30 +58,32 @@ extension FileManagerCommutator: FileManager {
         completion: @escaping (Result<[File], Error>) -> Void
     ) {
         var foundedFilesAcrossAll: [File] = []
-        let group = DispatchGroup()
         var error: Error?
-        for storage in File.StorageType.activeStorages() {
-            group.enter()
-            storage.contentBySearchingNameAcrossTagged(
-                tag: tag,
-                name: name)
-                 { result in
-                    defer { group.leave() }
+        let activeFileManagers = File.StorageType.activeStorages()
+
+        DispatchGroup.perform(
+            value: activeFileManagers,
+            action: { fileManager, completion in
+                fileManager.contentBySearchingNameAcrossTagged(
+                    tag: tag,
+                    name: name
+                ) { result in
                     switch result {
                     case .success(let files):
                         foundedFilesAcrossAll += files
                     case .failure(let _error):
                         error = _error
                     }
+                    completion()
                 }
-        }
-        group.notify(queue: .main) {
-            if let error {
-                completion(.failure(error))
-            } else {
-                completion(.success(foundedFilesAcrossAll))
-            }
-        }
+            },
+            completion: {
+                if let error {
+                    completion(.failure(error))
+                } else {
+                    completion(.success(foundedFilesAcrossAll))
+                }
+            })
     }
     
     func createFolder(at file: File, completion: @escaping (Result<Void, Error>) -> Void) {
@@ -258,27 +263,29 @@ extension FileManagerCommutator: FileManager {
 
     func filesWithTag(tag: Tag, completion: @escaping (Result<[File], Error>) -> Void) {
         var allFilesAcrossStoragesWithTag: [File] = []
-        let group = DispatchGroup()
         var error: Error?
-        for storage in File.StorageType.activeStorages() {
-            group.enter()
-            storage.filesWithTag(tag: tag) { result in
-                defer { group.leave() }
-                switch result {
-                case .success(let files):
-                    allFilesAcrossStoragesWithTag += files
-                case .failure(let _error):
-                    error = _error
+        let activeFileManagers = File.StorageType.activeStorages()
+
+        DispatchGroup.perform(
+            value: activeFileManagers,
+            action: { fileManager, completion in
+                fileManager.filesWithTag(tag: tag) { result in
+                    switch result {
+                    case .success(let files):
+                        allFilesAcrossStoragesWithTag += files
+                    case .failure(let _error):
+                        error = _error
+                    }
+                    completion()
                 }
-            }
-        }
-        group.notify(queue: .main) {
-            if let error {
-                completion(.failure(error))
-            } else {
-                completion(.success(allFilesAcrossStoragesWithTag))
-            }
-        }
+            },
+            completion: {
+                if let error {
+                    completion(.failure(error))
+                } else {
+                    completion(.success(allFilesAcrossStoragesWithTag))
+                }
+            })
     }
 }
 

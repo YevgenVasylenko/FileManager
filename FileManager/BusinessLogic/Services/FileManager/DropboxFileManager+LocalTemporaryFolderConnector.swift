@@ -14,30 +14,29 @@ extension DropboxFileManager: LocalTemporaryFolderConnector {
         files: [File],
         completion: @escaping (Result<[URL], Error>) -> Void
     ) {
-        let group = DispatchGroup()
         var destinationFileURLs: [URL] = []
         var lastError: Error?
 
-        for file in files {
-            group.enter()
-            copyOneFileToLocalTemporary(fileToCopy: file) { result in
-                switch result {
-                case .success(let url):
-                    destinationFileURLs.append(url)
-                case .failure(let failure):
-                    lastError = failure
+        DispatchGroup.perform(
+            value: files,
+            action: { file, completion in
+                self.copyOneFileToLocalTemporary(fileToCopy: file) { result in
+                    switch result {
+                    case .success(let url):
+                        destinationFileURLs.append(url)
+                    case .failure(let failure):
+                        lastError = failure
+                    }
+                    completion()
                 }
-                group.leave()
-            }
-        }
-
-        group.notify(queue: .main) {
-            if let lastError {
-                completion(.failure(lastError))
-            } else {
-                completion(.success(destinationFileURLs))
-            }
-        }
+            },
+            completion: {
+                if let lastError {
+                    completion(.failure(lastError))
+                } else {
+                    completion(.success(destinationFileURLs))
+                }
+            })
     }
 
     func moveBatchOfFilesToLocalTemporary(files: [File], completion: @escaping (Result<[URL], Error>) -> Void) {
@@ -82,11 +81,7 @@ private extension DropboxFileManager {
         fileToCopy: File,
         completion: @escaping (Result<URL, Error>) -> Void
     ) {
-        let destinationFolder = File(
-            path: SystemFileManger.default.temporaryDirectory
-                .appendingPathComponent(UUID().uuidString, isDirectory: true),
-            storageType: .local
-        )
+        let destinationFolder = File.localUUIDTemporaryFolder()
         do {
             try SystemFileManger.default.createDirectory(
                 at: destinationFolder.path,
@@ -123,39 +118,38 @@ private extension DropboxFileManager {
                 completion(.failure(failure))
 
             case .success(let files):
-                let group = DispatchGroup()
                 var destinationFileURL: URL?
                 var lastError: Error?
                 var isFirstFileInAll = true
 
-                for file in files {
-                    group.enter()
-                    self.createOrDownloadOneFileInLocal(
-                        file: file,
-                        destinationFile: destinationFile
-                    ) { result in
+                DispatchGroup.perform(
+                    value: files,
+                    action: { file, completion in
+                        self.createOrDownloadOneFileInLocal(
+                            file: file,
+                            destinationFile: destinationFile
+                        ) { result in
                             switch result {
+                            case .failure(let failure):
+                                lastError = failure
                             case .success(let file):
                                 if isFirstFileInAll {
                                     destinationFileURL = file.path
                                     isFirstFileInAll = false
                                 }
-                            case .failure(let failure):
-                                lastError = failure
                             }
-                            group.leave()
+                            completion()
                         }
-                }
-
-                group.notify(queue: .main) {
-                    if let lastError {
-                        completion(.failure(lastError))
-                    } else if let destinationFileURL {
-                        completion(.success(destinationFileURL))
-                    } else {
-                        completion(.failure(.unknown))
-                    }
-                }
+                    },
+                    completion: {
+                        if let lastError {
+                            completion(.failure(lastError))
+                        } else if let destinationFileURL {
+                            completion(.success(destinationFileURL))
+                        } else {
+                            completion(.failure(.unknown))
+                        }
+                    })
             }
         }
     }
