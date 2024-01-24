@@ -42,7 +42,8 @@ extension DropboxFileManager: LocalTemporaryFolderConnector {
     func moveBatchOfFilesToLocalTemporary(files: [File], completion: @escaping (Result<[URL], Error>) -> Void) {
 //              Dropbox api doesn't support permanent delete,
 //                  so move file with keeping original copy in trash doesn't make sense
-        fatalError()
+        assertionFailure()
+        completion(.failure(.unknown))
     }
 
     func saveFilesFromLocalTemporary(
@@ -51,14 +52,20 @@ extension DropboxFileManager: LocalTemporaryFolderConnector {
         conflictResolver: NameConflictResolver,
         completion: @escaping (Result<OperationResult, Error>) -> Void
     ) {
-        for file in files {
-            saveOneFileFromLocalTemporary(
-                file: file,
-                destination: destination,
-                conflictResolver: conflictResolver,
-                completion: completion
-            )
-        }
+
+        F.perform(
+            values: files[...],
+            completedResult: .finished,
+            action: { [self] file, completion in
+                saveOneFileFromLocalTemporary(
+                    file: file,
+                    destination: destination,
+                    conflictResolver: conflictResolver,
+                    completion: completion
+                )
+            },
+            completion: completion
+        )
     }
 
     func getLocalFileURL(file: File, completion: @escaping (Result<URL, Error>) -> Void) {
@@ -67,6 +74,8 @@ extension DropboxFileManager: LocalTemporaryFolderConnector {
             case .success(let urls):
                 if let tempURL = urls.first {
                     completion(.success(tempURL))
+                } else {
+                    completion(.failure(.unknown))
                 }
             case .failure(let error):
                 completion(.failure(error))
@@ -112,46 +121,56 @@ private extension DropboxFileManager {
         destinationFile: File,
         completion: @escaping (Result<URL, Error>) -> Void
     ) {
-        allFilesInDropbox(folder: fileToCopy) { result in
+        allFilesInDropbox(folder: fileToCopy) { [self] result in
             switch result {
             case .failure(let failure):
                 completion(.failure(failure))
 
             case .success(let files):
-                var destinationFileURL: URL?
-                var lastError: Error?
-                var isFirstFileInAll = true
-
-                DispatchGroup.perform(
-                    value: files,
-                    action: { file, completion in
-                        self.createOrDownloadOneFileInLocal(
-                            file: file,
-                            destinationFile: destinationFile
-                        ) { result in
-                            switch result {
-                            case .failure(let failure):
-                                lastError = failure
-                            case .success(let file):
-                                if isFirstFileInAll {
-                                    destinationFileURL = file.path
-                                    isFirstFileInAll = false
-                                }
-                            }
-                            completion()
-                        }
-                    },
-                    completion: {
-                        if let lastError {
-                            completion(.failure(lastError))
-                        } else if let destinationFileURL {
-                            completion(.success(destinationFileURL))
-                        } else {
-                            completion(.failure(.unknown))
-                        }
-                    })
+                createOrDownloadBatchOfFiles(
+                    files: files,
+                    destinationFile: destinationFile,
+                    completion: completion
+                )
             }
         }
+    }
+
+    func createOrDownloadBatchOfFiles(
+        files: [File],
+        destinationFile: File,
+        completion: @escaping (Result<URL, Error>) -> Void
+    ) {
+        var destinationFileURL: URL?
+        var lastError: Error?
+
+        DispatchGroup.perform(
+            value: files,
+            action: { file, completion in
+                self.createOrDownloadOneFileInLocal(
+                    file: file,
+                    destinationFile: destinationFile
+                ) { result in
+                    switch result {
+                    case .failure(let failure):
+                        lastError = failure
+                    case .success(let file):
+                        if destinationFileURL == nil {
+                            destinationFileURL = file.path
+                        }
+                    }
+                    completion()
+                }
+            },
+            completion: {
+                if let lastError {
+                    completion(.failure(lastError))
+                } else if let destinationFileURL {
+                    completion(.success(destinationFileURL))
+                } else {
+                    completion(.failure(.unknown))
+                }
+            })
     }
 
     func createOrDownloadOneFileInLocal(
@@ -212,6 +231,8 @@ private extension DropboxFileManager {
             }
             if let result = response {
                 completion(.success(result.1))
+            } else {
+                completion(.failure(.unknown))
             }
         }
     }
@@ -257,19 +278,14 @@ private extension DropboxFileManager {
         completion: @escaping (Result<OperationResult, Error>) -> Void
     ) {
         if file.isFolder() {
-            allFilesIn(folder: file) { result in
-                switch result {
-                case .failure(let failure):
-                    completion(.failure(failure))
-                case .success(let files):
-                    self.createOrUploadBatchOfFilesInDropbox(
-                        files: files,
-                        destination: destination,
-                        conflictResolver: conflictResolver,
-                        completion: completion
-                    )
-                }
-            }
+            let enumerator = SystemFileManger.enumeratorFor(file: file)
+            let allFiles = SystemFileManger.allFilesIn(enumerator: enumerator)
+            self.createOrUploadBatchOfFilesInDropbox(
+                files: allFiles,
+                destination: destination,
+                conflictResolver: conflictResolver,
+                completion: completion
+            )
         } else {
             uploadOneFileFromLocalTemporary(
                 file: file,
@@ -280,48 +296,24 @@ private extension DropboxFileManager {
         }
     }
 
-    func allFilesIn(
-        folder: File,
-        completion: @escaping (Result<[File], Error>) -> Void
-    ) {
-        LocalFileManager().allFilesInFolder(file: folder) { result in
-            switch result {
-            case .failure(let failure):
-                completion(.failure(failure))
-
-            case .success(let files):
-                completion(.success(files))
-            }
-        }
-    }
-
     func createOrUploadBatchOfFilesInDropbox(
         files: [File],
         destination: File,
         conflictResolver: NameConflictResolver,
         completion: @escaping (Result<OperationResult, Error>) -> Void
     ) {
-        guard let file = files.first else {
-            completion(.success(.finished))
-            return
-        }
-
-        createOrUploadOneFileInDropbox(
-            file: file,
-            destination: destination,
-            conflictResolver: conflictResolver) { [self] result in
-                switch result {
-                case .failure(let failure):
-                    completion(.failure(failure))
-                case .success:
-                    let files = files.dropFirst()
-                    createOrUploadBatchOfFilesInDropbox(
-                        files: Array(files),
-                        destination: destination,
-                        conflictResolver: conflictResolver,
-                        completion: completion)
-                }
-            }
+        F.perform(
+            values: files[...],
+            completedResult: .finished,
+            action: { [self] file, completion in
+                createOrUploadOneFileInDropbox(
+                    file: file,
+                    destination: destination,
+                    conflictResolver: conflictResolver,
+                    completion: completion
+                )},
+            completion: completion
+        )
     }
 
     func createOrUploadOneFileInDropbox(

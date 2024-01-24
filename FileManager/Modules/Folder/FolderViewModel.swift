@@ -208,24 +208,11 @@ final class FolderViewModel: ObservableObject {
         }
     }
 
-    func isFilesInCurrentFolder(files: [File]) -> Bool? {
-        if state.isLoading {
-            return nil
-        } else {
-            return state.files.contains(files)
-        }
+    func isActionSelectionButtonIsDisabled(fileSelectDelegate: FileSelectDelegate) -> Bool {
+        isFilesInCurrentFolder(fileSelectDelegate: fileSelectDelegate) ?? true ||
+        canPerformAction(fileSelectDelegate: fileSelectDelegate) == false
     }
 
-    func isFilesForMovingFromDropbox(fileSelectDelegate: FileSelectDelegate) -> Bool {
-        switch fileSelectDelegate.type {
-        case .copy:
-            return false
-        case .move:
-            return fileSelectDelegate.selectedFiles.first?.storageType == .dropbox
-            && state.content.storageTypeOfFolder() != .dropbox
-        }
-    }
-    
     func update(fileDisplayOptions: FileDisplayOptions) {
         FileDisplayOptionsManager.options = fileDisplayOptions
         state.fileDisplayOptions = fileDisplayOptions
@@ -415,6 +402,21 @@ private extension FolderViewModel {
             self.sort()
             self.state.isLoading = false
         }
+    }
+
+    func isFilesInCurrentFolder(fileSelectDelegate: FileSelectDelegate) -> Bool? {
+        if state.isLoading {
+            return nil
+        } else {
+            return state.files.contains(fileSelectDelegate.selectedFiles)
+        }
+    }
+
+    func canPerformAction(fileSelectDelegate: FileSelectDelegate) -> Bool {
+        return fileManagerCommutator.canPerformAction(
+            selectedDelegate: fileSelectDelegate,
+            destinationStorage: state.content.folderStorageType() ?? .local
+        )
     }
 }
 

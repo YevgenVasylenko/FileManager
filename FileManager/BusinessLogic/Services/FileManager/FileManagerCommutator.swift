@@ -12,8 +12,8 @@ final class FileManagerCommutator {
 
 extension FileManagerCommutator: FileManager {
 
-   func contents(of file: File, completion: @escaping (Result<[File], Error>) -> Void) {
-       FileManagerFactory.makeFileManager(file: file).contents(of: file, completion: completion)
+    func contents(of file: File, completion: @escaping (Result<[File], Error>) -> Void) {
+        FileManagerFactory.makeFileManager(file: file).contents(of: file, completion: completion)
     }
     
     func contentBySearchingName(
@@ -286,6 +286,22 @@ extension FileManagerCommutator: FileManager {
                     completion(.success(allFilesAcrossStoragesWithTag))
                 }
             })
+    }
+
+    func canPerformAction(
+        selectedDelegate: FileSelectDelegate,
+        destinationStorage: File.StorageType
+    ) -> Bool {
+        guard let file = selectedDelegate.selectedFiles.first else {
+            assertionFailure()
+            return false
+        }
+        let fileManager = FileManagerFactory.makeFileManager(file: file)
+
+        return fileManager.canPerformAction(
+            selectedDelegate: selectedDelegate,
+            destinationStorage: destinationStorage
+        )
     }
 }
 

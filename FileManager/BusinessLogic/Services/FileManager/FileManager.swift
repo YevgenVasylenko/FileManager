@@ -74,6 +74,11 @@ protocol FileManager {
     func getActiveTagIds(on file: File, completion: @escaping (Result<[String], Error>) -> Void)
 
     func filesWithTag(tag: Tag, completion: @escaping (Result<[File], Error>) -> Void)
+
+    func canPerformAction(
+        selectedDelegate: FileSelectDelegate,
+        destinationStorage: File.StorageType
+    ) -> Bool
 }
 
 

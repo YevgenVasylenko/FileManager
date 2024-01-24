@@ -11,7 +11,7 @@ enum Content: Hashable {
     case folder(File)
     case tag(Tag)
 
-    func storageTypeOfFolder() -> File.StorageType? {
+    func folderStorageType() -> File.StorageType? {
         switch self {
         case .folder(let file):
             return file.storageType

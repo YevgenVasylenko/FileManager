@@ -8,15 +8,6 @@
 import Foundation
 import SwiftyDropbox
 
-struct DropboxFile {
-    enum FileType {
-        case file
-        case folder(content: [DropboxFile])
-    }
-    var path: URL
-    var type: FileType
-}
-
 final class DropboxFileManager {
     enum Constants {
         static let root = ""
@@ -217,14 +208,17 @@ extension DropboxFileManager: FileManager {
         completion: @escaping (Result<OperationResult, Error>) -> Void
     ) {
         // Not supported
+        completion(.failure(.unknown))
     }
     
     func deleteFile(files: [File], completion: @escaping (Result<Void, Error>) -> Void) {
         // Not supported
+        completion(.failure(.unknown))
     }
     
     func cleanTrashFolder(fileForFileManager: File, completion: @escaping (Result<Void, Error>) -> Void) {
         // Not supported
+        completion(.failure(.unknown))
     }
     
     func makeFolderMonitor(file: File) -> FolderMonitor? {
@@ -376,8 +370,8 @@ extension DropboxFileManager: FileManager {
                             case .failure(let _error):
                                 error = _error
                             }
+                            completion()
                         }
-                        completion()
                     },
                     completion: {
                         if let error {
@@ -410,6 +404,28 @@ extension DropboxFileManager: FileManager {
     
     static func isStorageLogged() -> Bool {
         DropboxLoginManager.isLogged
+    }
+
+    func canPerformAction(
+        selectedDelegate: FileSelectDelegate,
+        destinationStorage: File.StorageType
+    ) -> Bool {
+        switch selectedDelegate.type {
+        case .copy:
+            switch destinationStorage {
+            case .local:
+                return true
+            case .dropbox:
+                return true
+            }
+        case .move:
+            switch destinationStorage {
+            case .local:
+                return false
+            case .dropbox:
+                return true
+            }
+        }
     }
 }
 

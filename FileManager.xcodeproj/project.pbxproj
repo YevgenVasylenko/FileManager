@@ -111,6 +111,7 @@
 		5DF815D22B58023900B96DE0 /* String+RemovePrefix.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DF815D12B58023900B96DE0 /* String+RemovePrefix.swift */; };
 		5DF815D72B594D6A00B96DE0 /* LocalFileManager+LocalTemporaryFolderConnector.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DF815D62B594D6A00B96DE0 /* LocalFileManager+LocalTemporaryFolderConnector.swift */; };
 		5DF815DC2B5ABC3B00B96DE0 /* DispatchGroup+Iteration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DF815DB2B5ABC3B00B96DE0 /* DispatchGroup+Iteration.swift */; };
+		5DF815DF2B5FE4AA00B96DE0 /* SystemFileManger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DF815DE2B5FE4AA00B96DE0 /* SystemFileManger.swift */; };
 		5DF870D32A77ADAA00F9E5D5 /* DropboxFileManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DF870D22A77ADAA00F9E5D5 /* DropboxFileManager.swift */; };
 		5DF9C96B2AB9A365007AF29C /* FolderGridListViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DF9C96A2AB9A365007AF29C /* FolderGridListViewModel.swift */; };
 /* End PBXBuildFile section */
@@ -201,6 +202,7 @@
 		5DF815D12B58023900B96DE0 /* String+RemovePrefix.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+RemovePrefix.swift"; sourceTree = "<group>"; };
 		5DF815D62B594D6A00B96DE0 /* LocalFileManager+LocalTemporaryFolderConnector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "LocalFileManager+LocalTemporaryFolderConnector.swift"; sourceTree = "<group>"; };
 		5DF815DB2B5ABC3B00B96DE0 /* DispatchGroup+Iteration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DispatchGroup+Iteration.swift"; sourceTree = "<group>"; };
+		5DF815DE2B5FE4AA00B96DE0 /* SystemFileManger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SystemFileManger.swift; sourceTree = "<group>"; };
 		5DF870CF2A76E06900F9E5D5 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		5DF870D22A77ADAA00F9E5D5 /* DropboxFileManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DropboxFileManager.swift; sourceTree = "<group>"; };
 		5DF9C96A2AB9A365007AF29C /* FolderGridListViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FolderGridListViewModel.swift; sourceTree = "<group>"; };
@@ -519,6 +521,7 @@
 				5DF815CE2B58020500B96DE0 /* URL+Removing.swift */,
 				5DF815D12B58023900B96DE0 /* String+RemovePrefix.swift */,
 				5DF815DB2B5ABC3B00B96DE0 /* DispatchGroup+Iteration.swift */,
+				5DF815DE2B5FE4AA00B96DE0 /* SystemFileManger.swift */,
 			);
 			path = Utilities;
 			sourceTree = "<group>";
@@ -745,6 +748,7 @@
 				5DF5DBA42A9610B500F91A46 /* FileContentViewModel.swift in Sources */,
 				5DC9F2002B0A2CB20078D38D /* URL+ExtendedAttributes.swift in Sources */,
 				5D7B59822AD597D400AFB058 /* Database.swift in Sources */,
+				5DF815DF2B5FE4AA00B96DE0 /* SystemFileManger.swift in Sources */,
 				5D06742F2B48256800E283FF /* SearchingPlace+Names.swift in Sources */,
 				5DACCB4E2A445689000A0CA9 /* RootView.swift in Sources */,
 				5DACCB4C2A445689000A0CA9 /* FileManagerApp.swift in Sources */,

@@ -9,10 +9,10 @@ import Foundation
 
 extension URL {
     func removeTemp() -> URL {
-        return URL(string: self.path.deletePrefix(SystemFileManger.default.temporaryDirectory.path)) ?? self
+        return URL(string: path.deletePrefix(SystemFileManger.default.temporaryDirectory.path)) ?? self
     }
 
     func removeFirst() -> URL {
-        return URL(string: self.pathComponents.dropFirst(2).joined(separator: "/")) ?? self
+        return URL(string: pathComponents.dropFirst(2).joined(separator: "/")) ?? self
     }
 }
