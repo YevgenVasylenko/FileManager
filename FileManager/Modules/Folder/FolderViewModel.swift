@@ -208,7 +208,7 @@ final class FolderViewModel: ObservableObject {
         }
     }
 
-    func isActionSelectionButtonIsDisabled(fileSelectDelegate: FileSelectDelegate) -> Bool {
+    func isActionSelectionDisabled(fileSelectDelegate: FileSelectDelegate) -> Bool {
         isFilesInCurrentFolder(fileSelectDelegate: fileSelectDelegate) ?? true ||
         canPerformAction(fileSelectDelegate: fileSelectDelegate) == false
     }
@@ -242,7 +242,7 @@ final class FolderViewModel: ObservableObject {
         }
     }
     
-    func isFolderOkForFolderCreationButton() -> Bool {
+    func isFolderOkForFolderCreation() -> Bool {
         switch state.content {
         case .tag:
             return false
@@ -413,8 +413,13 @@ private extension FolderViewModel {
     }
 
     func canPerformAction(fileSelectDelegate: FileSelectDelegate) -> Bool {
+        guard let file = fileSelectDelegate.selectedFiles.first else {
+            assertionFailure()
+            return false
+        }
         return fileManagerCommutator.canPerformAction(
-            selectedDelegate: fileSelectDelegate,
+            fileAction: fileSelectDelegate.type,
+            sourceStorage: file.storageType,
             destinationStorage: state.content.folderStorageType() ?? .local
         )
     }

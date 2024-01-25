@@ -64,8 +64,7 @@ extension LocalFileManager: FileManager {
         name: String,
         completion: @escaping (Result<[File], Error>) -> Void
     ) {
-        let enumerator = enumeratorDependOnSearchingPlace(searchingPlace: searchingPlace, currentFolder: file)
-        let allFiles = SystemFileManger.allFilesIn(enumerator: enumerator)
+        let allFiles = filesDependOnSearchingPlace(searchingPlace: searchingPlace, currentFolder: file)
         let filteredFiles = allFiles.filter { file in
             file.displayedName().lowercased().contains(name.lowercased())
         }
@@ -91,8 +90,7 @@ extension LocalFileManager: FileManager {
     }
 
     func filesWithTag(tag: Tag, completion: @escaping (Result<[File], Error>) -> Void) {
-        let enumerator = SystemFileManger.enumeratorFor(file: rootFolder)
-        let allFilesInFolder = SystemFileManger.allFilesIn(enumerator: enumerator)
+        let allFilesInFolder = SystemFileManger.allFilesIn(file: rootFolder)
         let filteredFiles = allFilesInFolder.filter { file in
             getActiveTagNamesOnFile(file: file).contains(tag.id.uuidString)
         }
@@ -386,25 +384,11 @@ extension LocalFileManager: FileManager {
     }
 
     func canPerformAction(
-        selectedDelegate: FileSelectDelegate,
+        fileAction: FileActionType,
+        sourceStorage: File.StorageType,
         destinationStorage: File.StorageType
     ) -> Bool {
-        switch selectedDelegate.type {
-        case .copy:
-            switch destinationStorage {
-            case .local:
-                return true
-            case .dropbox:
-                return true
-            }
-        case .move:
-            switch destinationStorage {
-            case .local:
-                return true
-            case .dropbox:
-                return true
-            }
-        }
+        return true
     }
 }
 
@@ -563,20 +547,20 @@ private extension LocalFileManager {
         }
     }
     
-    func enumeratorDependOnSearchingPlace(
+    func filesDependOnSearchingPlace(
         searchingPlace: SearchingPlace,
         currentFolder: File
-    ) -> SystemFileManger.DirectoryEnumerator? {
+    ) -> [File] {
         
         switch searchingPlace {
         case .currentStorage:
-            return SystemFileManger.enumeratorFor(file: rootFolder)
+            return SystemFileManger.allFilesIn(file: rootFolder)
         case .currentFolder:
-            return SystemFileManger.enumeratorFor(file: currentFolder)
+            return SystemFileManger.allFilesIn(file: currentFolder)
         case .currentTrash:
-            return SystemFileManger.enumeratorFor(file: trashFolder)
+            return SystemFileManger.allFilesIn(file: trashFolder)
         case .allStorages:
-            return SystemFileManger.enumeratorFor(file: rootFolder)
+            return SystemFileManger.allFilesIn(file: rootFolder)
         }
     }
 

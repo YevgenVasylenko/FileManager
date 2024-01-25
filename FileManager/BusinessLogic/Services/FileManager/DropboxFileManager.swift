@@ -407,24 +407,15 @@ extension DropboxFileManager: FileManager {
     }
 
     func canPerformAction(
-        selectedDelegate: FileSelectDelegate,
+        fileAction: FileActionType,
+        sourceStorage: File.StorageType,
         destinationStorage: File.StorageType
     ) -> Bool {
-        switch selectedDelegate.type {
+        switch fileAction {
         case .copy:
-            switch destinationStorage {
-            case .local:
-                return true
-            case .dropbox:
-                return true
-            }
+            return true
         case .move:
-            switch destinationStorage {
-            case .local:
-                return false
-            case .dropbox:
-                return true
-            }
+            return destinationStorage == sourceStorage
         }
     }
 }

@@ -90,7 +90,7 @@ private extension FolderView {
             else {
                 folderView()
             }
-            if viewModel.isFolderOkForFolderCreationButton() {
+            if viewModel.isFolderOkForFolderCreation() {
                 createFolderButton()
             }
             actionMenuBarForChosenFiles()
@@ -187,7 +187,7 @@ private extension FolderView {
                 Button(nameOfActionSelection(fileActionType: fileSelectDelegate.type)) {
                     chooseAction()
                 }
-                .disabled(viewModel.isActionSelectionButtonIsDisabled(fileSelectDelegate: fileSelectDelegate))
+                .disabled(viewModel.isActionSelectionDisabled(fileSelectDelegate: fileSelectDelegate))
             }
         }
     }

@@ -17,11 +17,12 @@ extension SystemFileManger {
         }
     }
 
-    static func enumeratorFor(file: File) -> DirectoryEnumerator? {
-        return SystemFileManger.default.enumerator(at: file.path, includingPropertiesForKeys: [.isRegularFileKey, .isDirectoryKey], options: [.skipsHiddenFiles, .skipsPackageDescendants])
-    }
-
-    static func allFilesIn(enumerator: SystemFileManger.DirectoryEnumerator?) -> [File] {
+    static func allFilesIn(file: File) -> [File] {
+        let enumerator = SystemFileManger.default.enumerator(
+            at: file.path,
+            includingPropertiesForKeys: [.isRegularFileKey, .isDirectoryKey],
+            options: [.skipsHiddenFiles, .skipsPackageDescendants]
+        )
         guard let enumerator
         else {
             return []

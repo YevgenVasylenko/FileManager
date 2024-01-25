@@ -40,8 +40,8 @@ extension DropboxFileManager: LocalTemporaryFolderConnector {
     }
 
     func moveBatchOfFilesToLocalTemporary(files: [File], completion: @escaping (Result<[URL], Error>) -> Void) {
-//              Dropbox api doesn't support permanent delete,
-//                  so move file with keeping original copy in trash doesn't make sense
+        // Dropbox api doesn't support permanent delete,
+        // so move file with keeping original copy in trash doesn't make sense
         assertionFailure()
         completion(.failure(.unknown))
     }
@@ -278,8 +278,7 @@ private extension DropboxFileManager {
         completion: @escaping (Result<OperationResult, Error>) -> Void
     ) {
         if file.isFolder() {
-            let enumerator = SystemFileManger.enumeratorFor(file: file)
-            let allFiles = SystemFileManger.allFilesIn(enumerator: enumerator)
+            let allFiles = SystemFileManger.allFilesIn(file: file)
             self.createOrUploadBatchOfFilesInDropbox(
                 files: allFiles,
                 destination: destination,
@@ -377,9 +376,9 @@ private extension DropboxFileManager {
 
     func makeDestinationFolderForUpload(file: File, destination: File) -> File {
         let pathWithoutTemp = file.path.removeTemp()
-        let pathWithoutFirst = pathWithoutTemp.removeFirst()
+        let pathWithoutUUIDUnificator = pathWithoutTemp.removeFirst()
         return File(
-            path: destination.path.appendingPathComponent(pathWithoutFirst.path),
+            path: destination.path.appendingPathComponent(pathWithoutUUIDUnificator.path),
             storageType: .dropbox
         )
     }

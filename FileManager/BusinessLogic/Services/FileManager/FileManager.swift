@@ -76,7 +76,8 @@ protocol FileManager {
     func filesWithTag(tag: Tag, completion: @escaping (Result<[File], Error>) -> Void)
 
     func canPerformAction(
-        selectedDelegate: FileSelectDelegate,
+        fileAction: FileActionType,
+        sourceStorage: File.StorageType,
         destinationStorage: File.StorageType
     ) -> Bool
 }

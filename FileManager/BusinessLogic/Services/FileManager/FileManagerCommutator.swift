@@ -289,17 +289,15 @@ extension FileManagerCommutator: FileManager {
     }
 
     func canPerformAction(
-        selectedDelegate: FileSelectDelegate,
+        fileAction: FileActionType,
+        sourceStorage: File.StorageType,
         destinationStorage: File.StorageType
     ) -> Bool {
-        guard let file = selectedDelegate.selectedFiles.first else {
-            assertionFailure()
-            return false
-        }
-        let fileManager = FileManagerFactory.makeFileManager(file: file)
+        let fileManager = FileManagerFactory.makeFileManager(storage: sourceStorage)
 
         return fileManager.canPerformAction(
-            selectedDelegate: selectedDelegate,
+            fileAction: fileAction,
+            sourceStorage: sourceStorage,
             destinationStorage: destinationStorage
         )
     }
