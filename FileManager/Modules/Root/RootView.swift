@@ -135,6 +135,7 @@ private extension RootView {
             ) { content in
                 listItem(content: content)
             }
+            .padding(-16)
         } header: {
             Text(R.string.localizable.places())
         }
@@ -150,6 +151,7 @@ private extension RootView {
             ) { content in
                 listItem(content: content)
             }
+            .padding(-16)
         } header: {
             Text(R.string.localizable.tags())
         }

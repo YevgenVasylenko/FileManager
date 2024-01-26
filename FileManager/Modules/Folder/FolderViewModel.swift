@@ -208,14 +208,11 @@ final class FolderViewModel: ObservableObject {
         }
     }
 
-    func isFilesInCurrentFolder(files: [File]) -> Bool? {
-        if state.isLoading {
-            return nil
-        } else {
-            return state.files.contains(files)
-        }
+    func isActionSelectionDisabled(fileSelectDelegate: FileSelectDelegate) -> Bool {
+        isFilesInCurrentFolder(fileSelectDelegate: fileSelectDelegate) ?? true ||
+        canPerformAction(fileSelectDelegate: fileSelectDelegate) == false
     }
-    
+
     func update(fileDisplayOptions: FileDisplayOptions) {
         FileDisplayOptionsManager.options = fileDisplayOptions
         state.fileDisplayOptions = fileDisplayOptions
@@ -245,7 +242,7 @@ final class FolderViewModel: ObservableObject {
         }
     }
     
-    func isFolderOkForFolderCreationButton() -> Bool {
+    func isFolderOkForFolderCreation() -> Bool {
         switch state.content {
         case .tag:
             return false
@@ -405,6 +402,26 @@ private extension FolderViewModel {
             self.sort()
             self.state.isLoading = false
         }
+    }
+
+    func isFilesInCurrentFolder(fileSelectDelegate: FileSelectDelegate) -> Bool? {
+        if state.isLoading {
+            return nil
+        } else {
+            return state.files.contains(fileSelectDelegate.selectedFiles)
+        }
+    }
+
+    func canPerformAction(fileSelectDelegate: FileSelectDelegate) -> Bool {
+        guard let file = fileSelectDelegate.selectedFiles.first else {
+            assertionFailure()
+            return false
+        }
+        return fileManagerCommutator.canPerformAction(
+            fileAction: fileSelectDelegate.type,
+            sourceStorage: file.storageType,
+            destinationStorage: state.content.folderStorageType() ?? .local
+        )
     }
 }
 

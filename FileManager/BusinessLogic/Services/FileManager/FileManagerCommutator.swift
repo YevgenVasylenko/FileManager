@@ -12,8 +12,8 @@ final class FileManagerCommutator {
 
 extension FileManagerCommutator: FileManager {
 
-   func contents(of file: File, completion: @escaping (Result<[File], Error>) -> Void) {
-       FileManagerFactory.makeFileManager(file: file).contents(of: file, completion: completion)
+    func contents(of file: File, completion: @escaping (Result<[File], Error>) -> Void) {
+        FileManagerFactory.makeFileManager(file: file).contents(of: file, completion: completion)
     }
     
     func contentBySearchingName(
@@ -23,30 +23,33 @@ extension FileManagerCommutator: FileManager {
         completion: @escaping (Result<[File], Error>) -> Void
     ) {
         var searchedFilesAcrossAll: [File] = []
-        let group = DispatchGroup()
         var error: Error?
-        for storage in makeListOfActiveFileManagers(file: file, searchingPlace: searchingPlace) {
-            group.enter()
-            storage.contentBySearchingName(
-                searchingPlace: searchingPlace,
-                file: file,
-                name: name) { result in
-                    defer { group.leave() }
+        let fileManagers = makeListOfActiveFileManagers(file: file, searchingPlace: searchingPlace)
+
+        DispatchGroup.perform(
+            value: fileManagers,
+            action: { fileManager, completion in
+                fileManager.contentBySearchingName(
+                    searchingPlace: searchingPlace,
+                    file: file,
+                    name: name
+                ) { result in
                     switch result {
                     case .success(let files):
                         searchedFilesAcrossAll += files
                     case .failure(let _error):
                         error = _error
                     }
+                    completion()
                 }
-        }
-        group.notify(queue: .main) {
-            if let error {
-                completion(.failure(error))
-            } else {
-                completion(.success(searchedFilesAcrossAll))
-            }
-        }
+            },
+            completion: {
+                if let error {
+                    completion(.failure(error))
+                } else {
+                    completion(.success(searchedFilesAcrossAll))
+                }
+            })
     }
 
     func contentBySearchingNameAcrossTagged(
@@ -55,30 +58,32 @@ extension FileManagerCommutator: FileManager {
         completion: @escaping (Result<[File], Error>) -> Void
     ) {
         var foundedFilesAcrossAll: [File] = []
-        let group = DispatchGroup()
         var error: Error?
-        for storage in File.StorageType.activeStorages() {
-            group.enter()
-            storage.contentBySearchingNameAcrossTagged(
-                tag: tag,
-                name: name)
-                 { result in
-                    defer { group.leave() }
+        let activeFileManagers = File.StorageType.activeStorages()
+
+        DispatchGroup.perform(
+            value: activeFileManagers,
+            action: { fileManager, completion in
+                fileManager.contentBySearchingNameAcrossTagged(
+                    tag: tag,
+                    name: name
+                ) { result in
                     switch result {
                     case .success(let files):
                         foundedFilesAcrossAll += files
                     case .failure(let _error):
                         error = _error
                     }
+                    completion()
                 }
-        }
-        group.notify(queue: .main) {
-            if let error {
-                completion(.failure(error))
-            } else {
-                completion(.success(foundedFilesAcrossAll))
-            }
-        }
+            },
+            completion: {
+                if let error {
+                    completion(.failure(error))
+                } else {
+                    completion(.success(foundedFilesAcrossAll))
+                }
+            })
     }
     
     func createFolder(at file: File, completion: @escaping (Result<Void, Error>) -> Void) {
@@ -124,25 +129,26 @@ extension FileManagerCommutator: FileManager {
                 files: files,
                 destination: destination,
                 conflictResolver: conflictResolver,
-                completion: completion)
+                completion: completion
+            )
             return
         }
-        fileManager.copyToLocalTemporary(files: files) { result in
+        fileManager.copyBatchOfFilesToLocalTemporary(files: files) { result in
             switch result {
+            case .failure(let error):
+                completion(.failure(Error(error: error)))
             case .success(let sentFileURLs):
                 var downloadedFiles: [File] = []
                 for addressURL in sentFileURLs {
                     downloadedFiles.append(File(path: addressURL, storageType: destination.storageType))
                 }
                 let destinationFileManager = FileManagerFactory.makeFileManager(file: destination)
-                destinationFileManager.saveFromLocalTemporary(
+                destinationFileManager.saveFilesFromLocalTemporary(
                     files: downloadedFiles,
                     destination: destination,
                     conflictResolver: conflictResolver,
                     completion: completion
                 )
-            case .failure(let error):
-                completion(.failure(Error(error: error)))
             }
         }
     }
@@ -166,6 +172,25 @@ extension FileManagerCommutator: FileManager {
                 conflictResolver: conflictResolver,
                 completion: completion
             )
+            return
+        }
+        fileManager.moveBatchOfFilesToLocalTemporary(files: files) { result in
+            switch result {
+            case .failure(let error):
+                completion(.failure(Error(error: error)))
+            case .success(let sentFileURLs):
+                var downloadedFiles: [File] = []
+                for addressURL in sentFileURLs {
+                    downloadedFiles.append(File(path: addressURL, storageType: destination.storageType))
+                }
+                let destinationFileManager = FileManagerFactory.makeFileManager(file: destination)
+                destinationFileManager.saveFilesFromLocalTemporary(
+                    files: downloadedFiles,
+                    destination: destination,
+                    conflictResolver: conflictResolver,
+                    completion: completion
+                )
+            }
         }
     }
 
@@ -238,27 +263,43 @@ extension FileManagerCommutator: FileManager {
 
     func filesWithTag(tag: Tag, completion: @escaping (Result<[File], Error>) -> Void) {
         var allFilesAcrossStoragesWithTag: [File] = []
-        let group = DispatchGroup()
         var error: Error?
-        for storage in File.StorageType.activeStorages() {
-            group.enter()
-            storage.filesWithTag(tag: tag) { result in
-                defer { group.leave() }
-                switch result {
-                case .success(let files):
-                    allFilesAcrossStoragesWithTag += files
-                case .failure(let _error):
-                    error = _error
+        let activeFileManagers = File.StorageType.activeStorages()
+
+        DispatchGroup.perform(
+            value: activeFileManagers,
+            action: { fileManager, completion in
+                fileManager.filesWithTag(tag: tag) { result in
+                    switch result {
+                    case .success(let files):
+                        allFilesAcrossStoragesWithTag += files
+                    case .failure(let _error):
+                        error = _error
+                    }
+                    completion()
                 }
-            }
-        }
-        group.notify(queue: .main) {
-            if let error {
-                completion(.failure(error))
-            } else {
-                completion(.success(allFilesAcrossStoragesWithTag))
-            }
-        }
+            },
+            completion: {
+                if let error {
+                    completion(.failure(error))
+                } else {
+                    completion(.success(allFilesAcrossStoragesWithTag))
+                }
+            })
+    }
+
+    func canPerformAction(
+        fileAction: FileActionType,
+        sourceStorage: File.StorageType,
+        destinationStorage: File.StorageType
+    ) -> Bool {
+        let fileManager = FileManagerFactory.makeFileManager(storage: sourceStorage)
+
+        return fileManager.canPerformAction(
+            fileAction: fileAction,
+            sourceStorage: sourceStorage,
+            destinationStorage: destinationStorage
+        )
     }
 }
 

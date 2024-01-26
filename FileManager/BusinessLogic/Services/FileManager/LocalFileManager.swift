@@ -44,7 +44,10 @@ extension LocalFileManager: FileManager {
     func contents(of file: File, completion: (Result<[File], Error>) -> Void) {
         do {
             var files: [File] = []
-            for path in try SystemFileManger.default.contentsOfDirectory(at: file.path, includingPropertiesForKeys: nil) {
+            for path in try SystemFileManger.default.contentsOfDirectory(
+                at: file.path,
+                includingPropertiesForKeys: nil
+            ) {
                 var newFile = File(path: path, storageType: .local)
                 newFile = updatedFile(file: newFile)
                 files.append(newFile)
@@ -61,36 +64,11 @@ extension LocalFileManager: FileManager {
         name: String,
         completion: @escaping (Result<[File], Error>) -> Void
     ) {
-        do {
-            var files: [File] = []
-            guard let enumerator = enumeratorDependOnSearchingPlace(searchingPlace: searchingPlace, currentFolder: file)
-            else {
-                completion(.failure(.unknown))
-                return
-            }
-            for case let fileURL as URL in enumerator {
-                do {
-                    let fileAttributes = try fileURL.resourceValues(forKeys:[.isRegularFileKey, .isDirectoryKey])
-                    guard
-                        let isRegularFile = fileAttributes.isRegularFile,
-                        let isDirectory = fileAttributes.isDirectory
-                    else {
-                        completion(.failure(.unknown))
-                        return
-                    }
-                    if isRegularFile || isDirectory {
-                        var newFile = File(path: fileURL, storageType: .local)
-                        newFile = updatedFile(file: newFile)
-                        if newFile.displayedName().lowercased().contains(name.lowercased()) {
-                            files.append(newFile)
-                        }
-                    }
-                }
-            }
-            completion(.success(files))
-        } catch {
-            completion(.failure(Error(error: error)))
+        let allFiles = filesDependOnSearchingPlace(searchingPlace: searchingPlace, currentFolder: file)
+        let filteredFiles = allFiles.filter { file in
+            file.displayedName().lowercased().contains(name.lowercased())
         }
+        completion(.success(filteredFiles))
     }
 
     func contentBySearchingNameAcrossTagged(
@@ -112,27 +90,17 @@ extension LocalFileManager: FileManager {
     }
 
     func filesWithTag(tag: Tag, completion: @escaping (Result<[File], Error>) -> Void) {
-        allFilesInLocal() { [weak self] result in
-            guard let self else { return }
-            switch result {
-            case .success(let files):
-                let filteredFiles = files.filter { file in
-                    self.getActiveTagNamesOnFile(file: file).contains(tag.id.uuidString)
-                }
-                completion(.success(filteredFiles))
-            case .failure(let failure):
-                completion(.failure(failure))
-            }
+        let allFilesInFolder = SystemFileManger.allFilesIn(file: rootFolder)
+        let filteredFiles = allFilesInFolder.filter { file in
+            getActiveTagNamesOnFile(file: file).contains(tag.id.uuidString)
         }
+        completion(.success(filteredFiles))
     }
     
     func createFolder(at file: File, completion: (Result<Void, Error>) -> Void) {
-        do {
-            try SystemFileManger.default.createDirectory(at: file.path, withIntermediateDirectories: false)
-            completion(.success(()))
-        } catch {
-            completion(.failure(Error(error: error)))
-        }
+        completion(
+            SystemFileManger.createFolder(at: file)
+        )
     }
     
     func newNameForCreationOfFolder(
@@ -165,6 +133,8 @@ extension LocalFileManager: FileManager {
         
         copy(file: file, destination: destination, conflictResolver: conflictResolver) { [weak self] result in
             switch result {
+            case .failure(let error):
+                completion(.failure(Error(error: error)))
             case .success(let result):
                 if result == .cancelled {
                     completion(.success(.cancelled))
@@ -177,8 +147,6 @@ extension LocalFileManager: FileManager {
                     conflictResolver: conflictResolver,
                     completion: completion
                 )
-            case .failure(let error):
-                completion(.failure(Error(error: error)))
             }
         }
     }
@@ -196,6 +164,8 @@ extension LocalFileManager: FileManager {
         
         move(file: file, destination: destination, conflictResolver: conflictResolver) { [weak self] result in
             switch result {
+            case .failure(let error):
+                completion(.failure(Error(error: error)))
             case .success(let cancelChoice):
                 if cancelChoice == .cancelled {
                     completion(.success(.cancelled))
@@ -206,10 +176,7 @@ extension LocalFileManager: FileManager {
                     files: Array(files),
                     destination: destination,
                     conflictResolver: conflictResolver,
-                    completion: completion
-                )
-            case .failure(let error):
-                completion(.failure(Error(error: error)))
+                    completion: completion)
             }
         }
     }
@@ -348,56 +315,80 @@ extension LocalFileManager: FileManager {
     func getActiveTagIds(on file: File, completion: @escaping (Result<[String], Error>) -> Void) {
         completion(.success(getActiveTagNamesOnFile(file: file)))
     }
-}
 
-extension LocalFileManager: LocalTemporaryFolderConnector {
-    
-    func copyToLocalTemporary(files: [File], completion: @escaping (Result<[URL], Error>) -> Void) {
-        let conflictResolve = NameConflictResolverError()
-        let group = DispatchGroup()
-        var destinationFileURLs: [URL] = []
-        for file in files {
-            group.enter()
-            let temporaryStorage = File(
-                path: SystemFileManger.default.temporaryDirectory.appendingPathComponent(
-                    UUID().uuidString, isDirectory: true),
-                storageType: .local
-            )
-            createFolder(at: temporaryStorage) { _ in
-            }
-            let destinationPath = temporaryStorage.makeSubfile(name: file.name).path
-            copy(file: file, destination: temporaryStorage, conflictResolver: conflictResolve) { result in
-                switch result {
-                case .success:
-                    defer { group.leave() }
-                    destinationFileURLs.append(destinationPath)
+    func copy(
+        file: File,
+        destination: File,
+        conflictResolver: NameConflictResolver,
+        completion: @escaping (Result<OperationResult, Error>) -> Void)
+    {
+        let destination = destination.makeSubfile(name: file.name)
+
+        if SystemFileManger.default.fileExists(atPath: destination.path.path) {
+            conflictResolve(fileToCopy: file, destination: destination, conflictResolver: conflictResolver) { conflictResolveResult in
+                switch conflictResolveResult {
+                case .success(let choice):
+                    completion(.success(choice))
                 case .failure(let error):
-                    defer { group.leave() }
                     completion(.failure(Error(error: error)))
-                    return
+                }
+            }
+        } else {
+            do {
+                try SystemFileManger.default.copyItem(at: file.path, to: destination.path)
+                completion(.success(.finished))
+            } catch {
+                let error = error as NSError
+                switch error.code {
+                case NSFileWriteFileExistsError:
+                    conflictResolve(fileToCopy: file, destination: destination, conflictResolver: conflictResolver) { conflictResolveResult in
+                        switch conflictResolveResult {
+                        case .success(let choice):
+                            completion(.success(choice))
+                        case .failure(let error):
+                            completion(.failure(Error(error: error)))
+                        }
+                    }
+                default:
+                    completion(.failure(Error(error: error)))
                 }
             }
         }
-        group.notify(queue: DispatchQueue.main) {
-            completion(.success(destinationFileURLs))
-        }
     }
-    
-    func saveFromLocalTemporary(
-        files: [File],
+
+    func move(
+        file: File,
         destination: File,
         conflictResolver: NameConflictResolver,
-        completion: @escaping (Result<OperationResult, Error>) -> Void) {
-        move(
-            files: files,
-            destination: destination,
-            conflictResolver: conflictResolver
-        ) { result in
+        completion: @escaping (Result<OperationResult, Error>) -> Void
+    ) {
+        copy(file: file, destination: destination, conflictResolver: conflictResolver) { copyResult in
+            switch copyResult {
+            case .success(let cancelChoice):
+                if cancelChoice == .cancelled {
+                    completion(.success(.cancelled))
+                    return
+                }
+                self.deleteFile(files: [file]) { result in
+                    switch result {
+                    case .success:
+                        completion(.success(.finished))
+                    case .failure(let error):
+                        completion(.failure(Error(error: error)))
+                    }
+                }
+            case .failure(let error):
+                completion(.failure(Error(error: error)))
+            }
         }
     }
-    
-    func getLocalFileURL(file: File, completion: @escaping (Result<URL, Error>) -> Void) {
-        completion(.success(file.path))
+
+    func canPerformAction(
+        fileAction: FileActionType,
+        sourceStorage: File.StorageType,
+        destinationStorage: File.StorageType
+    ) -> Bool {
+        return true
     }
 }
 
@@ -449,73 +440,6 @@ private extension LocalFileManager {
         }
     }
     
-    func copy(
-        file: File,
-        destination: File,
-        conflictResolver: NameConflictResolver,
-        completion: @escaping (Result<OperationResult, Error>) -> Void)
-    {
-        let destination = destination.makeSubfile(name: file.name)
-
-        if SystemFileManger.default.fileExists(atPath: destination.path.path) {
-            conflictResolve(fileToCopy: file, destination: destination, conflictResolver: conflictResolver) { conflictResolveResult in
-                switch conflictResolveResult {
-                case .success(let choice):
-                    completion(.success(choice))
-                case .failure(let error):
-                    completion(.failure(Error(error: error)))
-                }
-            }
-        } else {
-            do {
-                try SystemFileManger.default.copyItem(at: file.path, to: destination.path)
-                completion(.success(.finished))
-            } catch {
-                let error = error as NSError
-                switch error.code {
-                case NSFileWriteFileExistsError:
-                    conflictResolve(fileToCopy: file, destination: destination, conflictResolver: conflictResolver) { conflictResolveResult in
-                        switch conflictResolveResult {
-                        case .success(let choice):
-                            completion(.success(choice))
-                        case .failure(let error):
-                            completion(.failure(Error(error: error)))
-                        }
-                    }
-                default:
-                    completion(.failure(Error(error: error)))
-                }
-            }
-        }
-    }
-    
-    func move(
-        file: File,
-        destination: File,
-        conflictResolver: NameConflictResolver,
-        completion: @escaping (Result<OperationResult, Error>) -> Void)
-    {
-        copy(file: file, destination: destination, conflictResolver: conflictResolver) { copyResult in
-            switch copyResult {
-            case .success(let cancelChoice):
-                if cancelChoice == .cancelled {
-                    completion(.success(.cancelled))
-                    return
-                }
-                self.deleteFile(files: [file]) { result in
-                    switch result {
-                    case .success:
-                        completion(.success(.finished))
-                    case .failure(let error):
-                        completion(.failure(Error(error: error)))
-                    }
-                }
-            case .failure(let error):
-                completion(.failure(Error(error: error)))
-            }
-        }
-    }
-
     func copyFileWithNewName(file: File, destination: File) -> Result<Void, Error> {
         var finalFile = destination
         var numberOfCopy = 1
@@ -623,55 +547,20 @@ private extension LocalFileManager {
         }
     }
     
-    func enumeratorDependOnSearchingPlace(
+    func filesDependOnSearchingPlace(
         searchingPlace: SearchingPlace,
         currentFolder: File
-    ) -> SystemFileManger.DirectoryEnumerator? {
+    ) -> [File] {
         
         switch searchingPlace {
         case .currentStorage:
-            return enumeratorForSearching(file: rootFolder)
+            return SystemFileManger.allFilesIn(file: rootFolder)
         case .currentFolder:
-            return enumeratorForSearching(file: currentFolder)
+            return SystemFileManger.allFilesIn(file: currentFolder)
         case .currentTrash:
-            return enumeratorForSearching(file: trashFolder)
+            return SystemFileManger.allFilesIn(file: trashFolder)
         case .allStorages:
-            return enumeratorForSearching(file: rootFolder)
-        }
-    }
-    
-    func enumeratorForSearching(file: File) -> SystemFileManger.DirectoryEnumerator? {
-        return SystemFileManger.default.enumerator(at: file.path, includingPropertiesForKeys: [.isRegularFileKey, .isDirectoryKey], options: [.skipsHiddenFiles, .skipsPackageDescendants])
-    }
-
-    func allFilesInLocal(completion: @escaping (Result<[File], Error>) -> Void) {
-        do {
-            var files: [File] = []
-            guard let enumerator = SystemFileManger.default.enumerator(at: rootFolder.path, includingPropertiesForKeys: [.isRegularFileKey, .isDirectoryKey], options: [.skipsHiddenFiles, .skipsPackageDescendants])
-            else {
-                completion(.failure(.unknown))
-                return
-            }
-            for case let fileURL as URL in enumerator {
-                do {
-                    let fileAttributes = try fileURL.resourceValues(forKeys:[.isRegularFileKey, .isDirectoryKey])
-                    guard
-                        let isRegularFile = fileAttributes.isRegularFile,
-                        let isDirectory = fileAttributes.isDirectory
-                    else {
-                        completion(.failure(.unknown))
-                        return
-                    }
-                    if isRegularFile || isDirectory {
-                        var newFile = File(path: fileURL, storageType: .local)
-                        newFile = updatedFile(file: newFile)
-                        files.append(newFile)
-                    }
-                }
-            }
-            completion(.success(files))
-        } catch {
-            completion(.failure(Error(error: error)))
+            return SystemFileManger.allFilesIn(file: rootFolder)
         }
     }
 

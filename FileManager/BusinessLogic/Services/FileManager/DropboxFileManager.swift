@@ -60,7 +60,7 @@ extension DropboxFileManager: FileManager {
             completion(.success(files))
         }
     }
-   
+
     func contentBySearchingName(
         searchingPlace: SearchingPlace,
         file: File,
@@ -208,28 +208,17 @@ extension DropboxFileManager: FileManager {
         completion: @escaping (Result<OperationResult, Error>) -> Void
     ) {
         // Not supported
+        completion(.failure(.unknown))
     }
     
     func deleteFile(files: [File], completion: @escaping (Result<Void, Error>) -> Void) {
-        guard let client = DropboxClientsManager.authorizedClient else {
-            completion(.failure(.unknown))
-            return
-        }
-        for file in files {
-            let path = dropboxPath(file: file)
-            client.files.permanentlyDelete(path: path).response { response, error in
-                if let error = error {
-                    print(error)
-                    completion(.failure(Error(dropboxError: error)))
-                    return
-                }
-                completion(.success(()))
-            }
-        }
+        // Not supported
+        completion(.failure(.unknown))
     }
     
     func cleanTrashFolder(fileForFileManager: File, completion: @escaping (Result<Void, Error>) -> Void) {
         // Not supported
+        completion(.failure(.unknown))
     }
     
     func makeFolderMonitor(file: File) -> FolderMonitor? {
@@ -363,153 +352,49 @@ extension DropboxFileManager: FileManager {
     func filesWithTag(tag: Tag, completion: @escaping (Result<[File], Error>) -> Void) {
         allFilesInside(rootFolder) { result in
             switch result {
+            case .failure(let _error):
+                completion(.failure(_error))
             case .success(let files):
                 var filesWithTag: [File] = []
                 var error: Error?
-                let group = DispatchGroup()
-                for file in files {
-                    group.enter()
-                    self.getActiveTagIds(on: file) { result in
-                        defer { group.leave() }
-                        switch result {
-                        case .success(let tagIds):
-                            if tagIds.contains(tag.id.uuidString) {
-                                filesWithTag.append(file)
+
+                DispatchGroup.perform(
+                    value: files,
+                    action: { file, completion in
+                        self.getActiveTagIds(on: file) { result in
+                            switch result {
+                            case .success(let tagIds):
+                                if tagIds.contains(tag.id.uuidString) {
+                                    filesWithTag.append(file)
+                                }
+                            case .failure(let _error):
+                                error = _error
                             }
-                        case .failure(let _error):
-                            error = _error
+                            completion()
                         }
-                    }
-                }
-                group.notify(queue: .main) {
-                    if let error {
-                        completion(.failure(error))
-                    } else {
-                        completion(.success(filesWithTag))
-                    }
-                }
-            case .failure(let _error):
-                completion(.failure(_error))
-            }
-        }
-    }
-}
-
-extension DropboxFileManager: LocalTemporaryFolderConnector {
-    
-    func copyToLocalTemporary(
-        files: [File],
-        completion: @escaping (Result<[URL], Error>) -> Void
-    ) {
-        guard let client = DropboxClientsManager.authorizedClient else {
-            completion(.failure(.unknown))
-            return
-        }
-        let group = DispatchGroup()
-        var destinationFileURLs: [URL] = []
-        var lastError: Error?
-        for file in files {
-            group.enter()
-            let copyFilePath = dropboxPath(file: file)
-            let destinationFile = File(
-                path: SystemFileManger.default.temporaryDirectory
-                    .appendingPathComponent(UUID().uuidString, isDirectory: true),
-                storageType: .local
-            )
-            FileManagerCommutator().createFolder(at: destinationFile) { result in
-                switch result {
-                case .success:
-                    break
-                case .failure(let failure):
-                    completion(.failure(failure))
-                }
-            }
-            let destination: (URL, HTTPURLResponse) -> URL = { temporaryURL, response in
-                return destinationFile.makeSubfile(name: file.name).path
-            }
-            client.files.download(path: copyFilePath, overwrite: true, destination: destination).response { response, error in
-                defer { group.leave() }
-                if let error = error {
-                    lastError = Error(dropboxError: error)
-                    return
-                }
-                if let result = response {
-                    destinationFileURLs.append(result.1)
-                }
-            }
-        }
-        group.notify(queue: DispatchQueue.main) {
-            if let error = lastError {
-                completion(.failure(error))
-            } else {
-                completion(.success(destinationFileURLs))
-            }
-        }
-    }
-    
-    func saveFromLocalTemporary(
-        files: [File],
-        destination: File,
-        conflictResolver: NameConflictResolver,
-        completion: @escaping (Result<OperationResult, Error>) -> Void
-    ) {
-        guard let client = DropboxClientsManager.authorizedClient else {
-            completion(.failure(.unknown))
-            return
-        }
-        var filesCommitInfo = [URL: Files.CommitInfo]()
-        
-        for file in files {
-            let fileUrl = file.path
-            let uploadToPath = destination.makeSubfile(name: file.name).path.path
-            filesCommitInfo[fileUrl] = Files.CommitInfo(path: uploadToPath, mode: .overwrite)
-        }
-        
-        client.files.batchUploadFiles(
-            fileUrlsToCommitInfo: filesCommitInfo,
-            responseBlock: { uploadResults, finishBatchRequestError, fileUrlsToRequestErrors in
-                
-                if let finishBatchRequestError = finishBatchRequestError {
-                    completion(.failure(Error(dropboxError: finishBatchRequestError)))
-                    return
-                }
-                if let error = fileUrlsToRequestErrors.first?.value {
-                    completion(.failure(Error(dropboxError: error)))
-                    return
-                }
-                completion(.success(.finished))
-            })
-    }
-    
-    func getLocalFileURL(file: File, completion: @escaping (Result<URL, Error>) -> Void) {
-        copyToLocalTemporary(files: [file]) { result in
-            switch result {
-            case .success(let urls):
-                if let tempURL = urls.first {
-                    completion(.success(tempURL))
-                }
-            case .failure(let error):
-                completion(.failure(error))
+                    },
+                    completion: {
+                        if let error {
+                            completion(.failure(error))
+                        } else {
+                            completion(.success(filesWithTag))
+                        }
+                    })
             }
         }
     }
 
-    static func isStorageLogged() -> Bool {
-        DropboxLoginManager.isLogged
+    func dropboxPath(file: File) -> String {
+        return file == rootFolder ? "" : file.path.path
     }
-}
 
-// MARK: - Private
-
-private extension DropboxFileManager {
-    
     func correctFolderPath(file: inout File) {
-//    TODO make extension for file
+        //    TODO make extension for file
         if file.path.pathExtension == "" {
             file.path = file.path.appendingPathExtension(for: .folder)
         }
     }
-    
+
     func updatedFile(file: File) -> File {
         var file = file
         updateFileActionsAndDeleteStatus(file: &file)
@@ -517,6 +402,28 @@ private extension DropboxFileManager {
         return file
     }
     
+    static func isStorageLogged() -> Bool {
+        DropboxLoginManager.isLogged
+    }
+
+    func canPerformAction(
+        fileAction: FileActionType,
+        sourceStorage: File.StorageType,
+        destinationStorage: File.StorageType
+    ) -> Bool {
+        switch fileAction {
+        case .copy:
+            return true
+        case .move:
+            return destinationStorage == sourceStorage
+        }
+    }
+}
+
+// MARK: - Private
+
+private extension DropboxFileManager {
+
     func updateFileActionsAndDeleteStatus(file: inout File) {
         file.actions = FileAction.regularFile
     }
@@ -619,10 +526,6 @@ private extension DropboxFileManager {
         }
     }
     
-    func dropboxPath(file: File) -> String {
-        return file == rootFolder ? "" : file.path.path
-    }
-
     func getSizeOfFile(file: File, completion: @escaping (Result<Double, Error>) -> Void) {
         guard let client = DropboxClientsManager.authorizedClient else {
             completion(.failure(.unknown))
