@@ -20,7 +20,7 @@ enum Database {
     static func isTableExists(name: String) -> Bool {
         do {
             let query = "SELECT EXISTS (SELECT * FROM sqlite_master WHERE type = 'table' AND name = ?)"
-            return try Database.connection.scalar(query, name) as? Int != 0
+            return try Database.connection.scalar(query, name) as? Int64 != 0
         } catch {
             print(error)
             return false

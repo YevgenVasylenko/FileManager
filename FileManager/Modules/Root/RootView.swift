@@ -22,6 +22,7 @@ struct RootView: View {
         NavigationSplitView {
             List {
                 sidebarStorageSection()
+                photosObserver()
                 sidebarTagsSection()
             }
             .listStyle(.sidebar)
@@ -46,15 +47,7 @@ struct RootView: View {
 // MARK: - Private
 
 private extension RootView {
-    
-    func folderView(content: Content) -> some View {
-        FolderView(
-            content: content,
-            fileSelectDelegate: fileSelectDelegate
-        )
-        .id(content)
-    }
-    
+
     @ViewBuilder
     func rootDetailView() -> some View {
         if let selectedContent = viewModel.state.selectedContent {
@@ -66,7 +59,17 @@ private extension RootView {
                         FileContentView(file: file)
                     }
                 }
+        } else if viewModel.state.isPhotosToPresent {
+            PhotoView()
         }
+    }
+
+    func folderView(content: Content) -> some View {
+        FolderView(
+            content: content,
+            fileSelectDelegate: fileSelectDelegate
+        )
+        .id(content)
     }
 
     func storageListItem(file: File) -> some View {
@@ -138,8 +141,19 @@ private extension RootView {
             .padding(-16)
         } header: {
             Text(R.string.localizable.places())
+                .font(.headline)
         }
         .scaledToFit()
+    }
+
+    func photosObserver() -> some View {
+        Button {
+            viewModel.state.selectedContent = nil
+            viewModel.state.isPhotosToPresent = true
+        } label: {
+            Text(R.string.localizable.photos())
+                .font(.headline)
+        }
     }
 
     func sidebarTagsSection() -> some View {
@@ -154,6 +168,7 @@ private extension RootView {
             .padding(-16)
         } header: {
             Text(R.string.localizable.tags())
+                .font(.headline)
         }
         .scaledToFit()
     }

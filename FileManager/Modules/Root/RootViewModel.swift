@@ -14,6 +14,7 @@ final class RootViewModel: ObservableObject {
             .folder(LocalFileManager().rootFolder),
             .folder(DropboxFileManager().rootFolder)
         ]
+        var isPhotosToPresent = false
         var contentTags: [Content] = []
         var detailNavigationStack = NavigationPath()
         var isDropboxLogged = false
@@ -80,15 +81,16 @@ final class RootViewModel: ObservableObject {
             case .dropbox:
                 return state.isDropboxLogged
             case .local:
-                return false
+                return true
             }
         case .tag, .none:
-            return false
+            return true
         }
     }
     
     func isShouldConnectSelectedStorage() -> Bool {
-        isLoggedToCloud() || isSelectedContentIsLocalStorage()
+        isLoggedToCloud()
+//        || isSelectedContentIsLocalStorage()
     }
 
     func deleteTagFromList(tag: Tag) {

@@ -45,6 +45,9 @@
 		5D0B9CA52A4466460099021C /* FileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D0B9CA42A4466460099021C /* FileView.swift */; };
 		5D0B9CA72A4466BD0099021C /* File.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D0B9CA62A4466BD0099021C /* File.swift */; };
 		5D0B9CA92A446D080099021C /* LocalFileManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D0B9CA82A446D080099021C /* LocalFileManager.swift */; };
+		5D1069072B63E277000102AA /* AlbumsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D1069062B63E277000102AA /* AlbumsViewController.swift */; };
+		5D10692B2B66C193000102AA /* PhotoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D10692A2B66C193000102AA /* PhotoView.swift */; };
+		5D10692E2B67EFCC000102AA /* AlbumViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D10692D2B67EFCC000102AA /* AlbumViewCell.swift */; };
 		5D1B5B132A8E7B56004C7AA8 /* LocalTemporaryFolderConnector.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D1B5B122A8E7B56004C7AA8 /* LocalTemporaryFolderConnector.swift */; };
 		5D1B5B152A90E08B004C7AA8 /* FileAction.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DEDB9052A5ACAC2003CC86B /* FileAction.swift */; };
 		5D1B5B172A90E106004C7AA8 /* FolderMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D627D8A2A79875000170451 /* FolderMonitor.swift */; };
@@ -147,6 +150,9 @@
 		5D0B9CA42A4466460099021C /* FileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileView.swift; sourceTree = "<group>"; };
 		5D0B9CA62A4466BD0099021C /* File.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = File.swift; sourceTree = "<group>"; };
 		5D0B9CA82A446D080099021C /* LocalFileManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalFileManager.swift; sourceTree = "<group>"; };
+		5D1069062B63E277000102AA /* AlbumsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlbumsViewController.swift; sourceTree = "<group>"; };
+		5D10692A2B66C193000102AA /* PhotoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoView.swift; sourceTree = "<group>"; };
+		5D10692D2B67EFCC000102AA /* AlbumViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlbumViewCell.swift; sourceTree = "<group>"; };
 		5D1B5B122A8E7B56004C7AA8 /* LocalTemporaryFolderConnector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalTemporaryFolderConnector.swift; sourceTree = "<group>"; };
 		5D1B5B1D2A910598004C7AA8 /* FileDisplayedName.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileDisplayedName.swift; sourceTree = "<group>"; };
 		5D221D582A5D416A0072AA35 /* View+Utilities.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "View+Utilities.swift"; sourceTree = "<group>"; };
@@ -308,6 +314,16 @@
 			path = FolderShow;
 			sourceTree = "<group>";
 		};
+		5D1069052B63E1FB000102AA /* Photos */ = {
+			isa = PBXGroup;
+			children = (
+				5D10692A2B66C193000102AA /* PhotoView.swift */,
+				5D1069062B63E277000102AA /* AlbumsViewController.swift */,
+				5D10692D2B67EFCC000102AA /* AlbumViewCell.swift */,
+			);
+			path = Photos;
+			sourceTree = "<group>";
+		};
 		5D30A12C2A9CCD2F0052AA95 /* FileInfo */ = {
 			isa = PBXGroup;
 			children = (
@@ -383,6 +399,7 @@
 		5D954CD92A5AC78B00A221DB /* Modules */ = {
 			isa = PBXGroup;
 			children = (
+				5D1069052B63E1FB000102AA /* Photos */,
 				5D954CDB2A5AC7AA00A221DB /* Root */,
 				5D954CDC2A5AC7B400A221DB /* Folder */,
 				5D02F5702B1CA5EB006BB064 /* File */,
@@ -720,6 +737,7 @@
 				5D954CD52A597FF800A221DB /* File+UI.swift in Sources */,
 				5DF815D22B58023900B96DE0 /* String+RemovePrefix.swift in Sources */,
 				5D45509C2AC6C1DF00C29B1C /* ListViewItemWithoutDisclosureIndicator.swift in Sources */,
+				5D1069072B63E277000102AA /* AlbumsViewController.swift in Sources */,
 				5DC9F2282B165FF70078D38D /* Content.swift in Sources */,
 				5DC9F2072B0B4D590078D38D /* Tags.swift in Sources */,
 				5DC9F2202B10BAF20078D38D /* TagManager.swift in Sources */,
@@ -728,12 +746,14 @@
 				5D04653D2A71071900BE768E /* FileActionType.swift in Sources */,
 				5DC9F20C2B0B9E840078D38D /* Tag.swift in Sources */,
 				0DA5918B2AE826100092E07B /* UIApplication+Utilities.swift in Sources */,
+				5D10692E2B67EFCC000102AA /* AlbumViewCell.swift in Sources */,
 				5D221D5C2A5DA1170072AA35 /* LocalizedError.swift in Sources */,
 				5DF9C96B2AB9A365007AF29C /* FolderGridListViewModel.swift in Sources */,
 				5DD776162A544B5600F9B55D /* FileManager.swift in Sources */,
 				5D0B9CA52A4466460099021C /* FileView.swift in Sources */,
 				0DA591A32AE82AED0092E07B /* FileSelectDelegate.swift in Sources */,
 				5D02F5732B1CA635006BB064 /* FileViewModel.swift in Sources */,
+				5D10692B2B66C193000102AA /* PhotoView.swift in Sources */,
 				0DA591972AE8289A0092E07B /* FilesInTrash.swift in Sources */,
 				5D02F56E2B1C7EB4006BB064 /* AttributesCoding.swift in Sources */,
 				5D69E00D2A9392B20036AE44 /* FIle+FileType.swift in Sources */,
@@ -980,6 +1000,7 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = FileManager/Info.plist;
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "Need it for photo";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
@@ -1008,6 +1029,7 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = FileManager/Info.plist;
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "Need it for photo";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
