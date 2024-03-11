@@ -44,6 +44,7 @@ private extension FileInfoView {
     func typeOfFile() -> some View {
         HStack {
             Text(R.string.localizable.type())
+                .font(.headline)
             Spacer()
             Text(viewModel.state.file.path.pathExtension.isEmpty ?
                  R.string.localizable.folder() :
@@ -54,6 +55,7 @@ private extension FileInfoView {
     func sizeOfFile() -> some View {
         HStack {
             Text(R.string.localizable.size())
+                .font(.headline)
             Spacer()
             Text(bytesCalculator(size:viewModel.state.file.attributes?.size))
         }
@@ -62,6 +64,7 @@ private extension FileInfoView {
     func dateOfCreation() -> some View {
         HStack {
             Text(R.string.localizable.created())
+                .font(.headline)
             Spacer()
             Text(viewModel.state.file.attributes?.createdDate?.formatted() ?? "-")
         }
@@ -70,6 +73,7 @@ private extension FileInfoView {
     func dateOfLastModifier() -> some View {
         HStack {
             Text(R.string.localizable.modified())
+                .font(.headline)
             Spacer()
             Text(viewModel.state.file.attributes?.modifiedDate?.formatted() ?? "-")
         }

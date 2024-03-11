@@ -320,34 +320,16 @@ extension DropboxFileManager: FileManager {
     func getActiveTagIds(on file: File, completion: @escaping (Result<[String], Error>) -> Void) {
         getTemplateId { result in
             switch result {
-            case .failure(let error):
-                completion(.failure(error))
-                return
+            case .failure(let failure):
+                completion(.failure(failure))
             case .success(let id):
-                guard let client = DropboxClientsManager.authorizedClient else {
-                    completion(.failure(.unknown))
-                    return
-                }
-                let path = self.dropboxPath(file: file)
-                client.files.getMetadata(path: path, includeMediaInfo: true, includePropertyGroups: FileProperties.TemplateFilterBase.filterSome([id])).response { data, error in
-                    if let error = error {
-                        completion(.failure(Error(dropboxError: error)))
-                        return
-                    }
-                    if let data {
-                        switch data {
-                        case let fileMetadata as Files.FileMetadata:
-                            completion(.success(AttributesCoding.fromStringToArray(string: fileMetadata.propertyGroups?.first?.fields.first?.value ?? "")))
-                        case let folderMetadata as Files.FolderMetadata:
-                            completion(.success(AttributesCoding.fromStringToArray(string: folderMetadata.propertyGroups?.first?.fields.first?.value ?? "")))
-                        default:
-                            completion(.failure(.unknown))
-                        }
-                    }
-                }
+                self.getActiveTagIdsWithoutTemplateId(on: file, templateId: id, completion: completion)
             }
         }
+
     }
+
+
 
     func filesWithTag(tag: Tag, completion: @escaping (Result<[File], Error>) -> Void) {
         allFilesInside(rootFolder) { result in
@@ -358,28 +340,35 @@ extension DropboxFileManager: FileManager {
                 var filesWithTag: [File] = []
                 var error: Error?
 
-                DispatchGroup.perform(
-                    value: files,
-                    action: { file, completion in
-                        self.getActiveTagIds(on: file) { result in
-                            switch result {
-                            case .success(let tagIds):
-                                if tagIds.contains(tag.id.uuidString) {
-                                    filesWithTag.append(file)
+                self.getTemplateId { result in
+                    switch result {
+                    case .failure(let failure):
+                        completion(.failure(failure))
+                    case .success(let id):
+                        DispatchGroup.perform(
+                            value: files,
+                            action: { file, completion in
+                                self.getActiveTagIds(on: file, templateId: id) { result in
+                                    switch result {
+                                    case .success(let tagIds):
+                                        if tagIds.contains(tag.id.uuidString) {
+                                            filesWithTag.append(file)
+                                        }
+                                    case .failure(let _error):
+                                        error = _error
+                                    }
+                                    completion()
                                 }
-                            case .failure(let _error):
-                                error = _error
-                            }
-                            completion()
-                        }
-                    },
-                    completion: {
-                        if let error {
-                            completion(.failure(error))
-                        } else {
-                            completion(.success(filesWithTag))
-                        }
-                    })
+                            },
+                            completion: {
+                                if let error {
+                                    completion(.failure(error))
+                                } else {
+                                    completion(.success(filesWithTag))
+                                }
+                            })
+                    }
+                }
             }
         }
     }
@@ -622,6 +611,43 @@ private extension DropboxFileManager {
             break
         case .allStorages:
             allFilesInside(rootFolder, completion: completion)
+        }
+    }
+
+    func getActiveTagIds(
+        on file: File,
+        templateId: String,
+        completion: @escaping (Result<[String], Error>) -> Void
+    ) {
+        getActiveTagIdsWithoutTemplateId(on: file, templateId: templateId, completion: completion)
+    }
+
+    func getActiveTagIdsWithoutTemplateId(
+        on file: File,
+        templateId: String,
+        completion: @escaping (Result<[String], Error>) -> Void
+    ) {
+        guard let client = DropboxClientsManager.authorizedClient else {
+            completion(.failure(.unknown))
+            return
+        }
+
+        let path = self.dropboxPath(file: file)
+        client.files.getMetadata(path: path, includeMediaInfo: true, includePropertyGroups: FileProperties.TemplateFilterBase.filterSome([templateId])).response { data, error in
+            if let error = error {
+                completion(.failure(Error(dropboxError: error)))
+                return
+            }
+            if let data {
+                switch data {
+                case let fileMetadata as Files.FileMetadata:
+                    completion(.success(AttributesCoding.fromStringToArray(string: fileMetadata.propertyGroups?.first?.fields.first?.value ?? "")))
+                case let folderMetadata as Files.FolderMetadata:
+                    completion(.success(AttributesCoding.fromStringToArray(string: folderMetadata.propertyGroups?.first?.fields.first?.value ?? "")))
+                default:
+                    completion(.failure(.unknown))
+                }
+            }
         }
     }
 

@@ -257,16 +257,7 @@ final class FolderViewModel: ObservableObject {
         case .tag:
             return []
         case .folder(let file):
-            switch file.folderAffiliation {
-            case .user:
-                return SearchingPlace.allCases
-            case .system(.root):
-                return SearchingPlace.whenInRootOrTrashFolder
-            case .system(.trash):
-                return SearchingPlace.whenInRootOrTrashFolder
-            default:
-                return SearchingPlace.allCases
-            }
+            return SearchingPlace.dependsOnStorageAndAffiliation(file: file)
         }
     }
 

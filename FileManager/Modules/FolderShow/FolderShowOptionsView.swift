@@ -104,9 +104,3 @@ private extension FolderShowOptionsView {
         }
     }
 }
-//
-//struct FolderShowOptionsView_Previews: PreviewProvider {
-//    static var previews: some View {
-//        FolderShowOptionsView()
-//    }
-//}

@@ -49,38 +49,6 @@ struct FolderView: View {
 private extension FolderView {
 
     @ViewBuilder
-    func folderView() -> some View {
-        let files = viewModel.state.files
-        if files.isEmpty {
-            Image(R.image.noFiles.name)
-        } else {
-            FolderGridListView(
-                files: files,
-                fileSelectDelegate: fileSelectDelegate,
-                selectedFiles: $viewModel.state.chosenFiles
-            )
-            .id(files)
-        }
-    }
-    
-    func createFolderButton() -> some View {
-        VStack {
-            Spacer()
-            HStack {
-                Spacer()
-                Button {
-                    viewModel.startCreatingFolder()
-                } label: {
-                    Image(systemName: "plus.circle.fill")
-                        .font(.system(size: 70))
-                        .foregroundColor(.blue)
-                }
-                .padding()
-            }
-        }
-    }
-
-    @ViewBuilder
     func completeFolderView() -> some View {
         suggestedPlaceForSearchMenuBar()
         ZStack {
@@ -124,6 +92,38 @@ private extension FolderView {
                 chooseAction: {
                     fileSelectDelegate?.selected(fileForFileSelectDelegate())
                 })
+        }
+    }
+
+    @ViewBuilder
+    func folderView() -> some View {
+        let files = viewModel.state.files
+        if files.isEmpty {
+            Image(R.image.noFiles.name)
+        } else {
+            FolderGridListView(
+                files: files,
+                fileSelectDelegate: fileSelectDelegate,
+                selectedFiles: $viewModel.state.chosenFiles
+            )
+            .id(files)
+        }
+    }
+    
+    func createFolderButton() -> some View {
+        VStack {
+            Spacer()
+            HStack {
+                Spacer()
+                Button {
+                    viewModel.startCreatingFolder()
+                } label: {
+                    Image(systemName: "plus.circle.fill")
+                        .font(.system(size: 70))
+                        .foregroundColor(.blue)
+                }
+                .padding()
+            }
         }
     }
 
