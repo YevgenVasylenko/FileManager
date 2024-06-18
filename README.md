@@ -28,6 +28,7 @@ Training application. Represents usage of main tools for creation iOS app.
 * UIKit
 * SQLite.swift
 * SwiftyDropbox
+* Unit Tests
 
 ## Features
 
